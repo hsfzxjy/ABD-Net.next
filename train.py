@@ -211,11 +211,18 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
     model.eval()
 
+    use_valset = args.target_names == 'valset'
+
     with torch.no_grad():
-        qf, q_pids, q_camids = [], [], []
+        qf, q_pids, q_camids, q_imgpaths = [], [], [], []
         for batch_idx, (imgs, pids, camids, _) in enumerate(queryloader):
             if use_gpu:
                 imgs = imgs.cuda()
+
+            if use_valset:
+                camids, imgpaths = camids
+            else:
+                imgpaths = []
 
             end = time.time()
             features = model(imgs)
@@ -225,17 +232,25 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             qf.append(features)
             q_pids.extend(pids)
             q_camids.extend(camids)
+            q_imgpaths.extend(imgpaths)
+
         qf = torch.cat(qf, 0)
         q_pids = np.asarray(q_pids)
         q_camids = np.asarray(q_camids)
+        q_imgpaths = np.asarray(q_imgpaths)
 
         print("Extracted features for query set, obtained {}-by-{} matrix".format(qf.size(0), qf.size(1)))
 
-        gf, g_pids, g_camids = [], [], []
+        gf, g_pids, g_camids, g_imgpaths = [], [], [], []
         end = time.time()
         for batch_idx, (imgs, pids, camids, _) in enumerate(galleryloader):
             if use_gpu:
                 imgs = imgs.cuda()
+
+            if use_valset:
+                camids, imgpaths = camids
+            else:
+                imgpaths = []
 
             end = time.time()
             features = model(imgs)
@@ -245,13 +260,19 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             gf.append(features)
             g_pids.extend(pids)
             g_camids.extend(camids)
+            g_imgpaths.extend(imgpaths)
+
         gf = torch.cat(gf, 0)
         g_pids = np.asarray(g_pids)
         g_camids = np.asarray(g_camids)
+        g_imgpaths = np.asarray(g_imgpaths)
 
         print("Extracted features for gallery set, obtained {}-by-{} matrix".format(gf.size(0), gf.size(1)))
 
     print("==> BatchTime(s)/BatchSize(img): {:.3f}/{}".format(batch_time.avg, args.test_batch_size))
+
+    if args.target_names == 'valset':
+        valset(qf.numpy(), q_imgpaths, gf.numpy(), g_imgpaths)
 
     m, n = qf.size(0), gf.size(0)
     distmat = torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n) + \
@@ -272,6 +293,38 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
     if return_distmat:
         return distmat
     return cmc[0]
+
+
+def valset(qf, q_imgpaths, gf, g_imgpaths):
+
+    import os.path as osp
+    import os
+
+    DIR = './__TMP'
+    resolve = lambda *parts: osp.join(DIR, *parts)  # noqa
+    os.makedirs(DIR, 0o700, True)
+
+    label_dir_name = osp.join(osp.dirname(q_imgpaths[0]), '..')
+    q_imgpaths = np.asarray(
+        [osp.basename(x).rpartition('.')[0] for x in q_imgpaths]
+    )
+    g_imgpaths = np.asarray(
+        [osp.basename(x).rpartition('.')[0] for x in g_imgpaths]
+    )
+
+    import scipy.io as io
+    with open(resolve(f'feature_val_query.mat'), 'wb') as f:
+        io.savemat(f, {'features': qf, 'names': q_imgpaths})
+    with open(resolve(f'feature_val_gallery.mat'), 'wb') as f:
+        io.savemat(f, {'features': gf, 'names': g_imgpaths})
+
+    executable = osp.join(label_dir_name, '..', 'evaluate.py')
+    avail = os.environ['CUDA_VISIBLE_DEVICES'].split(',')[0]
+    import subprocess
+    subprocess.Popen(
+        ['python', executable, '--features', DIR, '--labels', label_dir_name, '--gpu', avail],
+        env={**os.environ, 'CUDA_VISIBLE_DEVICES': '0,1,2,3,4,5,6,7'}
+    ).communicate()
 
 
 if __name__ == '__main__':

@@ -216,12 +216,11 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
     with torch.no_grad():
         qf, q_pids, q_camids, q_imgpaths = [], [], [], []
         for batch_idx, (imgs, pids, camids, _) in enumerate(queryloader):
-            print(camids, _)
             if use_gpu:
                 imgs = imgs.cuda()
 
             if use_valset:
-                camids, imgpaths = camids
+                imgpaths = _
             else:
                 imgpaths = []
 
@@ -249,7 +248,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
                 imgs = imgs.cuda()
 
             if use_valset:
-                camids, imgpaths = camids
+                imgpaths = _
             else:
                 imgpaths = []
 

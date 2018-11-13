@@ -17,7 +17,7 @@ from .mars import Mars
 from .ilidsvid import iLIDSVID
 from .prid2011 import PRID2011
 from .dukemtmcvidreid import DukeMTMCVidReID
-
+from .valset import ValSet
 
 __imgreid_factory = {
     'market1501': Market1501,
@@ -30,6 +30,7 @@ __imgreid_factory = {
     'prid450s': PRID450S,
     'ilids': iLIDS,
     'sensereid': SenseReID,
+    'valset': ValSet,
 }
 
 

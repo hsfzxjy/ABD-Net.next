@@ -24,6 +24,7 @@ class LowRankLoss(nn.Module):
 
     def forward(self, inputs, pids):
 
+        print(len(inputs))
         x, y, _ = inputs
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)

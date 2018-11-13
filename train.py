@@ -211,7 +211,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
     model.eval()
 
-    use_valset = args.target_names == 'valset'
+    use_valset = 'valset' in args.target_names
 
     with torch.no_grad():
         qf, q_pids, q_camids, q_imgpaths = [], [], [], []
@@ -271,7 +271,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
     print("==> BatchTime(s)/BatchSize(img): {:.3f}/{}".format(batch_time.avg, args.test_batch_size))
 
-    if args.target_names == 'valset':
+    if use_valset:
         valset(qf.numpy(), q_imgpaths, gf.numpy(), g_imgpaths)
 
     m, n = qf.size(0), gf.size(0)

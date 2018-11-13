@@ -57,7 +57,7 @@ class SingularLoss(nn.Module):
 
     def forward(self, inputs, pids):
 
-        x, y = inputs
+        x, y, _ = inputs
 
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)

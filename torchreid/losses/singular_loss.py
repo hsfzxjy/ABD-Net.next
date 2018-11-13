@@ -11,7 +11,7 @@ USE_LOG = os.environ.get('use_log') is not None
 
 class SingularLoss(nn.Module):
 
-    def __init__(self, beta):
+    def __init__(self, beta=5e-8):
         super().__init__()
 
         os_beta = None

@@ -9,7 +9,7 @@ import os
 
 class LowRankLoss(nn.Module):
 
-    def __init__(self, beta):
+    def __init__(self, beta=5e-8):
         super().__init__()
 
         os_beta = None

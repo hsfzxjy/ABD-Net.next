@@ -82,11 +82,10 @@ class DensenetDAN(densenet_.DenseNet):
         f = self.features(x)
         old_f = f
 
-        # base_x = f
-        # pa = f
-        # # pa, pose, pose_mask = self.danet_head(base_x)
-        # pa = self.pa_avgpool(pa)
-        pa = f.view(f.size(0), -1)
+        base_x = f
+        pa = f
+        # pa, pose, pose_mask = self.danet_head(base_x)
+        pa = self.pa_avgpool(pa)
 
         f = F.relu(f, inplace=True)
         v = self.global_avgpool(f)

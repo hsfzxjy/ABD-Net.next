@@ -108,7 +108,7 @@ class DensenetDAN(densenet_.DenseNet):
             # raise KeyError("Unsupported loss: {}".format(self.loss))
 
 
-def densenet121_pam(num_classes, loss, pretrained='imagenet', **kwargs):
+def densenet121_dan(num_classes, loss, pretrained='imagenet', **kwargs):
 
     model = DensenetDAN(
         num_classes=num_classes,
@@ -123,7 +123,7 @@ def densenet121_pam(num_classes, loss, pretrained='imagenet', **kwargs):
     return model
 
 
-def densenet121_pam_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+def densenet121_dan_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
 
     model = DensenetDAN(
         num_classes=num_classes,

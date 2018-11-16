@@ -76,7 +76,6 @@ class DensenetDAN(densenet_.DenseNet):
         # feature_dim changed after _construct_fc_layer, so we must construct
         # classifier again
         self.classifier = nn.Linear(self.feature_dim, num_classes)
-        print(self.fc)
 
     def forward(self, x):
         f = self.features(x)
@@ -85,17 +84,14 @@ class DensenetDAN(densenet_.DenseNet):
         pa, pose, pose_mask = self.danet_head(base_x)
         pa = F.avg_pool2d(pa, pa.size()[2:])
         pa = pa.view(pa.size(0), -1)
-        print('danet_head out', pa.size())
 
         f = F.relu(f, inplace=True)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
-        print('densenet out', v.size())
 
         v = torch.cat((v, pa), 1)
 
         if self.fc is not None:
-            print('before fc', v.size())
             v = self.fc(v)
 
         if not self.training:

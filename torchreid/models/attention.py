@@ -70,7 +70,8 @@ class CAM_Module(Module):
         proj_query = x.view(m_batchsize, C, -1)
         proj_key = x.view(m_batchsize, C, -1).permute(0, 2, 1)
         energy = torch.bmm(proj_query, proj_key)
-        energy_new = torch.max(energy, -1, keepdim=True)[0].expand_as(energy) - energy
+        max_energy_0 = torch.tensor(torch.max(energy, -1, keepdim=True)[0]).cuda().expand_as(energy)
+        energy_new = max_energy_0 - energy
         attention = self.softmax(energy_new)
         proj_value = x.view(m_batchsize, C, -1)
 

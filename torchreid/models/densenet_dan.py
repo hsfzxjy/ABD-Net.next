@@ -36,13 +36,13 @@ class DANetHead(nn.Module):
         self.conv8 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(inter_channels, out_channels, 1))
 
     def forward(self, x):
-        feat1 = self.conv5a(x)
+        feat1, _ = self.conv5a(x)
         sa_feat = self.sa(feat1)
         sa_conv = self.conv51(sa_feat)
         sa_output = self.conv6(sa_conv)
 
         feat2 = self.conv5c(x)
-        sc_feat = self.sc(feat2)
+        sc_feat, _ = self.sc(feat2)
         sc_conv = self.conv52(sc_feat)
         sc_output = self.conv7(sc_conv)
 

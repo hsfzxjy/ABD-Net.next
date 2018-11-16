@@ -76,6 +76,7 @@ class DensenetDAN(densenet_.DenseNet):
 
         self.danet_head = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d)
         self.fc = self._construct_fc_layer(fc_dims, self.feature_dim, dropout_p=None)
+        print(self.fc)
 
     def forward(self, x):
         f = self.features(x)
@@ -92,6 +93,7 @@ class DensenetDAN(densenet_.DenseNet):
         v = torch.cat((v, pa), 1)
 
         if self.fc is not None:
+            print('before fc', v.size())
             v = self.fc(v)
 
         if not self.training:

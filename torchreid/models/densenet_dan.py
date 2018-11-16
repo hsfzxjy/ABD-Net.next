@@ -88,11 +88,11 @@ class DensenetDAN(densenet_.DenseNet):
         pa = self.pa_avgpool(pa)
         pa = pa.view(pa.size(0), -1)
 
-        f = F.relu(f, inplace=True)
-        v = self.global_avgpool(f)
-        v = v.view(v.size(0), -1)
+        # f = F.relu(f, inplace=True)
+        # v = self.global_avgpool(f)
+        # v = v.view(v.size(0), -1)
 
-        v = torch.cat((v, pa), 1)
+        v = pa
 
         if self.fc is not None:
             v = self.fc(v)

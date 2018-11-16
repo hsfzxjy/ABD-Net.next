@@ -42,7 +42,7 @@ class DANetHead(nn.Module):
         sa_output = self.conv6(sa_conv)
 
         feat2 = self.conv5c(x)
-        sc_feat, _ = self.sc(feat2)
+        sc_feat = self.sc(feat2)
         sc_conv = self.conv52(sc_feat)
         sc_output = self.conv7(sc_conv)
 

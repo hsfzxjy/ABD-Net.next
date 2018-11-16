@@ -83,6 +83,7 @@ class DensenetDAN(densenet_.DenseNet):
 
         base_x = f
         pa, pose, pose_mask = self.danet_head(base_x)
+        pa = f
         pa = F.avg_pool2d(pa, pa.size()[2:])
         pa = pa.view(pa.size(0), -1)
 

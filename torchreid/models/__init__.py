@@ -19,8 +19,12 @@ from .hacnn import *
 from .pcb import *
 from .mlfn import *
 
+from .densenet_pam import *
 
 __model_factory = {
+    # densenet based
+    'densenet121_pam': densenet121_pam,
+    'densenet121_pam_fc512': densenet121_pam_fc512,
     # image classification models
     'resnet50': resnet50,
     'resnet50_fc512': resnet50_fc512,

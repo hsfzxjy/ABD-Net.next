@@ -73,7 +73,7 @@ class CAM_Module(Module):
         energy_new = energy
         # max_energy_0 = torch.tensor(torch.max(energy, -1, keepdim=True)[0]).cuda().expand_as(energy)
         # energy_new = max_energy_0 - energy
-        # attention = self.softmax(energy_new)
+        attention = self.softmax(energy_new)
         proj_value = x.view(m_batchsize, C, -1)
 
         out = torch.bmm(attention, proj_value)

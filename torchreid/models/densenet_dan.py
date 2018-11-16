@@ -76,6 +76,7 @@ class DensenetDAN(densenet_.DenseNet):
         # feature_dim changed after _construct_fc_layer, so we must construct
         # classifier again
         self.classifier = nn.Linear(self.feature_dim, num_classes)
+        self.pa_avgpool = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, x):
         f = self.features(x)
@@ -83,8 +84,7 @@ class DensenetDAN(densenet_.DenseNet):
 
         base_x = f
         pa, pose, pose_mask = self.danet_head(base_x)
-        pa = f
-        pa = F.avg_pool2d(pa, pa.size()[2:])
+        pa = self.pa_avgpool(pa)
         pa = pa.view(pa.size(0), -1)
 
         f = F.relu(f, inplace=True)

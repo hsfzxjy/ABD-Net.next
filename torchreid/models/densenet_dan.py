@@ -71,11 +71,8 @@ class DensenetDAN(densenet_.DenseNet):
             **kwargs
         )
 
-        if fc_dims is not None and len(fc_dims) == 1:
-            fc_dims = [self.feature_dim // 4 + fc_dims[0]]
-
         self.danet_head = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d)
-        self.fc = self._construct_fc_layer(fc_dims, self.feature_dim, dropout_p=None)
+        self.fc = self._construct_fc_layer(fc_dims, self.feature_dim * 2, dropout_p=None)
         print(self.fc)
 
     def forward(self, x):

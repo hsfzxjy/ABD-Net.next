@@ -79,13 +79,14 @@ class DensenetDAN(densenet_.DenseNet):
 
     def forward(self, x):
         f = self.features(x)
+        old_f = f
 
         base_x = f
         pa, pose, pose_mask = self.danet_head(base_x)
         pa = F.avg_pool2d(pa, pa.size()[2:])
         pa = pa.view(pa.size(0), -1)
 
-        f = F.relu(f, inplace=True)
+        f = F.relu(f)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
@@ -104,7 +105,7 @@ class DensenetDAN(densenet_.DenseNet):
         elif self.loss == {'xent', 'htri'}:
             return y, v
         else:
-            return f, y, v
+            return old_f, y, v
             # raise KeyError("Unsupported loss: {}".format(self.loss))
 
 

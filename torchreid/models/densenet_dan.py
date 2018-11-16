@@ -81,17 +81,16 @@ class DensenetDAN(densenet_.DenseNet):
         f = self.features(x)
         old_f = f
 
-        base_x = f
+        # base_x = f
         # pa, pose, pose_mask = self.danet_head(base_x)
-        pa = base_x
-        pa = F.avg_pool2d(pa, pa.size()[2:])
-        pa = pa.view(pa.size(0), -1)
+        # pa = F.avg_pool2d(pa, pa.size()[2:])
+        # pa = pa.view(pa.size(0), -1)
 
         f = F.relu(f, inplace=True)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
-        v = torch.cat((v, pa), 1)
+        v = torch.cat((v, v), 1)
 
         if self.fc is not None:
             v = self.fc(v)

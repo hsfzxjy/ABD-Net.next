@@ -73,6 +73,7 @@ class DensenetDAN(densenet_.DenseNet):
 
         self.danet_head = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d)
         self.fc = self._construct_fc_layer(fc_dims, self.feature_dim, dropout_p=None)
+        print(self.fc)
         # feature_dim changed after _construct_fc_layer, so we must construct
         # classifier again
         self.classifier = nn.Linear(self.feature_dim, num_classes)

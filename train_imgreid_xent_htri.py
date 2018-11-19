@@ -34,11 +34,13 @@ args = parser.parse_args()
 
 def main():
     global args
-    
+
     torch.manual_seed(args.seed)
-    if not args.use_avai_gpus: os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_devices
+    if not args.use_avai_gpus:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_devices
     use_gpu = torch.cuda.is_available()
-    if args.use_cpu: use_gpu = False
+    if args.use_cpu:
+        use_gpu = False
     log_name = 'log_test.txt' if args.evaluate else 'log_train.txt'
     sys.stdout = Logger(osp.join(args.save_dir, log_name))
     print("==========\nArgs:{}\n==========".format(args))
@@ -60,7 +62,7 @@ def main():
 
     criterion_xent = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
     criterion_htri = TripletLoss(margin=args.margin)
-    
+
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
 
@@ -92,7 +94,7 @@ def main():
             queryloader = testloader_dict[name]['query']
             galleryloader = testloader_dict[name]['gallery']
             distmat = test(model, queryloader, galleryloader, use_gpu, return_distmat=True)
-        
+
             if args.visualize_ranks:
                 visualize_ranked_results(
                     distmat, dm.return_testdataset_by_name(name),
@@ -122,12 +124,23 @@ def main():
         start_train_time = time.time()
         train(epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, use_gpu)
         train_time += round(time.time() - start_train_time)
-        
+
+        if use_gpu:
+            state_dict = model.module.state_dict()
+        else:
+            state_dict = model.state_dict()
+
+        save_checkpoint({
+            'state_dict': state_dict,
+            'rank1': 0,
+            'epoch': epoch,
+        }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
+
         scheduler.step()
-        
+
         if (epoch + 1) > args.start_eval and args.eval_freq > 0 and (epoch + 1) % args.eval_freq == 0 or (epoch + 1) == args.max_epoch:
             print("==> Test")
-            
+
             for name in args.target_names:
                 print("Evaluating {} ...".format(name))
                 queryloader = testloader_dict[name]['query']
@@ -139,7 +152,7 @@ def main():
                 state_dict = model.module.state_dict()
             else:
                 state_dict = model.state_dict()
-            
+
             save_checkpoint({
                 'state_dict': state_dict,
                 'rank1': rank1,
@@ -168,10 +181,10 @@ def train(epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, 
     end = time.time()
     for batch_idx, (imgs, pids, _, _) in enumerate(trainloader):
         data_time.update(time.time() - end)
-        
+
         if use_gpu:
             imgs, pids = imgs.cuda(), pids.cuda()
-        
+
         outputs, features = model(imgs)
         if args.htri_only:
             if isinstance(features, (tuple, list)):
@@ -183,12 +196,12 @@ def train(epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, 
                 xent_loss = DeepSupervision(criterion_xent, outputs, pids)
             else:
                 xent_loss = criterion_xent(outputs, pids)
-            
+
             if isinstance(features, (tuple, list)):
                 htri_loss = DeepSupervision(criterion_htri, features, pids)
             else:
                 htri_loss = criterion_htri(features, pids)
-            
+
             loss = args.lambda_xent * xent_loss + args.lambda_htri * htri_loss
         optimizer.zero_grad()
         loss.backward()
@@ -203,9 +216,9 @@ def train(epoch, model, criterion_xent, criterion_htri, optimizer, trainloader, 
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.4f} ({data_time.avg:.4f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
-                   epoch + 1, batch_idx + 1, len(trainloader), batch_time=batch_time,
-                   data_time=data_time, loss=losses))
-        
+                      epoch + 1, batch_idx + 1, len(trainloader), batch_time=batch_time,
+                      data_time=data_time, loss=losses))
+
         end = time.time()
 
 
@@ -238,7 +251,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
         for batch_idx, (imgs, pids, camids, _) in enumerate(galleryloader):
             if use_gpu:
                 imgs = imgs.cuda()
-            
+
             end = time.time()
             features = model(imgs)
             batch_time.update(time.time() - end)
@@ -252,12 +265,12 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
         g_camids = np.asarray(g_camids)
 
         print("Extracted features for gallery set, obtained {}-by-{} matrix".format(gf.size(0), gf.size(1)))
-    
+
     print("==> BatchTime(s)/BatchSize(img): {:.3f}/{}".format(batch_time.avg, args.test_batch_size))
 
     m, n = qf.size(0), gf.size(0)
     distmat = torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n) + \
-              torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
+        torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
     distmat.addmm_(1, -2, qf, gf.t())
     distmat = distmat.numpy()
 
@@ -268,7 +281,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
     print("mAP: {:.1%}".format(mAP))
     print("CMC curve")
     for r in ranks:
-        print("Rank-{:<3}: {:.1%}".format(r, cmc[r-1]))
+        print("Rank-{:<3}: {:.1%}".format(r, cmc[r - 1]))
     print("------------------")
 
     if return_distmat:

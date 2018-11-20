@@ -85,6 +85,7 @@ class DensenetDAN(densenet_.DenseNet):
             x = 'p'
         x = x.lower()
         self.DAN_part = x
+        print('Using part', x)
 
     def forward(self, x):
         f = self.features(x)

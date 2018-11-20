@@ -5,7 +5,7 @@ from torch.nn import functional as F
 from . import densenet as densenet_
 from .attention import PAM_Module, CAM_Module
 
-__all__ = ['densenet121_pam', 'densenet121_pam_fc512']
+__all__ = ['densenet121_DAN', 'densenet121_DAN_fc512']
 
 
 class DANetHead(nn.Module):
@@ -56,7 +56,7 @@ class DANetHead(nn.Module):
         return tuple(output)
 
 
-class DensenetPAM(densenet_.DenseNet):
+class DensenetDAN(densenet_.DenseNet):
 
     def __init__(self, num_classes, loss, fc_dims, **kwargs):
 
@@ -79,13 +79,20 @@ class DensenetPAM(densenet_.DenseNet):
         self.classifier = nn.Linear(self.feature_dim, num_classes)
         self.pa_avgpool = nn.AdaptiveAvgPool2d(1)
 
+        import os
+        x = os.environ.get('DAN_part', 'p')
+        if x.lower() not in 'spc':
+            x = 'p'
+        x = x.lower()
+        self.DAN_part = x
+
     def forward(self, x):
         f = self.features(x)
         old_f = f
 
         base_x = f
         pa = f
-        suma, pa, ca = self.danet_head(base_x)
+        pa = self.danet_head(base_x)[{'s': 0, 'p': 1, 'c': 2}[self.DAN_part]]
         pa = self.pa_avgpool(pa)
         pa = pa.view(pa.size(0), -1)
 
@@ -113,9 +120,9 @@ class DensenetPAM(densenet_.DenseNet):
             # raise KeyError("Unsupported loss: {}".format(self.loss))
 
 
-def densenet121_pam(num_classes, loss, pretrained='imagenet', **kwargs):
+def densenet121_DAN(num_classes, loss, pretrained='imagenet', **kwargs):
 
-    model = DensenetPAM(
+    model = DensenetDAN(
         num_classes=num_classes,
         loss=loss,
         fc_dims=None,
@@ -128,9 +135,9 @@ def densenet121_pam(num_classes, loss, pretrained='imagenet', **kwargs):
     return model
 
 
-def densenet121_pam_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+def densenet121_DAN_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
 
-    model = DensenetPAM(
+    model = DensenetDAN(
         num_classes=num_classes,
         loss=loss,
         fc_dims=[512],

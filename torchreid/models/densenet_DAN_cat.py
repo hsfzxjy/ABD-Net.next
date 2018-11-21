@@ -97,7 +97,7 @@ class DensenetDANCat(densenet_.DenseNet):
         pa = self.pa_avgpool(pa)
         pa = pa.view(pa.size(0), -1)
 
-        f = F.relu(f, inplace=True)
+        f = F.relu(f)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 

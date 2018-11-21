@@ -20,6 +20,10 @@ def get_exp(dir):
     # basename = dir.rstrip('/').split('/')[-1]
     if 'densenet_DAN_fc512' in dir:
         name = 'densenet121_DAN_fc512'
+    elif 'densenet_DAN_cat_fc512' in dir:
+        name = 'densenet121_DAN_cat_fc512'
+    elif 'densenet_DAN_cat' in dir:
+        name = 'densenet121_DAN_cat'
     else:
         name = 'densenet121_DAN'
     matched = re.findall(r'(_[spc]_)', dir)

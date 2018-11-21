@@ -60,6 +60,7 @@ def run_exp(dir):
             f.write(result)
 
     print('----')
+    print('arch', name)
     print('name', dir)
     print('log')
     print(last_log)

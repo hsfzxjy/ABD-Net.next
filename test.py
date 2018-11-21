@@ -35,7 +35,7 @@ def run_exp(dir):
     p = subprocess.Popen(
         [
             'python', 'eval.py',
-            '--cd', '.',
+            # '--cd', '.',
             '--arch', name,
             '--snap_shot', tarname
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,

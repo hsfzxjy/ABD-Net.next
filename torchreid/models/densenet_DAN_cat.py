@@ -104,11 +104,10 @@ class DensenetDANCat(densenet_.DenseNet):
         v = torch.cat((v, pa), 1)
         # v = pa
 
-        if self.fc is not None:
-            v = self.fc(v)
-
         if not self.training:
             return v
+        if self.fc is not None:
+            v = self.fc(v)
 
         y = self.classifier(v)
 

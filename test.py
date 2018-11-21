@@ -4,8 +4,13 @@ import subprocess
 import re
 
 
+import argparse
+
+
 def get_exps():
-    return glob('./log/*')
+    p = argparse.ArgumentParser()
+    p.add_argument('glob', default='./log/*')
+    return glob(p.parse_args().glob)
 
 
 def get_exp(dir):

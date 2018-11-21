@@ -101,7 +101,7 @@ class DensenetDANCat(densenet_.DenseNet):
         v = self.global_avgpool(f)
 
         if not self.training:
-            return v.view(v.size(0), -1)
+            return hv#v.view(v.size(0), -1)
         v = v.view(v.size(0), -1)
 
         v = torch.cat((v, pa), 1)

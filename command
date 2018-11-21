@@ -75,3 +75,7 @@ DAN_part=p nohup python train_imgreid_xent.py --root data -s market1501 -t marke
 
 DAN_part=s nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc danet_head --train-batch-size 32 --test-batch-size 100 -a densenet121_DAN_cat --save-dir log/dprn_densenet_DAN_cat_s__dan_open__amsgrad_60_10_xent --gpu-devices 2 &
 
+
+
+python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc danet_head --train-batch-size 32 --test-batch-size 100 -a densenet121_DAN_cat --save-dir log/dprn_densenet_amsgrad_60_10_xent --gpu-devices 2
+

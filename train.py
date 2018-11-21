@@ -121,7 +121,7 @@ def main():
 
         for epoch in range(args.fixbase_epoch):
             start_train_time = time.time()
-            train(epoch, model, criterion, optimizer, trainloader, use_gpu, fixbase=True)
+            train(epoch, model, lambda x, pids: criterion(x[1], pids), optimizer, trainloader, use_gpu, fixbase=True)
             train_time += round(time.time() - start_train_time)
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))

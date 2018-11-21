@@ -70,6 +70,8 @@ def main():
     else:
         raise RuntimeError('Unknown criterion {!r}'.format(criterion))
 
+    fix_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu,label_smooth=args.label_smooth)
+
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
 
@@ -121,7 +123,7 @@ def main():
 
         for epoch in range(args.fixbase_epoch):
             start_train_time = time.time()
-            train(epoch, model, lambda x, pids: criterion(x[1], pids), optimizer, trainloader, use_gpu, fixbase=True)
+            train(epoch, model, lambda x, pids: fix_criterion(x[1], pids), optimizer, trainloader, use_gpu, fixbase=True)
             train_time += round(time.time() - start_train_time)
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))

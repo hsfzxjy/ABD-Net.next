@@ -24,8 +24,12 @@ def get_exp(dir):
         name = 'densenet121_DAN_cat_fc512'
     elif 'densenet_DAN_cat' in dir:
         name = 'densenet121_DAN_cat'
-    else:
+    elif 'densenet_DAN' in dir:
         name = 'densenet121_DAN'
+    elif 'densenet_fc512' in dir:
+        name = 'densenet121_fc512'
+    elif 'densenet' in dir:
+        name = 'densenet121'
     matched = re.findall(r'(_[spc]_)', dir)
     if matched:
         part = matched[0][1]

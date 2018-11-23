@@ -8,7 +8,7 @@ current_dir = osp.abspath(osp.dirname(__file__))
 resolve = lambda *parts: osp.join(current_dir, *parts)  # noqa
 
 sys.path.insert(0, resolve('..'))
-# os.chdir(resolve('..'))
+os.chdir(resolve('..'))
 sys.path.insert(0, resolve('pytorch-cnn-visualization/src'))
 print(sys.path)
 

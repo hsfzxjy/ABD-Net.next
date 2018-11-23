@@ -26,7 +26,7 @@ class VIPeR(BaseImageDataset):
     Gray et al. Evaluating appearance models for recognition, reacquisition, and tracking. PETS 2007.
 
     URL: https://vision.soe.ucsc.edu/node/178
-    
+
     Dataset statistics:
     # identities: 632
     # images: 632 x 2 = 1264
@@ -44,7 +44,7 @@ class VIPeR(BaseImageDataset):
 
         self._download_data()
         self._check_before_run()
-        
+
         self._prepare_split()
         splits = read_json(self.split_path)
         if split_id >= len(splits):
@@ -81,7 +81,7 @@ class VIPeR(BaseImageDataset):
         fpath = osp.join(self.dataset_dir, osp.basename(self.dataset_url))
 
         print("Downloading VIPeR dataset")
-        urllib.urlretrieve(self.dataset_url, fpath)
+        urllib.request.urlretrieve(self.dataset_url, fpath)
 
         print("Extracting files")
         zip_ref = zipfile.ZipFile(fpath, 'r')
@@ -113,7 +113,7 @@ class VIPeR(BaseImageDataset):
             sub-splits, one using cameraA as query and cameraB as gallery
             while the other using cameraB as query and cameraA as gallery.
             Therefore, results should be averaged over 20 splits (split_id=0~19).
-            
+
             In practice, a model trained on split_id=0 can be applied to split_id=0&1
             as split_id=0&1 share the same training data (so on and so forth).
             """

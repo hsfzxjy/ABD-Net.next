@@ -77,5 +77,45 @@ DAN_part=s nohup python train_imgreid_xent.py --root data -s market1501 -t marke
 
 
 
-python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc danet_head --train-batch-size 32 --test-batch-size 100 -a densenet121_DAN_cat --save-dir log/dprn_densenet_amsgrad_60_10_xent --gpu-devices 2
+beta=1e-8 python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_singular --criterion singular --gpu-devices 2
 
+
+beta=8e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_lowrank_beta_8e-10 --criterion lowrank --gpu-devices 2 &
+
+beta=6e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_lowrank_beta_6e-10 --criterion lowrank --gpu-devices 3 &
+
+beta=4e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_lowrank_beta_4e-10 --criterion lowrank --gpu-devices 4 &
+
+
+beta=2e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_lowrank_beta_2e-10 --criterion lowrank --gpu-devices 5 &
+
+beta=1e-11 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_lowrank_beta_1e-11 --criterion lowrank --gpu-devices 6 &
+
+
+beta=8e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_lowrank_beta_8e-10 --criterion lowrank --gpu-devices 2 &
+
+beta=6e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_lowrank_beta_6e-10 --criterion lowrank --gpu-devices 3 &
+
+beta=4e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_lowrank_beta_4e-10 --criterion lowrank --gpu-devices 4 &
+
+
+beta=2e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_lowrank_beta_2e-10 --criterion lowrank --gpu-devices 5 &
+
+beta=1e-11 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_lowrank_beta_1e-11 --criterion lowrank --gpu-devices 6 &
+
+beta=1e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_lowrank_beta_1e-10 --criterion lowrank --gpu-devices 7 &
+
+beta=1e-10 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121 --save-dir log/dprn_densenet_amsgrad_60_10_lowrank_beta_1e-10 --criterion lowrank --gpu-devices 7 &
+
+
+
+beta=8e-6 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_singular_beta_8e-6 --criterion singular --gpu-devices 2 &
+
+beta=6e-6 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_singular_beta_6e-6 --criterion singular --gpu-devices 3 &
+
+beta=4e-6 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_singular_beta_4e-6 --criterion singular --gpu-devices 4 &
+
+
+beta=2e-6 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_singular_beta_2e-6 --criterion singular --gpu-devices 5 &
+
+beta=1e-6 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim amsgrad --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir log/dprn_densenet_fc512_amsgrad_60_10_singular_beta_1e-6 --criterion singular --gpu-devices 6 &

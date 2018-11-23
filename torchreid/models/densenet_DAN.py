@@ -105,7 +105,7 @@ class DensenetDAN(densenet_.DenseNet):
         v = pa
 
         if not self.training:
-            return vf
+            return v
         if self.fc is not None:
             v = self.fc(v)
 

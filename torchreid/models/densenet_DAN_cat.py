@@ -72,11 +72,11 @@ class DensenetDANCat(densenet_.DenseNet):
         )
 
         self.danet_head = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d)
-        self.fc = self._construct_fc_layer(fc_dims, self.feature_dim, dropout_p=None)
+        self.fc = self._construct_fc_layer(fc_dims, self.feature_dim * 2, dropout_p=None)
         print(self.fc)
         # feature_dim changed after _construct_fc_layer, so we must construct
         # classifier again
-        self.classifier = nn.Linear(self.feature_dim * 2, num_classes)
+        self.classifier = nn.Linear(self.feature_dim, num_classes)
         self.pa_avgpool = nn.AdaptiveAvgPool2d(1)
 
         import os
@@ -101,7 +101,7 @@ class DensenetDANCat(densenet_.DenseNet):
         v = self.global_avgpool(f)
 
         if not self.training:
-            return hv#v.view(v.size(0), -1)
+            return v  # v.view(v.size(0), -1)
         v = v.view(v.size(0), -1)
 
         v = torch.cat((v, pa), 1)

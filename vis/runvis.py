@@ -8,7 +8,7 @@ def get_param(input_fn, layer):
     _, dir, name = input_fn.split('/')
     os.makedirs(osp.join('vis_output', dir, name), 0o777, True)
     path = osp.join('vis_output', dir, name)
-    return ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', layer]
+    return ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', str(layer)]
 
 
 if __name__ == '__main__':

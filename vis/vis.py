@@ -105,8 +105,6 @@ from inverted_representation import InvertedRepresentation
 
 if __name__ == '__main__':
 
-    print(get_model())
-    raise RuntimeError('')
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', dest='layer', type=int)
@@ -118,8 +116,6 @@ if __name__ == '__main__':
     img = read_image(options.input or resolve('1.jpg'))
     img = transform_test(img)
     print(img.shape)
-
-
 
     for i in range(0, 1024):
         model = get_model()

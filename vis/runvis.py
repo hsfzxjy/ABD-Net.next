@@ -20,4 +20,15 @@ if __name__ == '__main__':
         params.append(get_param(fn, 4))
 
     splitted = [params[i:i + 5] for i in range(0, len(params), 5)]
-    print(splitted)
+    import subprocess
+
+    for group in splitted:
+        ps = []
+        for param in group:
+            p = subprocess.Popen([
+                'python', 'vis.py',
+                *param
+            ])
+            ps.append(p)
+        for p in ps:
+            p.communicate()

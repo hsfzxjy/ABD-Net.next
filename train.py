@@ -70,7 +70,7 @@ def main():
     else:
         raise RuntimeError('Unknown criterion {!r}'.format(criterion))
 
-    fix_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu,label_smooth=args.label_smooth)
+    fix_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
 
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
@@ -135,6 +135,17 @@ def main():
         train_time += round(time.time() - start_train_time)
 
         scheduler.step()
+
+        if use_gpu:
+            state_dict = model.module.state_dict()
+        else:
+            state_dict = model.state_dict()
+
+        save_checkpoint({
+            'state_dict': state_dict,
+            'rank1': 0,
+            'epoch': epoch,
+        }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
 
         if (epoch + 1) > args.start_eval and args.eval_freq > 0 and (epoch + 1) % args.eval_freq == 0 or (epoch + 1) == args.max_epoch:
             print("==> Test")

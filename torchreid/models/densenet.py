@@ -158,10 +158,10 @@ class DenseNet(nn.Module):
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
-        if not self.training:
-            return v
         if self.fc is not None:
             v = self.fc(v)
+        if not self.training:
+            return v
 
         y = self.classifier(v)
 

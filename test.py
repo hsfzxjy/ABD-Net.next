@@ -28,6 +28,10 @@ def get_exp(dir):
         name = 'densenet121_DAN'
     elif 'densenet_fc512' in dir:
         name = 'densenet121_fc512'
+    elif 'densenet_cl_fc512' in dir:
+        name = 'densenet121_cl_fc512'
+    elif 'densenet_cl' in dir:
+        name = 'densenet121_cl'
     elif 'densenet' in dir:
         name = 'densenet121'
     matched = re.findall(r'(_[spc]_)', dir)

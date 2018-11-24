@@ -262,4 +262,6 @@ DAN_part=p beta=1e-12 nohup python train.py --root data -s market1501 -t market1
 
 -- cl --
 
-python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 0 --open-layers classifier fc danet_head --train-batch-size 32 --test-batch-size 100 -a densenet121_cl --save-dir cl_log/dprn_densenet_cl_adam_60_10_xent --criterion xent --gpu-devices 5
+python nohup train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_cl --save-dir cl_log/dprn_densenet_cl_adam_60_10_xent --criterion xent --gpu-devices 5 &
+
+nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_cl_fc512 --save-dir cl_log/dprn_densenet_cl_adam_fc512_60_10_xent --criterion xent --gpu-devices 5 &

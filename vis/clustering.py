@@ -60,6 +60,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('ROOT')
     parser.add_argument('-d', dest='dset', default='')
+    parser.add_argument('-k', dest='k', default=1.07, type=float)
     options = parser.parse_args()
 
     if options.ROOT.endswith('.h5'):
@@ -79,7 +80,7 @@ if __name__ == '__main__':
     # plt.show()
     from skfuzzy.cluster import cmeans
     print(dataset.shape)
-    u = cmeans(dataset.T, 2, 1.07, 1e-11, 700)[1]
+    u = cmeans(dataset.T, 2, options.k, 1e-11, 700)[1]
     result = u.argmax(axis=0)
     print(result)
     print(result.sum(), (1 - result).sum())

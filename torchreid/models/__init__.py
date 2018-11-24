@@ -21,6 +21,7 @@ from .mlfn import *
 
 from .densenet_DAN import *
 from .densenet_DAN_cat import *
+from .densenet_cl import *
 
 __model_factory = {
     # densenet based
@@ -28,6 +29,8 @@ __model_factory = {
     'densenet121_DAN_fc512': densenet121_DAN_fc512,
     'densenet121_DAN_cat': densenet121_DAN_cat,
     'densenet121_DAN_cat_fc512': densenet121_DAN_cat_fc512,
+    'densenet121_cl': densenet121_cl,
+    'densenet121_cl_fc512': densenet121_cl_fc512,
     # image classification models
     'resnet50': resnet50,
     'resnet50_fc512': resnet50_fc512,

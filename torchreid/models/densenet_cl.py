@@ -24,8 +24,8 @@ model_urls = {
     'densenet161': 'https://download.pytorch.org/models/densenet161-8d451a50.pth',
 }
 
-channels = set([7, 17, 19, 26, 27, 30, 46, 55, 68, 73, 77, 92, 94, 98, 116, 117, 123])
-b_channels = set(range(128)) - channels
+channels = [7, 17, 19, 26, 27, 30, 46, 55, 68, 73, 77, 92, 94, 98, 116, 117, 123]
+b_channels = list(sorted(set(range(128)) - set(channels)))
 
 
 class DANetHead(nn.Module):

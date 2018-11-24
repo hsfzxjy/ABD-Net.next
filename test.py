@@ -39,7 +39,10 @@ def get_exp(dir):
         part = matched[0][1]
     else:
         part = ''
-    tarname = dir + '/checkpoint_ep60.pth.tar'
+    epch = 100
+    while not os.path.exists(dir + '/checkpoint_ep{}.pth.tar'.format(epch)):
+        epch -= 1
+    tarname = dir + '/checkpoint_ep{}.pth.tar'.format(epch)
     last_log = subprocess.check_output(['tail', '-n', '11', dir + '/log_train.txt']).decode()
 
     return name, part, tarname, last_log

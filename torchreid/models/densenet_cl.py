@@ -212,7 +212,7 @@ class DenseNet(nn.Module):
     def forward(self, x):
         # f = self.features(x)
 
-        for index, layer in enumerate(self.base):
+        for index, layer in enumerate(self.features):
             x = layer(x)
             if index == 5:
                 B, C, H, W = x.shape

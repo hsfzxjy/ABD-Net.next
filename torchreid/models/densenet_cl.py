@@ -159,6 +159,9 @@ class DenseNet(nn.Module):
         # Linear layer
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
+        self.ca1 = CAM_Module(len(channels))
+        self.ca2 = CAM_Module(len(b_channels))
+
         self._init_params()
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):

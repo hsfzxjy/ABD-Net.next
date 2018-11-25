@@ -175,7 +175,7 @@ class DenseNet(nn.Module):
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self.ca1 = DANetHead(len(channels), len(channels), nn.BatchNorm2d)
-        self.ca2 = DANetHead(len(b_channels), len(channels), nn.BatchNorm2d)
+        self.ca2 = DANetHead(len(b_channels), len(b_channels), nn.BatchNorm2d)
         self.DAN_sum = DAN_sum
         self._init_params()
 

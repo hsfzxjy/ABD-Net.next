@@ -14,7 +14,7 @@ import torchvision
 from .attention import PAM_Module, CAM_Module
 
 
-__all__ = ['densenet121_cl', 'densenet121_cl_fc512']
+__all__ = ['densenet121_cl', 'densenet121_cl_fc512', 'densenet121_cl_sum', 'densenet121_cl_sum_fc512']
 
 
 model_urls = {

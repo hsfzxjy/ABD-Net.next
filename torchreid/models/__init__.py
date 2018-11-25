@@ -31,6 +31,8 @@ __model_factory = {
     'densenet121_DAN_cat_fc512': densenet121_DAN_cat_fc512,
     'densenet121_cl': densenet121_cl,
     'densenet121_cl_fc512': densenet121_cl_fc512,
+    'densenet121_cl_sum': densenet121_cl_sum,
+    'densenet121_cl_sum_fc512': densenet121_cl_sum_fc512,
     # image classification models
     'resnet50': resnet50,
     'resnet50_fc512': resnet50_fc512,

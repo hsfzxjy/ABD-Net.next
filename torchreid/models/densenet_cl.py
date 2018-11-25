@@ -24,7 +24,22 @@ model_urls = {
     'densenet161': 'https://download.pytorch.org/models/densenet161-8d451a50.pth',
 }
 
-channels = [7, 17, 19, 26, 27, 30, 46, 55, 68, 73, 77, 92, 94, 98, 116, 117, 123]
+# channels = [7, 17, 19, 26, 27, 30, 46, 55, 68, 73, 77, 92, 94, 98, 116, 117, 123]
+channels = [2,
+            3,
+            8,
+            24,
+            28,
+            33,
+            42,
+            48,
+            61,
+            63,
+            80,
+            96,
+            110,
+            117,
+            ]
 b_channels = list(sorted(set(range(128)) - set(channels)))
 
 
@@ -41,7 +56,7 @@ class DANetHead(nn.Module):
                                     norm_layer(inter_channels),
                                     nn.ReLU())
 
-        self.sa = PAM_Module(inter_channels)
+        # self.sa = PAM_Module(inter_channels)
         self.sc = CAM_Module(inter_channels)
         self.conv51 = nn.Sequential(nn.Conv2d(inter_channels, inter_channels, 3, padding=1, bias=False),
                                     norm_layer(inter_channels),
@@ -124,7 +139,7 @@ class DenseNet(nn.Module):
     """
 
     def __init__(self, num_classes, loss, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, **kwargs):
+                 num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, DAN_sum=False, **kwargs):
 
         super(DenseNet, self).__init__()
         self.loss = loss
@@ -159,9 +174,9 @@ class DenseNet(nn.Module):
         # Linear layer
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
-        self.ca1 = CAM_Module(len(channels))
-        self.ca2 = CAM_Module(len(b_channels))
-
+        self.ca1 = DANetHead(len(channels), len(channels), nn.BatchNorm2d)
+        self.ca2 = DANetHead(len(b_channels), len(channels), len(channels))
+        self.DAN_sum = DAN_sum
         self._init_params()
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
@@ -223,11 +238,15 @@ class DenseNet(nn.Module):
                 # x1 = torch.index_select(x, 1, c_tensor)
                 # x2 = torch.index_select(x, 1, bc_tensor)
                 # print(x.shape)
-                x1 = x[:, c_tensor]
-                x2 = x[:, bc_tensor]
+                oldx1 = x1 = x[:, c_tensor]
+                oldx2 = x2 = x[:, bc_tensor]
 
                 x1 = self.ca1(x1)
                 x2 = self.ca2(x2)
+
+                if self.DAN_sum:
+                    x1 = x1 + oldx1
+                    x2 = x2 + oldx2
 
                 x[:, c_tensor] = x1
                 x[:, bc_tensor] = x2
@@ -238,10 +257,10 @@ class DenseNet(nn.Module):
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
-        if not self.training:
-            return v
         if self.fc is not None:
             v = self.fc(v)
+        if not self.training:
+            return v
 
         y = self.classifier(v)
 
@@ -300,6 +319,7 @@ def densenet121_cl(num_classes, loss, pretrained='imagenet', **kwargs):
         block_config=(6, 12, 24, 16),
         fc_dims=None,
         dropout_p=None,
+        DAN_sum=False,
         **kwargs
     )
     if pretrained == 'imagenet':
@@ -316,6 +336,41 @@ def densenet121_cl_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
         block_config=(6, 12, 24, 16),
         fc_dims=[512],
         dropout_p=None,
+        DAN_sum=False,
+        **kwargs
+    )
+    if pretrained == 'imagenet':
+        init_pretrained_weights(model, model_urls['densenet121'])
+    return model
+
+
+def densenet121_cl_sum(num_classes, loss, pretrained='imagenet', **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 24, 16),
+        fc_dims=None,
+        dropout_p=None,
+        DAN_sum=True,
+        **kwargs
+    )
+    if pretrained == 'imagenet':
+        init_pretrained_weights(model, model_urls['densenet121'])
+    return model
+
+
+def densenet121_cl_sum_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 24, 16),
+        fc_dims=[512],
+        dropout_p=None,
+        DAN_sum=True,
         **kwargs
     )
     if pretrained == 'imagenet':

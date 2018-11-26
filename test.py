@@ -80,7 +80,7 @@ def run_exp(dir):
             f.write(result)
 
     print('----')
-    print('arch', name)
+    print('arch', name, 'part', part)
     print('name', dir)
     print('log')
     print(last_log)

@@ -176,6 +176,7 @@ class DenseNet(nn.Module):
 
         self.ca1 = DANetHead(len(channels), len(channels), nn.BatchNorm2d)
         self.ca2 = DANetHead(len(b_channels), len(b_channels), nn.BatchNorm2d)
+        self.conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(128, 128, 1))
         self.DAN_sum = DAN_sum
         self._init_params()
 
@@ -250,6 +251,7 @@ class DenseNet(nn.Module):
 
                 x[:, c_tensor] = x1
                 x[:, bc_tensor] = x2
+                x = self.conv(x)
 
         f = x
 

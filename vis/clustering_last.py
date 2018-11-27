@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     from glob import glob
     imgs = []
-    for x in glob('vis_input/**/*.jpg') + glob('vis_input/**/*.png'):
+    for x in glob(resolve('vis_input/**/*.jpg')) + glob(resolve('vis_input/**/*.png')):
         img = read_image(x)
         img = transform_test(img)
         img = img.view(1, *img.size())

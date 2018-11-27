@@ -76,4 +76,5 @@ if __name__ == '__main__':
     img = img.view(1, *img.size())
     print(img.shape)
     model = get_model()
-    model.features(img)
+    x = model.features(img)
+    print(x.size())

@@ -31,6 +31,7 @@ class args:
 
 use_gpu = True
 
+os.chdir(resolve('..'))
 
 transform_test = T.Compose([
     T.Resize((args.height, args.width)),
@@ -45,7 +46,6 @@ dataset = data_manager.init_imgreid_dataset(
 
 def get_model():
 
-    os.chdir(resolve('..'))
     model = models.init_model(name=args.arch, num_classes=dataset.num_train_pids, loss={'xent'}, use_gpu=use_gpu)
     if check_isfile(args.load_weights):
         checkpoint = torch.load(args.load_weights)

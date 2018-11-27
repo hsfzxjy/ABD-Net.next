@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
     from skfuzzy.cluster import cmeans
     s = set(range(len(f[1])))
-    from collections import defaultdict
+    from collections import defaultdict,Counter
     d = defaultdict(lambda: 0)
     for x in f:
         x = x.reshape(x.shape[0], -1)
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         for i in channels:
             d[i] += 1
 
-    print(d.items())
+    print(Counter(d))
     # import numpy
     # numpy.set_printoptions(threshold=numpy.nan)
     # print(result)

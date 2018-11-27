@@ -83,5 +83,6 @@ if __name__ == '__main__':
     print(x.shape, type(x))
 
     from skfuzzy.cluster import cmeans
-    u = cmeans(x, 2, options.k, 1e-11, 1000)[1]
-    print(u)
+    u = cmeans(x.T, 2, options.k, 1e-11, 1000)[1]
+    result = u.argmax(axis=0)
+    print(result)

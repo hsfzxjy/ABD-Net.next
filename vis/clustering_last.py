@@ -71,13 +71,19 @@ if __name__ == '__main__':
     parser.add_argument('-k', type=float, default=1.07)
     options = parser.parse_args()
 
-    path = options.path or resolve('..', 'generated_' + str(options.layer))
-    img = read_image(options.input or resolve('1.jpg'))
-    img = transform_test(img)
-    img = img.view(1, *img.size())
-    print(img.shape)
+    from glob import glob
+    imgs = []
+    for x in glob('vis_input/**/*.jpg') + glob('vis_input/**/*.png'):
+        img = read_image(x)
+        img = transform_test(img)
+        img = img.view(1, *img.size())
+        imgs.append(img)
+    imgs = torch.cat(imgs)
+    print(imgs.shape)
     model = get_model()
-    x = model.features(img)
+    x = model.features(imgs)
+    print(x.size())
+    raise SystemError
     x = (x[0].cpu().data).numpy()
     x = x.reshape(x.shape[0], -1)
     print(x.shape, type(x))

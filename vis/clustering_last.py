@@ -85,6 +85,7 @@ if __name__ == '__main__':
     f = f.cpu().data.numpy()
 
     from skfuzzy.cluster import cmeans
+    s = set(range(len(f[1])))
     for x in f:
         x = x.reshape(x.shape[0], -1)
         print(x.shape, type(x))
@@ -97,6 +98,9 @@ if __name__ == '__main__':
             target = 0
         channels = [i for i, c in enumerate(result) if c == target]
         print(channels)
+        s &= set(channels)
+
+    print(s)
     # import numpy
     # numpy.set_printoptions(threshold=numpy.nan)
     # print(result)

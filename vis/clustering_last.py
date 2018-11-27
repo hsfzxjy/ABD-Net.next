@@ -85,4 +85,6 @@ if __name__ == '__main__':
     from skfuzzy.cluster import cmeans
     u = cmeans(x.T, 2, options.k, 1e-11, 1000)[1]
     result = u.argmax(axis=0)
+    import numpy
+    numpy.set_printoptions(threshold=numpy.nan)
     print(result)

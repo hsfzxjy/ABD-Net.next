@@ -22,6 +22,7 @@ from .mlfn import *
 from .densenet_DAN import *
 from .densenet_DAN_cat import *
 from .densenet_cl import *
+from .densenet_CAM_cat import *
 
 __model_factory = {
     # densenet based
@@ -33,6 +34,7 @@ __model_factory = {
     'densenet121_cl_fc512': densenet121_cl_fc512,
     'densenet121_cl_sum': densenet121_cl_sum,
     'densenet121_cl_sum_fc512': densenet121_cl_sum_fc512,
+    'densenet121_CAM_cat_fc512': densenet121_CAM_cat_fc512,
     # image classification models
     'resnet50': resnet50,
     'resnet50_fc512': resnet50_fc512,

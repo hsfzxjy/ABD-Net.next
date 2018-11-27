@@ -68,6 +68,7 @@ if __name__ == '__main__':
     parser.add_argument('-l', dest='layer', type=int)
     parser.add_argument('-p', dest='path', default=None)
     parser.add_argument('-i', dest='input', default='')
+    parser.add_argument('-k', type=float, default=1.07)
     options = parser.parse_args()
 
     path = options.path or resolve('..', 'generated_' + str(options.layer))
@@ -80,3 +81,7 @@ if __name__ == '__main__':
     x = (x[0].cpu().data).numpy()
     x = x.reshape(x.shape[0], -1)
     print(x.shape, type(x))
+
+    from skfuzzy.cluster import cmeans
+    u = cmeans(dataset.T, 2, options.k, 1e-11, 1000)[1]
+    print(u)

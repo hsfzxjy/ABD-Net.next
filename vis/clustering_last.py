@@ -83,5 +83,5 @@ if __name__ == '__main__':
     print(x.shape, type(x))
 
     from skfuzzy.cluster import cmeans
-    u = cmeans(dataset.T, 2, options.k, 1e-11, 1000)[1]
+    u = cmeans(x, 2, options.k, 1e-11, 1000)[1]
     print(u)

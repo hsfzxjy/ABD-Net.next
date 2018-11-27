@@ -77,5 +77,5 @@ if __name__ == '__main__':
     print(img.shape)
     model = get_model()
     x = model.features(img)
-    x = x[0].cpu().numpy()
+    x = (x[0].cpu().data).numpy()
     print(x.shape, type(x))

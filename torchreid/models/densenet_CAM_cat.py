@@ -214,7 +214,7 @@ channels = sorted([5,
                    656,
                    578,
                    ])
-b_channels = sorted(list(set(range(1023) - set(channels))))
+b_channels = sorted(list(set(range(1023)) - set(channels)))
 
 
 class DANetHead(nn.Module):

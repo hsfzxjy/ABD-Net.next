@@ -73,6 +73,7 @@ if __name__ == '__main__':
     path = options.path or resolve('..', 'generated_' + str(options.layer))
     img = read_image(options.input or resolve('1.jpg'))
     img = transform_test(img)
+    img = img.view(1, *img.size())
     print(img.shape)
     model = get_model()
     model.features(img)

@@ -81,16 +81,22 @@ if __name__ == '__main__':
     imgs = torch.cat(imgs)
     print(imgs.shape)
     model = get_model()
-    x = model.features(imgs)
-    print(x.size())
-    raise SystemError
-    x = (x[0].cpu().data).numpy()
-    x = x.reshape(x.shape[0], -1)
-    print(x.shape, type(x))
+    f = model.features(imgs)
+    f = f.cpu().data.numpy()
 
     from skfuzzy.cluster import cmeans
-    u = cmeans(x.T, 2, options.k, 1e-11, 1000)[1]
-    result = u.argmax(axis=0)
-    import numpy
-    numpy.set_printoptions(threshold=numpy.nan)
-    print(result)
+    for x in f:
+        x = x.reshape(x.shape[0], -1)
+        print(x.shape, type(x))
+
+        u = cmeans(x.T, 2, options.k, 1e-11, 1000)[1]
+        result = u.argmax(axis=0)
+        if result.sum() < len(result) / 2:
+            target = 1
+        else:
+            target = 0
+        channels = [i for i, c in enumerate(result) if c == target]
+        print(channels)
+    # import numpy
+    # numpy.set_printoptions(threshold=numpy.nan)
+    # print(result)

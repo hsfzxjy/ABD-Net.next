@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
     from skfuzzy.cluster import cmeans
     s = set(range(len(f[1])))
-    from collections import defaultdict,Counter
+    from collections import defaultdict, Counter
     d = defaultdict(lambda: 0)
     for x in f:
         x = x.reshape(x.shape[0], -1)
@@ -104,6 +104,9 @@ if __name__ == '__main__':
             d[i] += 1
 
     print(Counter(d))
+    for k, v in d.items():
+        if v >= 7:
+            print(k)
     # import numpy
     # numpy.set_printoptions(threshold=numpy.nan)
     # print(result)

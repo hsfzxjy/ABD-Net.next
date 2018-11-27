@@ -61,9 +61,6 @@ def get_model():
 from torchreid.dataset_loader import read_image
 
 
-from inverted_representation import InvertedRepresentation
-
-
 if __name__ == '__main__':
 
     import argparse

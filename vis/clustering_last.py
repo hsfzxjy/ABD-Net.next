@@ -78,4 +78,5 @@ if __name__ == '__main__':
     model = get_model()
     x = model.features(img)
     x = (x[0].cpu().data).numpy()
+    x = x.reshape(x.shape[0], -1)
     print(x.shape, type(x))

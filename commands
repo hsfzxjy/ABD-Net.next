@@ -304,3 +304,7 @@ DAN_part=p beta=1e-8 nohup python train.py --root data -s cuhk03 -t cuhk03 -j 4 
 nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cat_fc512 --save-dir cam_log/dprn_densenet_CAM_cat_fc512_adam_60_10_xent  --gpu-devices 0
 
 beta=1e-8 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cat_fc512 --save-dir cam_log/dprn_densenet_CAM_cat_fc512_adam_60_10_singular_1e-8 --criterion singular --gpu-devices 4 &
+
+-- last --
+
+python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_cl_cat_fc512_adam_60_10_xent --criterion xent --gpu-devices 3

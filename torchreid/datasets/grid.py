@@ -27,7 +27,7 @@ class GRID(BaseImageDataset):
     Loy et al. Multi-camera activity correlation analysis. CVPR 2009.
 
     URL: http://personal.ie.cuhk.edu.hk/~ccloy/downloads_qmul_underground_reid.html
-    
+
     Dataset statistics:
     # identities: 250
     # images: 1275
@@ -94,7 +94,7 @@ class GRID(BaseImageDataset):
         fpath = osp.join(self.dataset_dir, osp.basename(self.dataset_url))
 
         print("Downloading GRID dataset")
-        urllib.urlretrieve(self.dataset_url, fpath)
+        urllib.request.urlretrieve(self.dataset_url, fpath)
 
         print("Extracting files")
         zip_ref = zipfile.ZipFile(fpath, 'r')
@@ -116,7 +116,7 @@ class GRID(BaseImageDataset):
                 idx2label = {idx: label for label, idx in enumerate(train_idxs)}
 
                 train, query, gallery = [], [], []
-                
+
                 # processing probe folder
                 for img_path in probe_img_paths:
                     img_name = osp.basename(img_path)
@@ -128,7 +128,7 @@ class GRID(BaseImageDataset):
                     else:
                         # add to query data
                         query.append((img_path, img_idx, camid))
-                
+
                 # process gallery folder
                 for img_path in gallery_img_paths:
                     img_name = osp.basename(img_path)
@@ -147,7 +147,7 @@ class GRID(BaseImageDataset):
                          'num_gallery_pids': 900,
                          }
                 splits.append(split)
-            
+
             print("Totally {} splits are created".format(len(splits)))
             write_json(splits, self.split_path)
             print("Split file saved to {}".format(self.split_path))

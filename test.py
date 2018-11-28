@@ -26,8 +26,10 @@ def get_exp(dir):
         name = 'densenet121_DAN_cat'
     elif 'densenet_DAN' in dir:
         name = 'densenet121_DAN'
-    elif 'densenet_CAM_cat_fc512' in dir:
-        name = 'densenet121_CAM_cat_fc512'
+    elif 'densenet_CAM_cl_cat_fc512' in dir:
+        name = 'densenet121_CAM_cl_cat_fc512'
+    elif 'densenet_CAM_noncl_cat_fc512' in dir:
+        name = 'densenet121_CAM_noncl_cat_fc512'
     elif 'densenet_CAM_cat' in dir:
         name = 'densenet121_CAM_cat'
     elif 'densenet_fc512' in dir:

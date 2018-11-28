@@ -27,7 +27,7 @@ class PRID450S(BaseImageDataset):
     Roth et al. Mahalanobis Distance Learning for Person Re-Identification. PR 2014.
 
     URL: https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/prid450s/
-    
+
     Dataset statistics:
     # identities: 450
     # images: 900
@@ -91,7 +91,7 @@ class PRID450S(BaseImageDataset):
         fpath = osp.join(self.dataset_dir, 'prid_450s.zip')
 
         print("Downloading PRID450S dataset")
-        urllib.urlretrieve(self.dataset_url, fpath)
+        urllib.request.urlretrieve(self.dataset_url, fpath)
 
         print("Extracting files")
         zip_ref = zipfile.ZipFile(fpath, 'r')

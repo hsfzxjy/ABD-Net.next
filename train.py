@@ -41,7 +41,7 @@ def main():
     if args.use_cpu:
         use_gpu = False
     log_name = 'log_test.txt' if args.evaluate else 'log_train.txt'
-    sys.stdout = Logger(osp.join(args.save_dir, log_name))
+    sys.stderr = sys.stdout = Logger(osp.join(args.save_dir, log_name))
     print("==========\nArgs:{}\n==========".format(args))
 
     if use_gpu:

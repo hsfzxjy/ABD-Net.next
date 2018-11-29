@@ -94,6 +94,8 @@ def argument_parser():
                         help="open specified layers for training while keeping others frozen")
 
     parser.add_argument('--criterion', type=str, default='xent')
+    parser.add_argument('--switch-loss', type=int, default=0)
+    parser.add_argument('--fix-custom-loss', action='store_true', default=False)
 
     # ************************************************************
     # Cross entropy loss-specific setting

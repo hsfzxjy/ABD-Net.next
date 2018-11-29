@@ -71,6 +71,7 @@ def main():
         raise RuntimeError('Unknown criterion {!r}'.format(criterion))
 
     fix_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    switch_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
 
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
@@ -131,6 +132,10 @@ def main():
 
     for epoch in range(args.start_epoch, args.max_epoch):
         start_train_time = time.time()
+
+        if args.switch_criterion and epoch >= args.switch_criterion:
+            criterion = switch_criterion
+
         train(epoch, model, criterion, optimizer, trainloader, use_gpu)
         train_time += round(time.time() - start_train_time)
 

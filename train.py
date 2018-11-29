@@ -134,7 +134,7 @@ def main():
         start_train_time = time.time()
 
         if args.switch_loss and epoch >= args.switch_loss:
-            criterion = switch_criterion
+            criterion = lambda x, pids: switch_criterion(x[1], pids)  # noqa
 
         train(epoch, model, criterion, optimizer, trainloader, use_gpu)
         train_time += round(time.time() - start_train_time)

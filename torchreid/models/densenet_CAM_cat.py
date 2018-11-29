@@ -290,8 +290,8 @@ class DensenetCAMCat(densenet_.DenseNet):
         self.cluster = cluster
         self.ca1 = DANetHead(len(channels), len(channels), nn.BatchNorm2d, type_='c')
         self.ca2 = DANetHead(len(b_channels), len(b_channels), nn.BatchNorm2d, type_='c')
-        self.ca = DANetHead(1024, 1024, nn.BatchNorm2d, type_='c')
-        self.pa = DANetHead(1024, 1024, nn.BatchNorm2d, type_='p')
+        self.ca = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d, type_='c')
+        self.pa = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d, type_='p')
         self.fc = self._construct_fc_layer(fc_dims, self.feature_dim * 3, dropout_p=None)
         print(self.fc)
         # feature_dim changed after _construct_fc_layer, so we must construct

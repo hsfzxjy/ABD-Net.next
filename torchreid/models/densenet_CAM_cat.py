@@ -274,15 +274,17 @@ class DensenetCAMCat(densenet_.DenseNet):
 
     def __init__(self, num_classes, loss, fc_dims, cluster=True, **kwargs):
 
+        kw = dict(num_classes=num_classes,
+                  loss=loss,
+                  num_init_features=64,
+                  growth_rate=32,
+                  block_config=(6, 12, 24, 16),
+                  fc_dims=None,
+                  dropout_p=None,)
+        kw.update(kwargs)
+
         super().__init__(
-            num_classes=num_classes,
-            loss=loss,
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 24, 16),
-            fc_dims=None,
-            dropout_p=None,
-            **kwargs
+            **kw
         )
 
         self.cluster = cluster
@@ -416,5 +418,24 @@ def densenet121_CAM_noncl_cat_fc512(num_classes, loss, pretrained='imagenet', **
 
     if pretrained == 'imagenet':
         densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet121'])
+
+    return model
+
+
+def densenet161_CAM_noncl_cat_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+
+    model = DensenetCAMCat(
+        num_classes=num_classes,
+        loss=loss,
+        fc_dims=[512],
+        cluster=False,
+        num_init_features=96,
+        growth_rate=48,
+        block_config=(6, 12, 36, 24),
+        **kwargs
+    )
+
+    if pretrained == 'imagenet':
+        densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet161'])
 
     return model

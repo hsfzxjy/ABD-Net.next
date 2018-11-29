@@ -450,7 +450,7 @@ def densenet161_CAM_noncl_cat_trick_fc512(num_classes, loss, pretrained='imagene
         cluster=False,
         num_init_features=96,
         growth_rate=48,
-        block_config=(6, 12, 36, 34),
+        block_config=(6, 12, 36, 24),
         dropout_p=0.5,
         **kwargs
     )

@@ -455,6 +455,6 @@ def densenet201_CAM_noncl_cat_fc512(num_classes, loss, pretrained='imagenet', **
     )
 
     if pretrained == 'imagenet':
-        densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet161'])
+        densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet201'])
 
     return model

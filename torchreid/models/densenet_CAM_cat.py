@@ -5,7 +5,7 @@ from torch.nn import functional as F
 from . import densenet as densenet_
 from .attention import PAM_Module, CAM_Module
 
-__all__ = ['densenet121_CAM_cl_cat_fc512', 'densenet121_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_fc512']
+__all__ = ['densenet121_CAM_cl_cat_fc512', 'densenet121_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_fc512', 'densenet201_CAM_noncl_cat_fc512']
 
 channels = sorted([5,
                    98,
@@ -432,6 +432,25 @@ def densenet161_CAM_noncl_cat_fc512(num_classes, loss, pretrained='imagenet', **
         num_init_features=96,
         growth_rate=48,
         block_config=(6, 12, 36, 24),
+        **kwargs
+    )
+
+    if pretrained == 'imagenet':
+        densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet161'])
+
+    return model
+
+
+def densenet201_CAM_noncl_cat_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+
+    model = DensenetCAMCat(
+        num_classes=num_classes,
+        loss=loss,
+        fc_dims=[512],
+        cluster=False,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 48, 32),
         **kwargs
     )
 

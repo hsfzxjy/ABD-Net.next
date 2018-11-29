@@ -307,4 +307,51 @@ beta=1e-8 nohup python train.py --root data -s market1501 -t market1501 -j 4 --h
 
 -- last --
 
-python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_cl_cat_fc512_adam_60_10_xent --criterion xent --gpu-devices 3
+nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_cl_cat_fc512_adam_60_10_xent --gpu-devices 3 &
+
+nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_noncl_cat_fc512_adam_60_10_xent --gpu-devices 4 &
+
+
+beta=1e-8 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_cl_cat_fc512_adam_60_10_singular_1e-8 --criterion singular --gpu-devices 3 &
+
+beta=1e-8 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_noncl_cat_fc512_adam_60_10_singular_1e-8 --criterion singular --gpu-devices 4 &
+
+
+- open -
+
+nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_cl_cat_fc512__open__adam_60_10_xent --gpu-devices 5 &
+
+nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_60_10_xent --gpu-devices 6 &
+
+
+beta=1e-8 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_cl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_cl_cat_fc512__open__adam_60_10_singular_1e-8 --criterion singular --gpu-devices 5 &
+
+beta=1e-8 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir last_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_60_10_singular_1e-8 --criterion singular --gpu-devices 6 &
+
+
+-- dataset --
+
+
+nohup python train.py --root data -s grid -t grid -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 0 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir dl_log/dprn_densenet_fc512_adam_60_10_xent_grid --gpu-devices 7 &
+
+nohup python train.py --root data -s prid450s -t prid450s -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 0 --open-layers classifier fc --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512 --save-dir dl_log/dprn_densenet_fc512_adam_60_10_xent_prid450s --gpu-devices 7 &
+w
+
+-- 11.29 --
+
+nohup python train_imgreid_xent_htri.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir 1129_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_60_10_xent_htri --gpu-devices 2 &
+
+
+nohup python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 384 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir 1129_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_60_10_384_xent --gpu-devices 3 &
+
+python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet161_CAM_noncl_cat_fc512 --save-dir 161_log/dprn_densenet161_CAM_noncl_cat_fc512__open__adam_60_10_256_xent --gpu-devices 4
+
+python train_imgreid_xent.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 60 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet201_CAM_noncl_cat_fc512 --save-dir 1129_log/dprn_densenet201_CAM_noncl_cat_fc512__open__adam_60_10_256_xent --gpu-devices 5
+
+
+beta=1e-9 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 40 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir 1129_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_40_10_256_singular_1e-9 --switch-loss 15 --gpu-devices 2 --criterion singular &
+
+beta=1e-6 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 40 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir 1129_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_40_10_256_singular_1e-6 --switch-loss 15 --gpu-devices 2 --criterion singular &
+
+beta=1e-7 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 40 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc pa ca ca1 ca2 --train-batch-size 32 --test-batch-size 100 -a densenet121_CAM_noncl_cat_fc512 --save-dir 1129_log/dprn_densenet_CAM_noncl_cat_fc512__open__adam_40_10_256_singular_1e-7 --switch-loss 15 --gpu-devices 3 --criterion singular &
+

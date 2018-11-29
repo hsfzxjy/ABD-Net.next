@@ -5,7 +5,7 @@ from torch.nn import functional as F
 from . import densenet as densenet_
 from .attention import PAM_Module, CAM_Module
 
-__all__ = ['densenet121_CAM_cl_cat_fc512', 'densenet121_CAM_noncl_cat_fc512']
+__all__ = ['densenet121_CAM_cl_cat_fc512', 'densenet121_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_fc512']
 
 channels = sorted([5,
                    98,

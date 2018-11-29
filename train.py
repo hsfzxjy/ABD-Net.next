@@ -130,7 +130,7 @@ def main():
             else:
                 ct = lambda x, pids: fix_criterion(x[1], pids)  # noqa
             print(ct)
-            train(epoch, model, lambda x, pids: ct, optimizer, trainloader, use_gpu, fixbase=True)
+            train(epoch, model, lambda x, pids: ct(x, pids), optimizer, trainloader, use_gpu, fixbase=True)
             train_time += round(time.time() - start_train_time)
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))

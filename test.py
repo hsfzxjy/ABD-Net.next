@@ -63,7 +63,12 @@ def get_exp(dir):
     tarname = dir + '/checkpoint_ep{}.pth.tar'.format(epch)
     last_log = subprocess.check_output(['tail', '-n', '11', dir + '/log_train.txt']).decode()
 
-    return name, part, tarname, last_log
+    if '384' in dir:
+        height = '384'
+    else:
+        height = '256'
+
+    return name, part, tarname, last_log, height
 
 
 def run_exp(dir):
@@ -71,12 +76,12 @@ def run_exp(dir):
     x = get_exp(dir)
     if x is None:
         return
-    name, part, tarname, last_log = x
+    name, part, tarname, last_log, height = x
 
     p = subprocess.Popen(
         [
             'python', 'eval.py',
-            # '--cd', '.',
+            '--height', height,
             '--arch', name,
             '--snap_shot', tarname
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,

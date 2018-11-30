@@ -55,12 +55,14 @@ def get_exp(dir):
         part = matched[0][1]
     else:
         part = ''
-    epch = 100
-    while not os.path.exists(dir + '/checkpoint_ep{}.pth.tar'.format(epch)) and epch > 0:
-        epch -= 1
-    if epch == 0:
+    # epch = 100
+    # while not os.path.exists(dir + '/checkpoint_ep{}.pth.tar'.format(epch)) and epch > 0:
+    #     epch -= 1
+    # if epch == 0:
+    #     return
+    tarnames = glob(dir + '/*pth.tar')
+    if not tarnames:
         return
-    tarname = dir + '/checkpoint_ep{}.pth.tar'.format(epch)
     last_log = subprocess.check_output(['tail', '-n', '11', dir + '/log_train.txt']).decode()
 
     if '384' in dir:
@@ -68,7 +70,7 @@ def get_exp(dir):
     else:
         height = '256'
 
-    return name, part, tarname, last_log, height
+    return name, part, tarnames, last_log, height
 
 
 def run_exp(dir):
@@ -76,25 +78,30 @@ def run_exp(dir):
     x = get_exp(dir)
     if x is None:
         return
-    name, part, tarname, last_log, height = x
+    name, part, tarnames, last_log, height = x
 
-    p = subprocess.Popen(
-        [
-            'python', 'eval.py',
-            '--height', height,
-            '--arch', name,
-            '--snap_shot', tarname
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        env={**os.environ, 'DAN_part': part}
-    )
+    results = []
+    for tarname in tarnames:
+        p = subprocess.Popen(
+            [
+                'python', 'eval.py',
+                '--height', height,
+                '--arch', name,
+                '--snap_shot', tarname
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            env={**os.environ, 'DAN_part': part}
+        )
 
-    stdout, stderr = p.communicate()
-    if p.returncode != 0:
-        raise RuntimeError(stderr.decode())
-    else:
-        result = stdout.decode().strip().split('\n')[-1]
-        with open(os.path.join(dir, 'eval.txt'), 'w') as f:
-            f.write(result)
+        stdout, stderr = p.communicate()
+        if p.returncode != 0:
+            raise RuntimeError(stderr.decode())
+        else:
+            result = stdout.decode().strip().split('\n')[-1]
+            results.append(tarname + '\n' + result)
+            print(tarname)
+            print(result)
+    with open(os.path.join(dir, 'eval.txt'), 'w') as f:
+        f.write(results.join('\n'))
 
     print('----')
     print('arch', name, 'part', part)
@@ -102,7 +109,7 @@ def run_exp(dir):
     print('log')
     print(last_log)
     print('result')
-    print(result)
+    # print(result)
     print('----')
 
 

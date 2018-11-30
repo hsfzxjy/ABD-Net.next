@@ -111,7 +111,7 @@ def run_exp(dir):
             with open(dir + '/eval' + str(number) + '.txt', 'w') as f:
                 f.write(result)
     with open(os.path.join(dir, 'eval.txt'), 'w') as f:
-        f.write(results.join('\n'))
+        f.write('\n\n'.join(results))
 
     print('----')
     print('arch', name, 'part', part)

@@ -82,6 +82,13 @@ def run_exp(dir):
 
     results = []
     for tarname in tarnames:
+
+        import re
+        number = int(re.findall(r'(\d+)\.pth', tarname)[0])
+
+        if os.path.exists(dir + '/eval' + str(number) + '.txt'):
+            continue
+
         p = subprocess.Popen(
             [
                 'python', 'eval.py',
@@ -100,6 +107,9 @@ def run_exp(dir):
             results.append(tarname + '\n' + result)
             print(tarname)
             print(result)
+
+            with open(dir + '/eval' + str(number) + '.txt', 'w') as f:
+                f.write(result)
     with open(os.path.join(dir, 'eval.txt'), 'w') as f:
         f.write(results.join('\n'))
 

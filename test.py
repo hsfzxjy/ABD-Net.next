@@ -135,6 +135,30 @@ def run_exp(dir):
                 with open(dir + '/eval_nofc' + str(number) + '.txt', 'w') as f:
                     f.write(result)
 
+        if not os.path.exists(dir + '/eval_fccnfc' + str(number) + '.txt'):
+
+            p = subprocess.Popen(
+                [
+                    'python', 'eval.py',
+                    '--height', height,
+                    '--arch', name,
+                    '--snap_shot', tarname
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env={**os.environ, 'DAN_part': part, 'FCCNFC': '1'}
+            )
+
+            stdout, stderr = p.communicate()
+            if p.returncode != 0:
+                raise RuntimeError(stderr.decode())
+            else:
+                result = stdout.decode().strip().split('\n')[-1]
+                results.append(tarname + '\n' + result)
+                print(tarname)
+                print(result)
+
+                with open(dir + '/eval_fccnfc' + str(number) + '.txt', 'w') as f:
+                    f.write(result)
+
     # with open(os.path.join(dir, 'eval.txt'), 'w') as f:
     #     f.write('\n\n'.join(results))
 

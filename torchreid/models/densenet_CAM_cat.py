@@ -303,6 +303,7 @@ class DensenetCAMCat(densenet_.DenseNet):
 
     def forward(self, x):
         f = self.features(x)
+        print('F!', f.size())
         old_f = f
 
         if self.cluster:

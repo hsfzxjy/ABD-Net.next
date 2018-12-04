@@ -350,6 +350,7 @@ class DensenetCAMCat(densenet_.DenseNet):
             v = self.fc(v)
         if not self.training:
             if os.environ.get('FCCNFC'):
+                print(pa.size(), ca.size(), old_v.size(), v.size())
                 return torch.cat((v, old_v), 1)
             return v.view(v.size(0), -1)
 

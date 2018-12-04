@@ -7,10 +7,12 @@ import re
 import argparse
 
 
-def get_exps():
+def get_args():
     p = argparse.ArgumentParser()
     p.add_argument('glob', default='./log/*')
-    return glob(p.parse_args().glob)
+    p.add_argument('--daemon', default=False, action='store_true')
+    args = p.parse_args()
+    return args
 
 
 def get_exp(dir):
@@ -172,5 +174,12 @@ def run_exp(dir):
     print('----')
 
 
-for x in get_exps():
-    run_exp(x)
+args = get_args()
+
+while 1:
+    for x in glob(args.glob):
+        run_exp(x)
+    import time
+    time.sleep(1)
+    if not args.daemon:
+        break

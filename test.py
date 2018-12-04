@@ -87,7 +87,7 @@ def run_exp(dir, ep):
     if x is None:
         return
     name, part, tarnames, last_log, height = x
-    if ep is not None:
+    if ep:
         tarnames = [t for t in tarnames if ep in t]
 
     results = []

@@ -294,7 +294,7 @@ class DensenetCAMCat(densenet_.DenseNet):
         self.ca = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d, type_='c')
         self.pa = DANetHead(self.feature_dim, self.feature_dim // pam_division, nn.BatchNorm2d, type_='p')
         print(self.pa)
-        self.fc = self._construct_fc_layer(fc_dims, self.feature_dim * 3, dropout_p=None)
+        self.fc = self._construct_fc_layer(fc_dims, self.feature_dim * 2 + self.feature_dim // pam_division, dropout_p=None)
         print(self.fc)
         # feature_dim changed after _construct_fc_layer, so we must construct
         # classifier again

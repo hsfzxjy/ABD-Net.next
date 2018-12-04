@@ -25,6 +25,7 @@ def extractor(model, dataloader):
             names, images = sample['name'], sample['img']
 
             ff = model(images.cuda()).data.cpu()
+            print(ff.shape)
             ff = ff + model(fliplr(images).cuda()).data.cpu()
             ff = ff.div(torch.norm(ff, p=2, dim=1, keepdim=True).expand_as(ff))
 

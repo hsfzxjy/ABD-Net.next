@@ -125,7 +125,8 @@ def run_exp(dir):
                     'python', 'eval.py',
                     '--height', height,
                     '--arch', name,
-                    '--snap_shot', tarname
+                    '--snap_shot', tarname,
+                    '--log-dir', os.environ.get('LOGDIR', '__TMP')
                 ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 env={**os.environ, 'DAN_part': part, 'NOFC': '1'}
             )
@@ -149,7 +150,8 @@ def run_exp(dir):
                     'python', 'eval.py',
                     '--height', height,
                     '--arch', name,
-                    '--snap_shot', tarname
+                    '--snap_shot', tarname,
+                    '--log-dir', os.environ.get('LOGDIR', '__TMP')
                 ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 env={**os.environ, 'DAN_part': part, 'FCCNFC': '1'}
             )

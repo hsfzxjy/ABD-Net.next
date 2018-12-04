@@ -6,7 +6,7 @@ from torch.nn import functional as F
 from . import densenet as densenet_
 from .attention import PAM_Module, CAM_Module
 
-__all__ = ['densenet121_CAM_cl_cat_fc512', 'densenet121_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_fc512', 'densenet201_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_trick_fc512']
+__all__ = ['densenet121_CAM_cl_cat_fc512', 'densenet121_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_fc512', 'densenet201_CAM_noncl_cat_fc512', 'densenet161_CAM_noncl_cat_trick_fc512', 'densenet161_CAM_noncl_cat_trick_1_4_fc512', 'densenet161_CAM_noncl_cat_1_4_fc512']
 
 channels = sorted([5,
                    98,
@@ -273,7 +273,7 @@ class DANetHead(nn.Module):
 
 class DensenetCAMCat(densenet_.DenseNet):
 
-    def __init__(self, num_classes, loss, fc_dims, cluster=True, **kwargs):
+    def __init__(self, num_classes, loss, fc_dims, cluster=True, pam_division=1, **kwargs):
 
         kw = dict(num_classes=num_classes,
                   loss=loss,
@@ -292,7 +292,7 @@ class DensenetCAMCat(densenet_.DenseNet):
         self.ca1 = DANetHead(len(channels), len(channels), nn.BatchNorm2d, type_='c')
         self.ca2 = DANetHead(len(b_channels), len(b_channels), nn.BatchNorm2d, type_='c')
         self.ca = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d, type_='c')
-        self.pa = DANetHead(self.feature_dim, self.feature_dim, nn.BatchNorm2d, type_='p')
+        self.pa = DANetHead(self.feature_dim, self.feature_dim // 1, nn.BatchNorm2d, type_='p')
         self.fc = self._construct_fc_layer(fc_dims, self.feature_dim * 3, dropout_p=None)
         print(self.fc)
         # feature_dim changed after _construct_fc_layer, so we must construct
@@ -461,6 +461,47 @@ def densenet161_CAM_noncl_cat_trick_fc512(num_classes, loss, pretrained='imagene
         growth_rate=48,
         block_config=(6, 12, 36, 24),
         dropout_p=0.5,
+        **kwargs
+    )
+
+    if pretrained == 'imagenet':
+        densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet161'])
+
+    return model
+
+
+def densenet161_CAM_noncl_cat_1_4_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+
+    model = DensenetCAMCat(
+        num_classes=num_classes,
+        loss=loss,
+        fc_dims=[512],
+        cluster=False,
+        num_init_features=96,
+        growth_rate=48,
+        block_config=(6, 12, 36, 24),
+        pam_division=4,
+        **kwargs
+    )
+
+    if pretrained == 'imagenet':
+        densenet_.init_pretrained_weights(model, densenet_.model_urls['densenet161'])
+
+    return model
+
+
+def densenet161_CAM_noncl_cat_trick_1_4_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
+
+    model = DensenetCAMCat(
+        num_classes=num_classes,
+        loss=loss,
+        fc_dims=[512],
+        cluster=False,
+        num_init_features=96,
+        growth_rate=48,
+        block_config=(6, 12, 36, 24),
+        dropout_p=0.5,
+        pam_division=4,
         **kwargs
     )
 

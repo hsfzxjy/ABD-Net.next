@@ -39,6 +39,8 @@ __model_factory = {
     'densenet161_CAM_noncl_cat_fc512': densenet161_CAM_noncl_cat_fc512,
     'densenet201_CAM_noncl_cat_fc512': densenet201_CAM_noncl_cat_fc512,
     'densenet161_CAM_noncl_cat_trick_fc512': densenet161_CAM_noncl_cat_trick_fc512,
+    'densenet161_CAM_noncl_cat_trick_1_4_fc512': densenet161_CAM_noncl_cat_trick_1_4_fc512,
+    'densenet161_CAM_noncl_cat_1_4_fc512': densenet161_CAM_noncl_cat_1_4_fc512,
     # image classification models
     'resnet50': resnet50,
     'resnet50_fc512': resnet50_fc512,

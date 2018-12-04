@@ -1,3 +1,4 @@
+import os
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -341,6 +342,9 @@ class DensenetCAMCat(densenet_.DenseNet):
 
         v = torch.cat((v, pa, ca), 1)
         # v = pa
+        #
+        if os.environ.get('NOFC'):
+            return v.view(v.size(0), -1)
         if self.fc is not None:
             v = self.fc(v)
         if not self.training:

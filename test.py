@@ -11,6 +11,7 @@ def get_args():
     p = argparse.ArgumentParser()
     p.add_argument('glob', default='./log/*')
     p.add_argument('--daemon', default=False, action='store_true')
+    p.add_argument('--ep')
     args = p.parse_args()
     return args
 
@@ -79,12 +80,15 @@ def get_exp(dir):
     return name, part, tarnames, last_log, height
 
 
-def run_exp(dir):
+def run_exp(dir, ep):
 
     x = get_exp(dir)
+
     if x is None:
         return
     name, part, tarnames, last_log, height = x
+    if ep is not None:
+        tarnames = [t for t in tarnames if ep in t]
 
     results = []
     for tarname in tarnames:
@@ -185,7 +189,7 @@ args = get_args()
 
 while 1:
     for x in glob(args.glob):
-        run_exp(x)
+        run_exp(x, ep=args.ep)
     import time
     time.sleep(1)
     if not args.daemon:

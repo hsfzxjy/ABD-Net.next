@@ -222,30 +222,42 @@ class DANetHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, type_):
         super(DANetHead, self).__init__()
         inter_channels = in_channels // 4
-        # inter_channels = in_channels
-        self.conv5a = nn.Sequential(nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
-                                    norm_layer(inter_channels),
-                                    nn.ReLU())
 
-        self.conv5c = nn.Sequential(nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
-                                    norm_layer(inter_channels),
-                                    nn.ReLU())
-
-        self.sa = PAM_Module(inter_channels)
-        self.sc = CAM_Module(inter_channels)
-        self.conv51 = nn.Sequential(nn.Conv2d(inter_channels, inter_channels, 3, padding=1, bias=False),
-                                    norm_layer(inter_channels),
-                                    nn.ReLU())
-        self.conv52 = nn.Sequential(nn.Conv2d(inter_channels, inter_channels, 3, padding=1, bias=False),
-                                    norm_layer(inter_channels),
-                                    nn.ReLU())
-
-        self.conv6 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(inter_channels, out_channels, 1))
-        self.conv7 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(inter_channels, out_channels, 1))
-
-        self.conv8 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(inter_channels, out_channels, 1))
         self.type_ = type_.lower()
-        assert self.type_ in 'cp'
+        assert len(self.type_) == 1 and self.type_ in 'cp'
+
+        if self.type_ == 'p':
+            self.conv5a = nn.Sequential(
+                nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
+                norm_layer(inter_channels),
+                nn.ReLU()
+            )
+            self.sa = PAM_Module(inter_channels)
+            self.conv51 = nn.Sequential(
+                nn.Conv2d(inter_channels, inter_channels, 3, padding=1, bias=False),
+                norm_layer(inter_channels),
+                nn.ReLU()
+            )
+            self.conv6 = nn.Sequential(
+                nn.Dropout2d(0.1, False),
+                nn.Conv2d(inter_channels, out_channels, 1)
+            )
+        elif self.type_ == 'c':
+            self.conv5c = nn.Sequential(
+                nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
+                norm_layer(inter_channels),
+                nn.ReLU()
+            )
+            self.sc = CAM_Module(inter_channels)
+            self.conv52 = nn.Sequential(
+                nn.Conv2d(inter_channels, inter_channels, 3, padding=1, bias=False),
+                norm_layer(inter_channels),
+                nn.ReLU()
+            )
+            self.conv7 = nn.Sequential(
+                nn.Dropout2d(0.1, False),
+                nn.Conv2d(inter_channels, out_channels, 1)
+            )
 
     def forward(self, x):
 
@@ -261,14 +273,6 @@ class DANetHead(nn.Module):
             sc_conv = self.conv52(sc_feat)
             sc_output = self.conv7(sc_conv)
             return sc_output
-        # feat_sum = sa_conv + sc_conv
-
-        # sasc_output = self.conv8(feat_sum)
-
-        # output = [sasc_output]
-        # output.append(sa_output)
-        # output.append(sc_output)
-        # return tuple(output)
 
 
 class DensenetCAMCat(densenet_.DenseNet):
@@ -304,7 +308,6 @@ class DensenetCAMCat(densenet_.DenseNet):
 
     def forward(self, x):
         f = self.features(x)
-        print('F!', f.size())
         old_f = f
 
         if self.cluster:
@@ -313,9 +316,6 @@ class DensenetCAMCat(densenet_.DenseNet):
             c_tensor = torch.tensor(channels).to(torch.device('cuda'))
             bc_tensor = torch.tensor(b_channels).to(torch.device('cuda'))
 
-            # x1 = torch.index_select(x, 1, c_tensor)
-            # x2 = torch.index_select(x, 1, bc_tensor)
-            # print(x.shape)
             x1 = ca[:, c_tensor]
             x2 = ca[:, bc_tensor]
 
@@ -343,29 +343,32 @@ class DensenetCAMCat(densenet_.DenseNet):
         v = v.view(v.size(0), -1)
 
         v = torch.cat((v, pa, ca), 1)
-        # v = pa
-        #
-        if os.environ.get('NOFC') and not self.training:
-            return v.view(v.size(0), -1)
-        old_v = v
+        v_before_fc = v
+
         if self.fc is not None:
             v = self.fc(v)
+
         if not self.training:
+
+            if os.environ.get('NOFC'):
+                return v_before_fc
+
             if os.environ.get('FCCNFC'):
-                print(pa.size(), ca.size(), old_v.size(), v.size())
-                return torch.cat((v, old_v), 1)
+                return torch.cat((v, v_before_fc), 1)
+
             return v.view(v.size(0), -1)
 
         y = self.classifier(v)
-        print(self.classifier.weight.size())
 
-        if self.loss == {'xent'}:
-            return y
-        elif self.loss == {'xent', 'htri'}:
-            return y, v
-        else:
-            return old_f, y, v
-            # raise KeyError("Unsupported loss: {}".format(self.loss))
+        return old_f, y, v, self.classifier.weight
+
+        # if self.loss == {'xent'}:
+        #     return y
+        # elif self.loss == {'xent', 'htri'}:
+        #     return y, v
+        # else:
+        #     return old_f, y, v
+        #     # raise KeyError("Unsupported loss: {}".format(self.loss))
 
 
 def densenet121_CAM_cl_cat(num_classes, loss, pretrained='imagenet', **kwargs):

@@ -19,21 +19,21 @@ from .hacnn import *
 from .pcb import *
 from .mlfn import *
 
-from .densenet_DAN import *
-from .densenet_DAN_cat import *
-from .densenet_cl import *
+# from .densenet_DAN import *
+# from .densenet_DAN_cat import *
+# from .densenet_cl import *
 from .densenet_CAM_cat import *
 
 __model_factory = {
     # densenet based
-    'densenet121_DAN': densenet121_DAN,
-    'densenet121_DAN_fc512': densenet121_DAN_fc512,
-    'densenet121_DAN_cat': densenet121_DAN_cat,
-    'densenet121_DAN_cat_fc512': densenet121_DAN_cat_fc512,
-    'densenet121_cl': densenet121_cl,
-    'densenet121_cl_fc512': densenet121_cl_fc512,
-    'densenet121_cl_sum': densenet121_cl_sum,
-    'densenet121_cl_sum_fc512': densenet121_cl_sum_fc512,
+    # 'densenet121_DAN': densenet121_DAN,
+    # 'densenet121_DAN_fc512': densenet121_DAN_fc512,
+    # 'densenet121_DAN_cat': densenet121_DAN_cat,
+    # 'densenet121_DAN_cat_fc512': densenet121_DAN_cat_fc512,
+    # 'densenet121_cl': densenet121_cl,
+    # 'densenet121_cl_fc512': densenet121_cl_fc512,
+    # 'densenet121_cl_sum': densenet121_cl_sum,
+    # 'densenet121_cl_sum_fc512': densenet121_cl_sum_fc512,
     'densenet121_CAM_cl_cat_fc512': densenet121_CAM_cl_cat_fc512,
     'densenet121_CAM_noncl_cat_fc512': densenet121_CAM_noncl_cat_fc512,
     'densenet161_CAM_noncl_cat_fc512': densenet161_CAM_noncl_cat_fc512,

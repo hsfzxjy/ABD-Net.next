@@ -6,10 +6,14 @@ import torch.nn as nn
 
 import os
 
+from .cross_entropy_loss import CrossEntropyLoss
+
+CONSTRAINT_WEIGHTS = os.environ.get('constraint_weights') is not None
+
 
 class LowRankLoss(nn.Module):
 
-    def __init__(self, beta=5e-8):
+    def __init__(self, num_classes, *, use_gpu=True, label_smooth=True, beta=None):
         super().__init__()
 
         os_beta = None
@@ -17,14 +21,18 @@ class LowRankLoss(nn.Module):
         try:
             os_beta = float(os.environ.get('beta'))
         except ValueError:
-            pass
+            raise RuntimeError('No beta specified. ABORTED.')
 
         self.beta = beta if not os_beta else os_beta
-        self.xent_loss = nn.CrossEntropyLoss()
+        self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
 
     def forward(self, inputs, pids):
 
-        x, y, _ = inputs
+        x, y, _, w = inputs
+
+        if CONSTRAINT_WEIGHTS:
+            x = w
+
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)
         WT = x.view(batches, channels, -1).permute(0, 2, 1)

@@ -17,6 +17,7 @@ from args import argument_parser, image_dataset_kwargs, optimizer_kwargs
 from torchreid.data_manager import ImageDataManager
 from torchreid import models
 from torchreid.losses import CrossEntropyLoss, DeepSupervision
+from torchreid.losses.wrapped_cross_entropy_loss import WrappedCrossEntropyLoss
 from torchreid.utils.iotools import save_checkpoint, check_isfile
 from torchreid.utils.avgmeter import AverageMeter
 from torchreid.utils.loggers import Logger, RankLogger
@@ -29,6 +30,28 @@ from torchreid.optimizers import init_optimizer
 # global variables
 parser = argument_parser()
 args = parser.parse_args()
+
+
+def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_criterion', 'switch_criterion'):
+
+    fix_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    switch_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+
+    if args.criterion == 'xent':
+        criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    elif args.criterion == 'lowrank':
+        from torchreid.losses.lowrank_loss import LowRankLoss
+        criterion = LowRankLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    elif args.criterion == 'singular':
+        from torchreid.losses.singular_loss import SingularLoss
+        criterion = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    else:
+        raise RuntimeError('Unknown criterion {!r}'.format(criterion))
+
+    if args.fix_custom_loss:
+        fix_criterion = criterion
+
+    return criterion, fix_criterion, switch_criterion
 
 
 def main():
@@ -59,19 +82,11 @@ def main():
     model = models.init_model(name=args.arch, num_classes=dm.num_train_pids, loss={args.criterion}, use_gpu=use_gpu)
     print("Model size: {:.3f} M".format(count_num_param(model)))
 
-    if args.criterion == 'xent':
-        criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
-    elif args.criterion == 'lowrank':
-        from torchreid.losses.lowrank_loss import LowRankLoss
-        criterion = LowRankLoss()
-    elif args.criterion == 'singular':
-        from torchreid.losses.singular_loss import SingularLoss
-        criterion = SingularLoss()
-    else:
-        raise RuntimeError('Unknown criterion {!r}'.format(criterion))
+    # init criterion begin
 
-    fix_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
-    switch_criterion = CrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    criterion, fix_criterion, switch_criterion = get_criterions(dm.num_train_pids, use_gpu, args)
+
+    # init criterion end
 
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
@@ -125,12 +140,7 @@ def main():
         for epoch in range(args.fixbase_epoch):
             start_train_time = time.time()
 
-            if args.fix_custom_loss:
-                ct = criterion
-            else:
-                ct = lambda x, pids: fix_criterion(x[1], pids)  # noqa
-            print(ct)
-            train(epoch, model, lambda x, pids: ct(x, pids), optimizer, trainloader, use_gpu, fixbase=True)
+            train(epoch, model, fix_criterion, optimizer, trainloader, use_gpu, fixbase=True)
             train_time += round(time.time() - start_train_time)
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))
@@ -140,7 +150,7 @@ def main():
         start_train_time = time.time()
 
         if args.switch_loss and epoch >= args.switch_loss:
-            criterion = lambda x, pids: switch_criterion(x[1], pids)  # noqa
+            criterion = switch_criterion
 
         train(epoch, model, criterion, optimizer, trainloader, use_gpu)
         train_time += round(time.time() - start_train_time)

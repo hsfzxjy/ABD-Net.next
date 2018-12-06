@@ -266,6 +266,8 @@ class DenseNet(nn.Module):
 
         y = self.classifier(v)
 
+        print(self.classifier.weights)
+
         if self.loss == {'xent'}:
             return y
         elif self.loss == {'xent', 'htri'}:

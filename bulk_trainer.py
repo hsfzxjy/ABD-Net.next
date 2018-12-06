@@ -152,7 +152,7 @@ def main():
 
             for process, args, p_gpu in processes:
                 try:
-                    process.communicate(timeout=1)
+                    process.wait(timeout=1)
                 except subprocess.TimeoutExpired:
                     print(f'{args["log_dir"]} still running...')
                 else:

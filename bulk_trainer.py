@@ -120,7 +120,7 @@ used_gpus = collections.defaultdict(lambda: 0)
 
 def get_next_available_gpu() -> Optional[int]:
 
-    gpus = GPUtil.getAvailable(maxMemory=0.4, excludeID=[used_gpu for used_gpu, count in used_gpus if count >= 3])
+    gpus = GPUtil.getAvailable(maxMemory=0.4, excludeID=[used_gpu for used_gpu, count in used_gpus.items() if count >= 3])
     if not gpus:
         return None
     return gpus[0]

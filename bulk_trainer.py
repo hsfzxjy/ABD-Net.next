@@ -92,7 +92,7 @@ def run_task(args: dict, gpu_id: int, dry_run: bool=False) -> Optional[subproces
             else []
         ),
         '--criterion', args['criterion'],
-        '--fix-custom-loss' if args['fix_custom_loss'] else '',
+        *(['--fix-custom-loss'] if args['fix_custom_loss'] else []),
         '--label-smooth',
 
         '--gpu-devices', str(gpu_id),
@@ -148,7 +148,7 @@ def main():
     processes = []
 
     try:
-        while arg_list:
+        while arg_list or processes:
 
             for process, args, p_gpu in processes:
 

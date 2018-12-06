@@ -150,6 +150,8 @@ def main():
     try:
         while arg_list or processes:
 
+            time.sleep(0.1)
+
             for process, args, p_gpu in processes:
 
                 rtc = process.returncode
@@ -168,7 +170,6 @@ def main():
 
             gpu = get_next_available_gpu()
             if gpu is None:
-                time.sleep(0.1)
                 continue
 
             args = arg_list.popleft()

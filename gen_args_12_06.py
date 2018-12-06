@@ -16,7 +16,7 @@ arg_list = [
     {
         "epoch": 40,
         "env": {},
-        "criterion": "xent",
+        "criterion": "xen",
         "fixbase": 10,
         "fix_custom_loss": False,
         "switch_loss": 0,

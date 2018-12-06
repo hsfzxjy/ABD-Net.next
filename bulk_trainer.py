@@ -163,6 +163,9 @@ def main():
                     if rtc != 0:
                         print(f'FAILED: {args["log_dir"]} with code {rtc}')
 
+            if not arg_list:
+                continue
+
             gpu = get_next_available_gpu()
             if gpu is None:
                 time.sleep(0.1)

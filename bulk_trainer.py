@@ -154,7 +154,7 @@ def main():
                 try:
                     process.communicate(timeout=1)
                 except subprocess.TimeoutExpired:
-                    pass
+                    print(f'{args["log_dir"]} still running...')
                 else:
                     processes.remove((process, args, p_gpu))
                     used_gpus[p_gpu] -= 1
@@ -169,12 +169,13 @@ def main():
 
             args = arg_list.popleft()
             process = run_task(args, gpu)
+            print(f'{args["log_dir"]} started.')
             if process is None:
                 print(f'WARNING: Task {args["log_dir"]} exists. Skipped.')
             processes.append((process, args, gpu))
             used_gpus[gpu] += 1
     except KeyboardInterrupt:
-        for process, _ in processes:
+        for process, _, _ in processes:
             process.terminate()
             process.communicate()
 

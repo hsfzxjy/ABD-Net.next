@@ -172,8 +172,9 @@ def main():
             print(f'{args["log_dir"]} started.')
             if process is None:
                 print(f'WARNING: Task {args["log_dir"]} exists. Skipped.')
-            processes.append((process, args, gpu))
-            used_gpus[gpu] += 1
+            else:
+                processes.append((process, args, gpu))
+                used_gpus[gpu] += 1
     except KeyboardInterrupt:
         for process, _, _ in processes:
             process.terminate()

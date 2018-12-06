@@ -28,14 +28,16 @@ class LowRankLoss(nn.Module):
 
     def forward(self, inputs, pids):
 
-        x, y, _, w = inputs
+        x, y, _, weights = inputs
 
         if CONSTRAINT_WEIGHTS:
-            x = w
-
-        batches, channels, height, width = x.size()
-        W = x.view(batches, channels, -1)
-        WT = x.view(batches, channels, -1).permute(0, 2, 1)
+            height, width = weights.size()
+            batches = 1
+            W = weights.view(1, height, width)
+        else:
+            batches, channels, height, width = x.size()
+            W = x.view(batches, channels, -1)
+        WT = W.permute(0, 2, 1)
         WWT = torch.bmm(W, WT)
         I = torch.eye(channels).expand(batches, channels, channels).cuda()  # noqa
         delta = WWT - I

@@ -59,13 +59,15 @@ class SingularLoss(nn.Module):
 
     def forward(self, inputs, pids):
 
-        x, y, _, w = inputs
+        x, y, _, weights = inputs
 
         if CONSTRAINT_WEIGHTS:
-            x = w
-
-        batches, channels, height, width = x.size()
-        W = x.view(batches, channels, -1)
+            height, width = weights.size()
+            batches = 1
+            W = weights.view(1, height, width)
+        else:
+            batches, channels, height, width = x.size()
+            W = x.view(batches, channels, -1)
         smallest, largest = self.get_singular_values(W)
         if not USE_LOG:
             singular_penalty = (largest - smallest) * self.beta

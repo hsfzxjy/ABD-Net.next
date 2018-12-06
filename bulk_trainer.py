@@ -156,7 +156,7 @@ def main():
                 except subprocess.TimeoutExpired:
                     pass
                 else:
-                    processes.remove((process, args))
+                    processes.remove((process, args, p_gpu))
                     used_gpus[p_gpu] -= 1
 
                     if process.returncode != 0:

@@ -154,16 +154,17 @@ def main():
 
             for process, args, p_gpu in processes:
 
-                rtc = process.returncode
                 print(used_gpus)
-                if rtc is None:
+                try:
+                    process.wait(timeout=0.2)
+                except subprocess.TimeoutExpired:
                     print(f'{args["log_dir"]} still running...')
                 else:
                     processes.remove((process, args, p_gpu))
                     used_gpus[p_gpu] -= 1
 
-                    if rtc != 0:
-                        print(f'FAILED: {args["log_dir"]} with code {rtc}')
+                    if process.returncode != 0:
+                        print(f'FAILED: {args["log_dir"]} with code {process.returncode}')
 
             if not arg_list:
                 continue

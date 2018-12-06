@@ -112,19 +112,23 @@ def run_task(args: dict, gpu_id: int, dry_run: bool=False) -> Optional[subproces
     )
 
 
+import time
+import collections
+
+used_gpus = collections.defaultdict(lambda: int)
+
+
 def get_next_available_gpu() -> Optional[int]:
 
-    gpus = GPUtil.getAvailable(maxMemory=0.6)
+    gpus = GPUtil.getAvailable(maxMemory=0.4, excludeID=[used_gpu for used_gpu, count in used_gpus if count >= 3])
     if not gpus:
         return None
     return gpus[0]
 
 
-import time
-import collections
-
-
 def main():
+
+    global used_gpus
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument('input')
@@ -146,27 +150,29 @@ def main():
     try:
         while arg_list:
 
-            for process, args in processes:
+            for process, args, p_gpu in processes:
                 try:
                     process.communicate(timeout=1)
                 except subprocess.TimeoutExpired:
                     pass
                 else:
                     processes.remove((process, args))
+                    used_gpus[p_gpu] -= 1
 
                     if process.returncode != 0:
                         print(f'FAILED: {args["log_dir"]}')
 
             gpu = get_next_available_gpu()
             if gpu is None:
-                time.sleep(1)
+                time.sleep(0.1)
                 continue
 
             args = arg_list.popleft()
             process = run_task(args, gpu)
             if process is None:
                 print(f'WARNING: Task {args["log_dir"]} exists. Skipped.')
-            processes.append((process, args))
+            processes.append((process, args, gpu))
+            used_gpus[gpu] += 1
     except KeyboardInterrupt:
         for process, _ in processes:
             process.terminate()

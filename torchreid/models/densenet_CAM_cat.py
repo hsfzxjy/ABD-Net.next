@@ -357,7 +357,7 @@ class DensenetCAMCat(densenet_.DenseNet):
             return v.view(v.size(0), -1)
 
         y = self.classifier(v)
-        print(dir(self.classifier))
+        print(dir(self.classifier.weight))
 
         if self.loss == {'xent'}:
             return y

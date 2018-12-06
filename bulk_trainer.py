@@ -154,11 +154,12 @@ def main():
 
             for process, args, p_gpu in processes:
 
-                print(used_gpus)
+                # print(used_gpus)
                 try:
                     process.wait(timeout=0.2)
                 except subprocess.TimeoutExpired:
-                    print(f'{args["log_dir"]} still running...')
+                    # print(f'{args["log_dir"]} still running...')
+                    pass
                 else:
                     processes.remove((process, args, p_gpu))
                     used_gpus[p_gpu] -= 1
@@ -184,7 +185,7 @@ def main():
     except KeyboardInterrupt:
         for process, _, _ in processes:
             process.terminate()
-            process.wait()
+            process.kill()
             process.communicate()
 
         sys.exit()

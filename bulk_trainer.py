@@ -153,7 +153,7 @@ def main():
             for process, args, p_gpu in processes:
 
                 rtc = process.returncode
-
+                print(used_gpus)
                 if rtc is None:
                     print(f'{args["log_dir"]} still running...')
                 else:
@@ -179,6 +179,7 @@ def main():
     except KeyboardInterrupt:
         for process, _, _ in processes:
             process.terminate()
+            process.wait()
             process.communicate()
 
         sys.exit()

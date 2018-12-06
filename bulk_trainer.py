@@ -115,7 +115,7 @@ def run_task(args: dict, gpu_id: int, dry_run: bool=False) -> Optional[subproces
 import time
 import collections
 
-used_gpus = collections.defaultdict(lambda: int)
+used_gpus = collections.defaultdict(lambda: 0)
 
 
 def get_next_available_gpu() -> Optional[int]:

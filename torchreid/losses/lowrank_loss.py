@@ -33,6 +33,7 @@ class LowRankLoss(nn.Module):
         if CONSTRAINT_WEIGHTS:
             height, width = weights.size()
             batches = 1
+            channels = height
             W = weights.view(1, height, width)
         else:
             batches, channels, height, width = x.size()

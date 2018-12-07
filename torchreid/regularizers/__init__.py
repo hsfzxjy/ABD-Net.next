@@ -3,10 +3,12 @@ import torch.nn as nn
 
 from .NR import NoneRegularizer
 from .SVO import SVORegularizer
+from .SO import SORegularizer
 
 mapping = {
     'none': NoneRegularizer,
-    'svo': SVORegularizer
+    'svo': SVORegularizer,
+    'so': SORegularizer
 }
 
 

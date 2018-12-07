@@ -62,7 +62,7 @@ class SVORegularizer(nn.Module):
 
     def forward(self, W: 'C x S x H x W'):
 
-        old_W = W
+        # old_W = W
         old_size = W.size()
 
         W = W.view(old_size[0], -1).permute(1, 0)

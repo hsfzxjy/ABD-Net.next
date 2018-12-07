@@ -27,8 +27,8 @@ class SingularLoss(nn.Module):
             raise RuntimeError('No beta specified. ABORTED.')
         print('USE_GPU', use_gpu)
         self.beta = beta if not os_beta else os_beta
-        # self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
-        self.xent_loss = nn.CrossEntropyLoss()
+        self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
+        # self.xent_loss = nn.CrossEntropyLoss()
 
     def dominant_eigenvalue(self, A):
 

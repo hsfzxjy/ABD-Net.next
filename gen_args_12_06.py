@@ -73,28 +73,28 @@ for beta in [f'{base}e-{exp}' for exp in [6, 7, 8, 9] for base in [1, 5, 7]]:
     #     },
     # ])
 
-    arg_list.extend([
-        {
-            "epoch": 40,
-            "env": {"beta": beta},
-            "criterion": "lowrank",
-            "fixbase": 0,
-            "fix_custom_loss": False,
-            "switch_loss": 15,
-            "arch": 'densenet121',
-            "log_dir": f"multi_test_log/densenet121_40_0_lowrank_beta_{beta}_sl15"
-        },
-        {
-            "epoch": 40,
-            "env": {"beta": beta},
-            "criterion": "lowrank",
-            "fixbase": 10,
-            "fix_custom_loss": True,
-            "switch_loss": 15,
-            "arch": 'densenet121_fc512',
-            "log_dir": f"multi_test_log/densenet121_fc512_40_10_lowrank_beta_{beta}_sl15_fcl"
-        },
-    ])
+    # arg_list.extend([
+    #     {
+    #         "epoch": 40,
+    #         "env": {"beta": beta},
+    #         "criterion": "lowrank",
+    #         "fixbase": 0,
+    #         "fix_custom_loss": False,
+    #         "switch_loss": 15,
+    #         "arch": 'densenet121',
+    #         "log_dir": f"multi_test_log/densenet121_40_0_lowrank_beta_{beta}_sl15"
+    #     },
+    #     {
+    #         "epoch": 40,
+    #         "env": {"beta": beta},
+    #         "criterion": "lowrank",
+    #         "fixbase": 10,
+    #         "fix_custom_loss": True,
+    #         "switch_loss": 15,
+    #         "arch": 'densenet121_fc512',
+    #         "log_dir": f"multi_test_log/densenet121_fc512_40_10_lowrank_beta_{beta}_sl15_fcl"
+    #     },
+    # ])
 
     # Singular
     # constrain weights

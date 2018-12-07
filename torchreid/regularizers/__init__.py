@@ -27,7 +27,7 @@ class ConvRegularizer(nn.Module):
     def forward(self, net):
         print(list(self.get_all_conv_layers(net.module.features)))
 
-        return torch.tensor([0.0]).cuda()
+        return torch.tensor(0.0).cuda()
 
 
 def get_regularizer(name):

@@ -9,7 +9,7 @@ import os
 w_rate = 1e-4
 
 
-class SVORegularizer(nn.Module):
+class SVMORegularizer(nn.Module):
 
     def __init__(self):
         super().__init__()
@@ -66,9 +66,8 @@ class SVORegularizer(nn.Module):
         old_size = W.size()
 
         W = W.view(old_size[0], -1).permute(1, 0)
-        # W = W.permute(2, 3, 0, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
 
         smallest, largest = self.get_singular_values(W)
         return (
-            self.beta * (largest / smallest - 1)
+            self.beta * (largest - smallest)
         ).squeeze()

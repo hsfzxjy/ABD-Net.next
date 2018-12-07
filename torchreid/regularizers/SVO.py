@@ -30,9 +30,9 @@ class SVORegularizer(nn.Module):
         Ax = (A @ x).squeeze()
         AAx = (A @ Ax).squeeze()
 
-        return torch.norm(AAx, p=2) / torch.norm(Ax, p=2)
+        # return torch.norm(AAx, p=2) / torch.norm(Ax, p=2)
 
-        # return AAx.permute(1, 0) @ Ax / (Ax.permute(1, 0) @ Ax)
+        return AAx.permute(1, 0) @ Ax / (Ax.permute(1, 0) @ Ax)
 
         # for _ in range(1):
         #     x = A @ x

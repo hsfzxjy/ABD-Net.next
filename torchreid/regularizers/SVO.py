@@ -27,10 +27,13 @@ class SVORegularizer(nn.Module):
         N, _ = A.size()
         x = torch.rand(N, 1).cuda()
 
-        Ax = (A @ x).squeeze()
-        AAx = (A @ Ax).squeeze()
+        # Ax = (A @ x).squeeze()
+        # AAx = (A @ Ax).squeeze()
 
         # return torch.norm(AAx, p=2) / torch.norm(Ax, p=2)
+
+        Ax = (A @ x)
+        AAx = (A @ Ax)
 
         return AAx.permute(1, 0) @ Ax / (Ax.permute(1, 0) @ Ax)
 

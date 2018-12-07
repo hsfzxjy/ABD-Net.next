@@ -184,7 +184,7 @@ def train(epoch, model, criterion, optimizer, trainloader, use_gpu, fixbase=Fals
 
         outputs = model(imgs)
         print(type(outputs), len(outputs), type(pids), len(pids))
-        if isinstance(outputs, (tuple, list)):
+        if False and isinstance(outputs, (tuple, list)):
             loss = DeepSupervision(criterion, outputs, pids)
         else:
             loss = criterion(outputs, pids)

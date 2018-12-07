@@ -70,5 +70,5 @@ class SVORegularizer(nn.Module):
 
         smallest, largest = self.get_singular_values(W)
         return (
-            self.beta * (largest - smallest)
+            self.beta * (largest / smallest - 1)
         ).squeeze()

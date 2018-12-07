@@ -76,5 +76,5 @@ class SingularLoss(nn.Module):
         else:
             singular_penalty = (torch.log1p(largest) - torch.log1p(smallest)) * self.beta
         xloss = self.xent_loss(y, pids)
-        print(xloss)
+        print(xloss, nn.CrossEntropyLoss()(y, pids))
         return singular_penalty.sum() + xloss

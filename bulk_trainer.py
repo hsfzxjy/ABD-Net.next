@@ -142,7 +142,10 @@ def main():
 
     if parsed.dry_run:
         results = [run_task(args, 0, True) for args in arg_list]
-        print(json.dumps(results, indent=2))
+        # print(json.dumps(results, indent=2))
+        for cmd, env in results:
+            print(' '.join([f'{k}={v}' for k, v in env.items()] + ['nohup'] + cmd))
+            print('----')
         sys.exit(0)
 
     processes = []

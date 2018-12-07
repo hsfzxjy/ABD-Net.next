@@ -19,7 +19,7 @@ class ConvRegularizer(nn.Module):
     def forward(self, net):
 
         for param in net.parameters():
-            print(param)
+            print(param.name)
         return torch.tensor([0.0]).cuda()
 
 

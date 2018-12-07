@@ -75,5 +75,6 @@ class SingularLoss(nn.Module):
             singular_penalty = (largest - smallest) * self.beta
         else:
             singular_penalty = (torch.log1p(largest) - torch.log1p(smallest)) * self.beta
-
-        return singular_penalty.sum() + self.xent_loss(y, pids)
+        xloss = self.xent_loss(y, pids)
+        print(xloss)
+        return singular_penalty.sum() + xloss

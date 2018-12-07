@@ -25,7 +25,7 @@ class SingularLoss(nn.Module):
             os_beta = float(os.environ.get('beta'))
         except (ValueError, TypeError):
             raise RuntimeError('No beta specified. ABORTED.')
-
+        print('USE_GPU', use_gpu)
         self.beta = beta if not os_beta else os_beta
         self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
 

@@ -14,10 +14,10 @@ CONSTRAINT_WEIGHTS = os.environ.get('constraint_weights') is not None
 print('CONSTRAINT_WEIGHTS:', CONSTRAINT_WEIGHTS)
 
 
-class SingularLoss(CrossEntropyLoss):
+class SingularLoss(nn.Module):
 
     def __init__(self, num_classes, *, use_gpu=True, label_smooth=True, beta=None):
-        super().__init__(num_classes, use_gpu, label_smooth)
+        super().__init__()
 
         os_beta = None
 
@@ -28,7 +28,7 @@ class SingularLoss(CrossEntropyLoss):
         print('USE_GPU', use_gpu)
         self.beta = beta if not os_beta else os_beta
         # self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
-        # self.xent_loss = nn.CrossEntropyLoss()
+        self.xent_loss = nn.CrossEntropyLoss()
 
     def dominant_eigenvalue(self, A):
 
@@ -75,8 +75,6 @@ class SingularLoss(CrossEntropyLoss):
             singular_penalty = (largest - smallest) * self.beta
         else:
             singular_penalty = (torch.log1p(largest) - torch.log1p(smallest)) * self.beta
-        # xloss = self.xent_loss(y, pids)
-        # print(xloss, nn.CrossEntropyLoss()(y, pids))
-        xloss = super().forward(y, pids)
+        xloss = self.xent_loss(y, pids)
+        print(xloss)
         return singular_penalty.sum() + xloss
-

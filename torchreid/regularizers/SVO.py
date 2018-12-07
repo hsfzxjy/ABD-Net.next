@@ -60,7 +60,8 @@ class SVORegularizer(nn.Module):
         old_W = W
         old_size = W.size()
 
-        W = W.permute(2, 3, 0, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
+        W = W.view(old_size[0], -1).transpose()
+        # W = W.permute(2, 3, 0, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
 
         smallest, largest = self.get_singular_values(W)
         return self.beta * (largest - smallest) + w_rate * old_W.sum()

@@ -47,7 +47,7 @@ class SVORegularizer(nn.Module):
 
     def get_singular_values(self, A: 'M x N, M >= N'):
 
-        ATA = A.T @ A
+        ATA = A.transpose() @ A
         N, _ = ATA.size()
         largest = self.dominant_eigenvalue(ATA)
         I = torch.eye(N).cuda()  # noqa
@@ -60,7 +60,7 @@ class SVORegularizer(nn.Module):
         old_W = W
         old_size = W.size()
 
-        W = W.transpose(2, 3, 0, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
+        W = W.permute(2, 3, 0, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
 
         smallest, largest = self.get_singular_values(W)
         return self.beta * (largest - smallest) + w_rate * old_W.sum()

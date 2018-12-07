@@ -55,12 +55,12 @@ class SVORegularizer(nn.Module):
         tmp = self.dominant_eigenvalue(ATA - I)
         return tmp + largest, largest
 
-    def forward(self, W: 'H x W x S x C'):
+    def forward(self, W: 'S x C x H x W'):
 
         old_W = W
         old_size = W.size()
 
-        W = W.view(old_size[0] * old_size[1] * old_size[2], old_size[3])
+        W = W.transpose(0, 2, 3, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
 
         smallest, largest = self.get_singular_values(W)
         return self.beta * (largest - smallest) + w_rate * old_W.sum()

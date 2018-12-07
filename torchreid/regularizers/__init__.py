@@ -30,10 +30,10 @@ class ConvRegularizer(nn.Module):
         accumulator = torch.tensor(0.0).cuda()
 
         for conv in self.get_all_conv_layers(net.module.features):
-            print(self.reg_instance(conv.weight).size())
-            raise RuntimeError
+            accumulator += self.reg_instance(conv.weight)
 
-        return torch.tensor(0.0).cuda()
+        print(accumulator.data)
+        return accumulator
 
 
 def get_regularizer(name):

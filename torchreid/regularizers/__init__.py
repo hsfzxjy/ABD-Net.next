@@ -27,8 +27,10 @@ class ConvRegularizer(nn.Module):
 
     def forward(self, net):
 
+        accumulator = torch.tensor(0.0).cuda()
+
         for conv in self.get_all_conv_layers(net.module.features):
-            print(conv.weight.shape)
+            print(self.reg_instance(conv.weight).size())
             raise RuntimeError
 
         return torch.tensor(0.0).cuda()

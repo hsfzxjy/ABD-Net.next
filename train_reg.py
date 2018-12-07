@@ -184,7 +184,6 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             imgs, pids = imgs.cuda(), pids.cuda()
 
         outputs = model(imgs)
-        print(type(outputs), len(outputs), type(pids), len(pids))
         if False and isinstance(outputs, (tuple, list)):
             loss = DeepSupervision(criterion, outputs, pids)
         else:

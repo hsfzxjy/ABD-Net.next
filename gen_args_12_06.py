@@ -48,7 +48,7 @@ arg_list = [
 ]
 
 for beta in [f'{base}e-{exp}' for exp in [6, 7, 8, 9] for base in [1, 5, 7]]:
-
+    pass
     # constrain weights
     # arg_list.extend([
     #     {

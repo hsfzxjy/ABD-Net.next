@@ -16,10 +16,18 @@ class ConvRegularizer(nn.Module):
         super().__init__()
         self.reg_instance = klass()
 
+    def get_all_conv_layers(self, module):
+
+        if isinstance(module, nn.Sequential):
+            yield from self.get_all_conv_layers(module)
+
+        if isinstance(module, nn.Conv2d):
+            yield module
+
     def forward(self, net):
 
-        for param in net.parameters():
-            print(param.name)
+        print(list(self.get_all_conv_layers(net.features)))
+
         return torch.tensor([0.0]).cuda()
 
 

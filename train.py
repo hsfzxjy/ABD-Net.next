@@ -150,6 +150,7 @@ def main():
         start_train_time = time.time()
 
         if args.switch_loss and epoch >= args.switch_loss:
+            print('Switch!')
             criterion = switch_criterion
 
         train(epoch, model, criterion, optimizer, trainloader, use_gpu)

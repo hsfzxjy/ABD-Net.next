@@ -119,7 +119,7 @@ def main():
 
     for epoch in range(args.start_epoch, args.max_epoch):
         start_train_time = time.time()
-        train(epoch, model, criterion, optimizer, trainloader, use_gpu)
+        train(epoch, model, lambda x, pids: criterion(x[1]), optimizer, trainloader, use_gpu)
         train_time += round(time.time() - start_train_time)
 
         if use_gpu:

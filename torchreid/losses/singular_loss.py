@@ -61,6 +61,7 @@ class SingularLoss(nn.Module):
     def forward(self, inputs, pids):
 
         x, y, _, weights = inputs
+        print(x.size(), y.size(), _.size(), weights.size())
 
         if CONSTRAINT_WEIGHTS:
             height, width = weights.size()

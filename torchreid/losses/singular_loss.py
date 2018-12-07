@@ -11,6 +11,7 @@ from .cross_entropy_loss import CrossEntropyLoss
 
 USE_LOG = os.environ.get('use_log') is not None
 CONSTRAINT_WEIGHTS = os.environ.get('constraint_weights') is not None
+print('CONSTRAINT_WEIGHTS:', CONSTRAINT_WEIGHTS)
 
 
 class SingularLoss(nn.Module):

@@ -25,4 +25,4 @@ class ConvRegularizer(nn.Module):
 
 def get_regularizer(name):
 
-    return ConvRegularizer(mapping[name])()
+    return ConvRegularizer(mapping[name])

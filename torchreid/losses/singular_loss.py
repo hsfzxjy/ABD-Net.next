@@ -27,7 +27,8 @@ class SingularLoss(nn.Module):
             raise RuntimeError('No beta specified. ABORTED.')
         print('USE_GPU', use_gpu)
         self.beta = beta if not os_beta else os_beta
-        self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
+        # self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
+        self.xent_loss = nn.CrossEntropyLoss()
 
     def dominant_eigenvalue(self, A):
 
@@ -61,7 +62,6 @@ class SingularLoss(nn.Module):
     def forward(self, inputs, pids):
 
         x, y, _, weights = inputs
-        print(x.size(), y.size(), _.size(), weights.size())
 
         if CONSTRAINT_WEIGHTS:
             height, width = weights.size()

@@ -148,7 +148,7 @@ def main():
 
     for epoch in range(args.start_epoch, args.max_epoch):
         start_train_time = time.time()
-
+        print(epoch, args.switch_loss)
         if args.switch_loss and epoch >= args.switch_loss:
             print('Switch!')
             criterion = switch_criterion

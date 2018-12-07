@@ -23,6 +23,28 @@ arg_list = [
         "arch": 'densenet121_fc512',
         "log_dir": "multi_test_log/densenet121_fc512_40_10_xent"
     },
+
+    {
+        "epoch": 40,
+        "env": {},
+        "criterion": "xent",
+        "fixbase": 10,
+        "fix_custom_loss": False,
+        "switch_loss": 0,
+        "arch": 'densenet121',
+        "log_dir": "multi_test_log/densenet121_40_10_xent"
+    },
+    {
+        "epoch": 40,
+        "env": {},
+        "criterion": "xent",
+        "fixbase": 0,
+        "fix_custom_loss": False,
+        "switch_loss": 0,
+        "arch": 'densenet121_fc512',
+        "log_dir": "multi_test_log/densenet121_fc512_40_0_xent"
+    },
+
 ]
 
 for beta in [f'{base}e-{exp}' for exp in [6, 7, 8, 9] for base in [1, 5, 7]]:

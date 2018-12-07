@@ -13,7 +13,7 @@ mapping = {
 class ConvRegularizer(nn.Module):
 
     def __init__(self, klass):
-
+        super().__init__()
         self.reg_instance = klass()
 
     def forward(self, net):

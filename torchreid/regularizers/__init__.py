@@ -19,7 +19,8 @@ class ConvRegularizer(nn.Module):
     def get_all_conv_layers(self, module):
 
         if isinstance(module, nn.Sequential):
-            yield from self.get_all_conv_layers(module)
+            for m in module:
+                yield from self.get_all_conv_layers(m)
 
         if isinstance(module, nn.Conv2d):
             yield module

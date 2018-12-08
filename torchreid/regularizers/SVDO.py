@@ -69,5 +69,5 @@ class SVDORegularizer(nn.Module):
 
         smallest, largest = self.get_singular_values(W)
         return (
-            self.beta * (largest / smallest - 1)
+            self.beta * (largest / smallest - 1) ** 2
         ).squeeze()

@@ -36,6 +36,7 @@ def validate_arguments(args: dict) -> dict:
         ('fixbase', int, str),
         ('fix_custom_loss', bool, identity),
         ('switch_loss', int, lambda x: str(x) if x else ''),
+        ('regularizer', (str, type(None)), identity),
     ]
 
     for name, type_, validator in validators:
@@ -62,10 +63,10 @@ def get_arguments(filename: str):
     return result
 
 
-def run_task(args: dict, gpu_id: int, dry_run: bool=False) -> Optional[subprocess.Popen]:
+def run_task(exe: str, args: dict, gpu_id: int, dry_run: bool=False) -> Optional[subprocess.Popen]:
 
     cmd = [
-        'python', 'train.py',
+        'python', exe,
 
         '--root', 'data',
         '-s', 'market1501',
@@ -94,6 +95,7 @@ def run_task(args: dict, gpu_id: int, dry_run: bool=False) -> Optional[subproces
         '--criterion', args['criterion'],
         *(['--fix-custom-loss'] if args['fix_custom_loss'] else []),
         '--label-smooth',
+        *(['--regularizer', args['regularizer']] if args['regularizer'] else []),
 
         '--gpu-devices', str(gpu_id),
     ]
@@ -133,6 +135,7 @@ def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('input')
     argparser.add_argument('--dry-run', action='store_true', default=False)
+    argparser.add_argument('--exe', default='train.py')
     parsed = argparser.parse_args()
 
     arg_list = get_arguments(parsed.input)
@@ -141,7 +144,7 @@ def main():
     ])
 
     if parsed.dry_run:
-        results = [run_task(args, 0, True) for args in arg_list]
+        results = [run_task(parsed.exe, args, 0, True) for args in arg_list]
         # print(json.dumps(results, indent=2))
         for cmd, env in results:
             print(' '.join([f'{k}={v}' for k, v in env.items()] + ['nohup'] + cmd + ['&']))

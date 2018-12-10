@@ -47,9 +47,9 @@ arg_list = []
 
 # ]
 
-for beta in [f'{base}e-{exp}' for exp in [2, 3, 4] for base in [1]]:
+for beta in [f'{base}e-{exp}' for exp in [3, 4, 5, 6] for base in [1]]:
     for reg in ['svmo', 'svdo', 'so']:
-        for fixbase in [0, 10]:
+        for fixbase in [10]:
             arg_list.extend([
                 {
                     "epoch": 40,
@@ -59,8 +59,8 @@ for beta in [f'{base}e-{exp}' for exp in [2, 3, 4] for base in [1]]:
                     "fixbase": fixbase,
                     "fix_custom_loss": False,
                     "switch_loss": 15,
-                    "arch": 'densenet121_fc512',
-                    "log_dir": f"multi_test_log/densenet121_fc512_40_{fixbase}_xent_reg_{reg}_beta_{beta}_sl15"
+                    "arch": 'densenet121',
+                    "log_dir": f"multi_test_log/densenet121_40_{fixbase}_xent_reg_{reg}_beta_{beta}_sl15"
                 },
 
             ])

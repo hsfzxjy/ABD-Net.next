@@ -23,6 +23,7 @@ from .mlfn import *
 # from .densenet_DAN_cat import *
 # from .densenet_cl import *
 from .densenet_CAM_cat import *
+from .cltmp.densenet_cl import *
 
 __model_factory = {
     # densenet based
@@ -34,6 +35,8 @@ __model_factory = {
     # 'densenet121_cl_fc512': densenet121_cl_fc512,
     # 'densenet121_cl_sum': densenet121_cl_sum,
     # 'densenet121_cl_sum_fc512': densenet121_cl_sum_fc512,
+    'densenet121_cl': densenet121_cl,
+    'densenet121_cl_fc512': densenet121_cl_fc512,
     'densenet121_CAM_cl_cat_fc512': densenet121_CAM_cl_cat_fc512,
     'densenet121_CAM_noncl_cat_fc512': densenet121_CAM_noncl_cat_fc512,
     'densenet161_CAM_noncl_cat_fc512': densenet161_CAM_noncl_cat_fc512,

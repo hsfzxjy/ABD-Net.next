@@ -290,7 +290,7 @@ configurations = OrderedDict([
     (
         'fc_dims',
         [
-            (None, 'nofc'),
+            (None, '_nofc'),
             ([512], '_fc512'),
         ],
     ),

@@ -11,7 +11,7 @@ from torch.utils import model_zoo
 from torch.nn import functional as F
 import torchvision
 
-from .attention import PAM_Module, CAM_Module
+from ..attention import PAM_Module, CAM_Module
 
 __all__ = ['densenet121', 'densenet121_fc512']
 

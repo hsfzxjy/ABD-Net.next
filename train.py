@@ -178,7 +178,12 @@ def main():
                 print("Evaluating {} ...".format(name))
                 queryloader = testloader_dict[name]['query']
                 galleryloader = testloader_dict[name]['gallery']
+                print('!!!!!!!!FC!!!!!!!!')
+                os.environ['NOFC'] = ''
                 rank1 = test(model, queryloader, galleryloader, use_gpu)
+                print('!!!!!!!!NOFC!!!!!!')
+                test(model, queryloader, galleryloader, use_gpu)
+                os.environ['NOFC'] = '1'
                 ranklogger.write(name, epoch + 1, rank1)
 
             if use_gpu:

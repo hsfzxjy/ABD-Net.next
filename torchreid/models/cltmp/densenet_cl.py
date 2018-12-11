@@ -155,7 +155,7 @@ class DenseNet(nn.Module):
         self._init_params()
 
         import os
-        CAM_parts = os.get('cam_parts')
+        CAM_parts = os.environ.get('cam_parts')
         if CAM_parts is None:
             raise RuntimeError
         CAM_parts = CAM_parts.split('_')

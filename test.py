@@ -1,196 +1,24 @@
-from glob import glob
-import os
-import subprocess
-import re
-
-
 import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('arch')
+parser.add_argument('ckpt')
+parser.add_argument('gpu')
 
-def get_args():
-    p = argparse.ArgumentParser()
-    p.add_argument('glob', default='./log/*')
-    p.add_argument('--daemon', default=False, action='store_true')
-    p.add_argument('--ep')
-    args = p.parse_args()
-    return args
+parsed = parser.parse_args()
 
-
-def get_exp(dir):
-    """
-    returns (name,DAN_part, tarname, last_log)
-    """
-    # basename = dir.rstrip('/').split('/')[-1]
-    if 'densenet_DAN_fc512' in dir:
-        name = 'densenet121_DAN_fc512'
-    elif 'densenet_DAN_cat_fc512' in dir:
-        name = 'densenet121_DAN_cat_fc512'
-    elif 'densenet_DAN_cat' in dir:
-        name = 'densenet121_DAN_cat'
-    elif 'densenet_DAN' in dir:
-        name = 'densenet121_DAN'
-    elif 'densenet_CAM_cl_cat_fc512' in dir:
-        name = 'densenet121_CAM_cl_cat_fc512'
-    elif 'densenet_CAM_noncl_cat_fc512' in dir:
-        name = 'densenet121_CAM_noncl_cat_fc512'
-    elif 'densenet161_CAM_noncl_cat_fc512' in dir:
-        name = 'densenet161_CAM_noncl_cat_fc512'
-    elif 'densenet161_CAM_noncl_cat_trick_fc512' in dir:
-        name = 'densenet161_CAM_noncl_cat_trick_fc512'
-    elif 'densenet161_CAM_noncl_cat_1_4_fc512' in dir:
-        name = 'densenet161_CAM_noncl_cat_1_4_fc512'
-    elif 'densenet161_CAM_noncl_cat_trick_1_4_fc512' in dir:
-        name = 'densenet161_CAM_noncl_cat_trick_1_4_fc512'
-    elif 'densenet201_CAM_noncl_cat_fc512' in dir:
-        name = 'densenet201_CAM_noncl_cat_fc512'
-    elif 'densenet_CAM_cat' in dir:
-        name = 'densenet121_CAM_cat'
-    elif 'densenet_fc512' in dir:
-        name = 'densenet121_fc512'
-    elif 'densenet_cl_sum_fc512' in dir:
-        name = 'densenet121_cl_sum_fc512'
-    elif 'densenet_cl_sum' in dir:
-        name = 'densenet121_cl_sum'
-    elif 'densenet_cl_fc512' in dir:
-        name = 'densenet121_cl_fc512'
-    elif 'densenet_cl' in dir:
-        name = 'densenet121_cl'
-    elif 'densenet' in dir:
-        name = 'densenet121'
-    matched = re.findall(r'(_[spc]_)', dir)
-    if matched:
-        part = matched[0][1]
-    else:
-        part = ''
-    # epch = 100
-    # while not os.path.exists(dir + '/checkpoint_ep{}.pth.tar'.format(epch)) and epch > 0:
-    #     epch -= 1
-    # if epch == 0:
-    #     return
-    tarnames = glob(dir + '/*pth.tar')
-    if not tarnames:
-        return
-    last_log = subprocess.check_output(['tail', '-n', '11', dir + '/log_train.txt']).decode()
-
-    if '384' in dir:
-        height = '384'
-    else:
-        height = '256'
-
-    return name, part, tarnames, last_log, height
-
-
-def run_exp(dir, ep):
-
-    x = get_exp(dir)
-
-    if x is None:
-        return
-    name, part, tarnames, last_log, height = x
-    if ep:
-        tarnames = [t for t in tarnames if ep in t]
-
-    results = []
-    for tarname in tarnames:
-
-        import re
-        number = int(re.findall(r'(\d+)\.pth', tarname)[0])
-
-        if not os.path.exists(dir + '/eval' + str(number) + '.txt'):
-
-            p = subprocess.Popen(
-                [
-                    'python', 'eval.py',
-                    '--height', height,
-                    '--arch', name,
-                    '--snap_shot', tarname,
-                    '--log-dir', os.environ.get('LOGDIR', '__TMP')
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                env={**os.environ, 'DAN_part': part}
-            )
-
-            stdout, stderr = p.communicate()
-            if p.returncode != 0:
-                raise RuntimeError(stderr.decode())
-            else:
-                result = stdout.decode().strip().split('\n')[-1]
-                results.append(tarname + '\n' + result)
-                print(tarname)
-                print(result)
-
-                with open(dir + '/eval' + str(number) + '.txt', 'w') as f:
-                    f.write(result)
-
-        # ---
-        if not os.path.exists(dir + '/eval_nofc' + str(number) + '.txt'):
-
-            p = subprocess.Popen(
-                [
-                    'python', 'eval.py',
-                    '--height', height,
-                    '--arch', name,
-                    '--snap_shot', tarname,
-                    '--log-dir', os.environ.get('LOGDIR', '__TMP')
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                env={**os.environ, 'DAN_part': part, 'NOFC': '1'}
-            )
-
-            stdout, stderr = p.communicate()
-            if p.returncode != 0:
-                raise RuntimeError(stderr.decode())
-            else:
-                result = stdout.decode().strip().split('\n')[-1]
-                results.append(tarname + '\n' + result)
-                print(tarname)
-                print(result)
-
-                with open(dir + '/eval_nofc' + str(number) + '.txt', 'w') as f:
-                    f.write(result)
-
-        if not os.path.exists(dir + '/eval_fccnfc' + str(number) + '.txt'):
-
-            p = subprocess.Popen(
-                [
-                    'python', 'eval.py',
-                    '--height', height,
-                    '--arch', name,
-                    '--snap_shot', tarname,
-                    '--log-dir', os.environ.get('LOGDIR', '__TMP')
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                env={**os.environ, 'DAN_part': part, 'FCCNFC': '1'}
-            )
-
-            stdout, stderr = p.communicate()
-            if p.returncode != 0:
-                raise RuntimeError(stderr.decode())
-            else:
-                result = stdout.decode().strip().split('\n')[-1]
-                results.append(tarname + '\n' + result)
-                print(tarname)
-                print(result)
-
-                with open(dir + '/eval_fccnfc' + str(number) + '.txt', 'w') as f:
-                    f.write(result)
-
-    # with open(os.path.join(dir, 'eval.txt'), 'w') as f:
-    #     f.write('\n\n'.join(results))
-
-    print('----')
-    print('arch', name, 'part', part)
-    print('name', dir)
-    print('log')
-    print(last_log)
-    print('result')
-    # print(result)
-    print('----')
-
-
-args = get_args()
-
-while 1:
-    for x in glob(args.glob):
-        run_exp(x, ep=args.ep)
-    import time
-    time.sleep(1)
-    if not args.daemon:
-        break
+import subprocess
+subprocess.Popen(
+    [
+        'python', 'train_imgreid_xent.py',
+        '-s', 'market1501',
+        '-t', 'market1501',
+        '--height', '256',
+        '--width', '128',
+        '--test-batch-size', '100',
+        '--evaluate',
+        '-a', parsed.arch,
+        '--load-weights', parsed.ckpt,
+        '--save-dir', '../__',
+        '--gpu-devices', parsed.gpu
+    ]).communicate()

@@ -111,7 +111,7 @@ class DenseNet(nn.Module):
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
-        from tricks.feature_distilation import FeatureDistilationTrick
+        from .tricks.feature_distilation import FeatureDistilationTrick
         self.feature_distilation = FeatureDistilationTrick(
             self.features,
             fd_config['parts'],
@@ -127,7 +127,7 @@ class DenseNet(nn.Module):
         # Begin Attention Module
         if attention_config is None:
             attention_config = {'parts': (), 'use_conv_head': False}
-        from tricks.attention import AttentionModule
+        from .tricks.attention import AttentionModule
 
         self.attention_module = AttentionModule(
             attention_config['parts'],

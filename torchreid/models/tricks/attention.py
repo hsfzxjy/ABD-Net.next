@@ -6,9 +6,111 @@
 
 import torch
 from torch.nn import Module, Conv2d, Parameter, Softmax
+import torch.nn as nn
 torch_ver = torch.__version__[:3]
 
-__all__ = ['PAM_Module', 'CAM_Module']
+__all__ = ['PAM_Module', 'CAM_Module', 'get_attention_module_instance', 'AttentionModule']
+
+
+class AttentionModule(nn.Module):
+
+    def __init__(
+        self,
+        module_names: 'subset of ("pam", "cam")',
+        dim: int,
+        *,
+        use_conv_head: bool=False,
+        use_avg_pool: bool=False
+    ):
+        super().__init__()
+
+        self.modules = []
+        for name in module_names:
+            module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head)
+            setattr(self, f'_{name}_module', module)  # force gpu
+
+            if use_avg_pool:
+                pool = nn.AdaptiveAvgPool2d(1)
+                setattr(self, f'_{name}_avgpool', pool)  # force gpu
+            else:
+                pool = None
+
+            self.modules.append((module, pool))
+
+        self.output_dim = len(self.modules) * dim
+
+    def forward(self, x):
+
+        xs = []
+        for module, pool in self.modules:
+            f = module(x)
+            if pool is not None:
+                f = pool(f)
+            xs.append(f.view(f.size(0), -1))
+        return xs
+
+
+def get_attention_module_instance(
+    name: 'cam|pam',
+    dim: int,
+    *,
+    use_conv_head: bool=False
+):
+
+    name = name.lower()
+    assert name in ('cam', 'pam')
+
+    module_class = {'cam': CAM_Module, 'pam': PAM_Module}[name]
+
+    if use_conv_head:
+        return DANetHead(dim, dim, nn.BatchNorm2d, module_class)
+    else:
+        return module_class(dim)
+
+
+class DANetHead(nn.Module):
+    def __init__(self, in_channels, out_channels, norm_layer, module_class):
+        super(DANetHead, self).__init__()
+        inter_channels = in_channels // 4
+
+        self.conv5c = nn.Sequential(
+            nn.Conv2d(
+                in_channels,
+                inter_channels,
+                3,
+                padding=1,
+                bias=False
+            ),
+            norm_layer(inter_channels),
+            nn.ReLU()
+        )
+
+        self.attention_module = module_class(inter_channels)
+        self.conv52 = nn.Sequential(
+            nn.Conv2d(
+                inter_channels,
+                inter_channels,
+                3,
+                padding=1,
+                bias=False
+            ),
+            norm_layer(inter_channels),
+            nn.ReLU()
+        )
+
+        self.conv7 = nn.Sequential(
+            nn.Dropout2d(0.1, False),
+            nn.Conv2d(inter_channels, out_channels, 1)
+        )
+
+    def forward(self, x):
+
+        feat2 = self.conv5c(x)
+        sc_feat = self.attention_module(feat2)
+        sc_conv = self.conv52(sc_feat)
+        sc_output = self.conv7(sc_conv)
+
+        return sc_output
 
 
 class PAM_Module(Module):

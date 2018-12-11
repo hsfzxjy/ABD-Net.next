@@ -25,7 +25,10 @@ from .mlfn import *
 from .densenet_CAM_cat import *
 from .cltmp.densenet_cl import *
 
+from . import densenet_
+
 __model_factory = {
+    **densenet_.name_function_mapping,
     # densenet based
     # 'densenet121_DAN': densenet121_DAN,
     # 'densenet121_DAN_fc512': densenet121_DAN_fc512,
@@ -35,16 +38,16 @@ __model_factory = {
     # 'densenet121_cl_fc512': densenet121_cl_fc512,
     # 'densenet121_cl_sum': densenet121_cl_sum,
     # 'densenet121_cl_sum_fc512': densenet121_cl_sum_fc512,
-    'densenet121_cl': densenet121_cl,
-    'densenet121_cl_fc512': densenet121_cl_fc512,
-    'densenet121_CAM_cl_cat_fc512': densenet121_CAM_cl_cat_fc512,
-    'densenet121_CAM_noncl_cat_fc512': densenet121_CAM_noncl_cat_fc512,
-    'densenet161_CAM_noncl_cat_fc512': densenet161_CAM_noncl_cat_fc512,
-    'densenet201_CAM_noncl_cat_fc512': densenet201_CAM_noncl_cat_fc512,
-    'densenet161_CAM_noncl_cat_trick_fc512': densenet161_CAM_noncl_cat_trick_fc512,
-    'densenet161_CAM_noncl_cat_trick_1_4_fc512': densenet161_CAM_noncl_cat_trick_1_4_fc512,
-    'densenet161_CAM_noncl_cat_1_4_fc512': densenet161_CAM_noncl_cat_1_4_fc512,
-    # image classification models
+    # 'densenet121_cl': densenet121_cl,
+    # 'densenet121_cl_fc512': densenet121_cl_fc512,
+    # 'densenet121_CAM_cl_cat_fc512': densenet121_CAM_cl_cat_fc512,
+    # 'densenet121_CAM_noncl_cat_fc512': densenet121_CAM_noncl_cat_fc512,
+    # 'densenet161_CAM_noncl_cat_fc512': densenet161_CAM_noncl_cat_fc512,
+    # 'densenet201_CAM_noncl_cat_fc512': densenet201_CAM_noncl_cat_fc512,
+    # 'densenet161_CAM_noncl_cat_trick_fc512': densenet161_CAM_noncl_cat_trick_fc512,
+    # 'densenet161_CAM_noncl_cat_trick_1_4_fc512': densenet161_CAM_noncl_cat_trick_1_4_fc512,
+    # 'densenet161_CAM_noncl_cat_1_4_fc512': densenet161_CAM_noncl_cat_1_4_fc512,
+    # # image classification models
     'resnet50': resnet50,
     'resnet50_fc512': resnet50_fc512,
     'resnext50_32x4d': resnext50_32x4d,

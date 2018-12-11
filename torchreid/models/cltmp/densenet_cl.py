@@ -170,7 +170,7 @@ class DenseNet(nn.Module):
             cs.sort()
             cam = DANetHead(len(cs), len(cs), nn.BatchNorm2d)
             self.CAMs.append((cs, cam))
-            setattr(self, 'cam_ids', cam)
+            setattr(self, f'cam_{ids}', cam)
         self.resting = sorted(list(resting))
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):

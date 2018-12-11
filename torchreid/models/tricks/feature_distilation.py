@@ -52,7 +52,7 @@ class FeatureDistilationTrick(nn.Module):
             if index == 5:
                 B, C, H, W = x.shape
 
-                for cs, cam in self.cam_module:
+                for cs, cam in self.cam_modules:
                     c_tensor = torch.tensor(cs).cuda()
 
                     new_x = x[:, c_tensor]

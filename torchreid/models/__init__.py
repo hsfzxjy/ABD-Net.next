@@ -25,10 +25,10 @@ from .mlfn import *
 from .densenet_CAM_cat import *
 from .cltmp.densenet_cl import *
 
-from . import densenet_
+from . import densenet
 
 __model_factory = {
-    **densenet_.name_function_mapping,
+    **densenet.name_function_mapping,
     # densenet based
     # 'densenet121_DAN': densenet121_DAN,
     # 'densenet121_DAN_fc512': densenet121_DAN_fc512,

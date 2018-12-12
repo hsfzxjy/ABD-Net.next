@@ -69,8 +69,21 @@ class DenseNet(nn.Module):
     Huang et al. Densely Connected Convolutional Networks. CVPR 2017.
     """
 
-    def __init__(self, num_classes, loss, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, **kwargs):
+    def __init__(
+            self,
+            num_classes,
+            loss,
+            growth_rate=32,
+            block_config=(6, 12, 24, 16),
+            num_init_features=64,
+            bn_size=4,
+            drop_rate=0,
+            fc_dims=None,
+            dropout_p=None,
+            *,
+            fd_config=None,
+            attention_config=None,
+            **kwargs):
 
         super(DenseNet, self).__init__()
         self.loss = loss
@@ -95,11 +108,35 @@ class DenseNet(nn.Module):
                 self.features.add_module('transition%d' % (i + 1), trans)
                 num_features = num_features // 2
 
+        # Begin Feature Distilation
+        if fd_config is None:
+            fd_config = {'parts': (), 'use_conv_head': False}
+        from .tricks.feature_distilation import FeatureDistilationTrick
+        self.feature_distilation = FeatureDistilationTrick(
+            self.features,
+            fd_config['parts'],
+            use_conv_head=fd_config['use_conv_head']
+        )
+        # End Feature Distilation
+
         # Final batch norm
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
-        self.feature_dim = num_features
+
+        # Begin Attention Module
+        if attention_config is None:
+            attention_config = {'parts': (), 'use_conv_head': False}
+        from .tricks.attention import AttentionModule
+
+        self.attention_module = AttentionModule(
+            attention_config['parts'],
+            num_features,
+            use_conv_head=attention_config['use_conv_head']
+        )
+        self.feature_dim = num_features = num_features + self.attention_module.output_dim
+        # End Attention Module
+
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_p)
 
         # Linear layer
@@ -153,10 +190,18 @@ class DenseNet(nn.Module):
                     nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        f = self.features(x)
+        f = self.feature_distilation(x)
+
+        attention_parts = [
+            part.view(part.size(0), -1) for part in
+            self.attention_module(f)
+        ]
+
         f = F.relu(f, inplace=True)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
+
+        v = torch.cat([v, *attention_parts], 1)
 
         v_before_fc = v
         if self.fc is not None:
@@ -217,33 +262,85 @@ densenet161: num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24)
 """
 
 
-def densenet121(num_classes, loss, pretrained='imagenet', **kwargs):
-    model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 24, 16),
-        fc_dims=None,
-        dropout_p=None,
-        **kwargs
-    )
-    if pretrained == 'imagenet':
-        init_pretrained_weights(model, model_urls['densenet121'])
-    return model
+def make_function(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+
+        model = DenseNet(
+            num_classes=num_classes,
+            loss=loss,
+            num_init_features=64,
+            growth_rate=32,
+            block_config=(6, 12, 24, 16),
+            dropout_p=None,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['densenet121'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
 
 
-def densenet121_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
-    model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 24, 16),
-        fc_dims=[512],
-        dropout_p=None,
-        **kwargs
+configurations = OrderedDict([
+    (
+        'fc_dims',
+        [
+            (None, '_nofc'),
+            ([512], '_fc512'),
+        ],
+    ),
+    (
+        'fd_config',
+        [
+            (
+                {
+                    'parts': parts,
+                    'use_conv_head': use_conv_head
+                },
+                f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
+            )
+            for parts in (('ab', 'c'), ('ab',), ('a',), ())
+            for parts_name in ('ab_c', 'ab', 'a', 'none')
+            for use_conv_head in (True, False)
+        ],
+    ),
+    (
+        'attention_config',
+        [
+            (
+                {
+                    'parts': parts,
+                    'use_conv_head': use_conv_head
+                },
+                f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
+            )
+            for parts in (('cam', 'pam'), ('cam',), ('pam',), ())
+            for parts_name in ('cam_pam', 'cam', 'pam', 'none')
+            for use_conv_head in (True, False)
+        ]
     )
-    if pretrained == 'imagenet':
-        init_pretrained_weights(model, model_urls['densenet121'])
-    return model
+])
+
+configurations: 'Dict[str, List[Tuple[config, name_frag]]]'
+
+import itertools
+
+fragments = itertools.product(*configurations.values())
+keys = list(configurations.keys())
+
+name_function_mapping = {}
+
+for fragment in fragments:
+
+    name = 'densenet121'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function(name, config)

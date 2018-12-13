@@ -15,7 +15,7 @@ def adjust_learning_rate(optimizer, base_lr, epoch, stepsize=20, gamma=0.1,
     else:
         # decay learning rate by gamma for every stepsize
         lr = base_lr * (gamma ** (epoch // stepsize))
-    
+
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
@@ -52,11 +52,12 @@ def open_specified_layers(model, open_layers):
     if isinstance(model, nn.DataParallel):
         model = model.module
 
-    for layer in open_layers:
-        assert hasattr(model, layer), "'{}' is not an attribute of the model, please provide the correct name".format(layer)
+    # for layer in open_layers:
+    #     assert hasattr(model, layer), "'{}' is not an attribute of the model, please provide the correct name".format(layer)
 
     for name, module in model.named_children():
-        if name in open_layers:
+        # if name in open_layers:
+        if name != 'features':
             module.train()
             for p in module.parameters():
                 p.requires_grad = True

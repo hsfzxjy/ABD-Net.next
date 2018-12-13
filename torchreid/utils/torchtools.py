@@ -62,6 +62,7 @@ def open_specified_layers(model, open_layers):
             for p in module.parameters():
                 p.requires_grad = True
         else:
+            print('Skipped', name, module)
             module.eval()
             for p in module.parameters():
                 p.requires_grad = False

@@ -4,7 +4,7 @@ from .resnet import *
 from .resnetmid import *
 from .resnext import *
 from .senet import *
-from .densenet import *
+# from .densenet import *
 from .inceptionresnetv2 import *
 from .inceptionv4 import *
 from .xception import *
@@ -22,8 +22,8 @@ from .mlfn import *
 # from .densenet_DAN import *
 # from .densenet_DAN_cat import *
 # from .densenet_cl import *
-from .densenet_CAM_cat import *
-from .cltmp.densenet_cl import *
+# from .densenet_CAM_cat import *
+# from .cltmp.densenet_cl import *
 
 from . import densenet
 
@@ -39,8 +39,8 @@ __model_factory = {
     'se_resnet101': se_resnet101,
     'se_resnext50_32x4d': se_resnext50_32x4d,
     'se_resnext101_32x4d': se_resnext101_32x4d,
-    'densenet121': densenet121,
-    'densenet121_fc512': densenet121_fc512,
+    # 'densenet121': densenet121,
+    # 'densenet121_fc512': densenet121_fc512,
     'inceptionresnetv2': InceptionResNetV2,
     'inceptionv4': inceptionv4,
     'xception': xception,

@@ -24,7 +24,7 @@ class SingularLoss(nn.Module):
         sing_beta = os.environ.get('sing_beta')
         if sing_beta is not None:
             try:
-                os_beta = float(os.environ.get('beta'))
+                os_beta = float(sing_beta)
             except (ValueError, TypeError):
                 pass
 

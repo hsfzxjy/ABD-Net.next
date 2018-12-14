@@ -1,3 +1,5 @@
+sleep 60m
+
 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 40 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc  --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512_fd_ab_c_head_dan_cam_pam_nohead --save-dir 1214_log/densenet121_fc512_fd_ab_c_head_dan_cam_pam_nohead_xent_40_10 --gpu-devices 0 --criterion xent  &
 
 nohup python train.py --root data -s market1501 -t market1501 -j 4 --height 256 --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch 40 --stepsize 20 40 --fixbase-epoch 10 --open-layers classifier fc  --train-batch-size 32 --test-batch-size 100 -a densenet121_fc512_fd_ab_head_dan_cam_pam_nohead --save-dir 1214_log/densenet121_fc512_fd_ab_head_dan_cam_pam_nohead_xent_40_10 --gpu-devices 0 --criterion xent  &

@@ -20,5 +20,7 @@ class IncidenceLoss(nn.Module):
             for i in targets
         ]
         A = torch.tensor(A).cuda()
+        print('WWT', WWT.size())
+        print('A', A.size())
 
         return ((WWT - A)**2).sum() ** (1 / 2)

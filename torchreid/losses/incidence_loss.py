@@ -21,4 +21,4 @@ class IncidenceLoss(nn.Module):
         ]
         A = torch.tensor(A).cuda()
 
-        return (WWT - A).norm(p='F')
+        return (WWT - A).norm()

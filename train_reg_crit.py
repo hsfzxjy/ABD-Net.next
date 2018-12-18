@@ -30,10 +30,17 @@ from torchreid.losses.wrapped_cross_entropy_loss import WrappedCrossEntropyLoss
 parser = argument_parser()
 args = parser.parse_args()
 
+
 def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_criterion', 'switch_criterion'):
 
-    fix_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
-    switch_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    from torchreid.losses.wrapped_triplet_loss import WrappedTripletLoss
+
+    if 'htri' in args.criterion:
+        fix_criterion = WrappedTripletLoss(num_classes, use_gpu, args)
+        switch_criterion = WrappedTripletLoss(num_classes, use_gpu, args)
+    else:
+        fix_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+        switch_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
 
     if args.criterion == 'xent':
         criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
@@ -43,6 +50,17 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     elif args.criterion == 'singular':
         from torchreid.losses.singular_loss import SingularLoss
         criterion = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    elif args.criterion == 'htri':
+        criterion = WrappedTripletLoss(num_classes=num_classes, use_gpu=use_gpu, args=args)
+    elif args.criterion == 'singular_htri':
+        from torchreid.losses.singular_triplet_loss import SingularTripletLoss
+        criterion = SingularTripletLoss(num_classes, use_gpu, args)
+    elif args.criterion == 'incidence':
+        from torchreid.losses.incidence_loss import IncidenceLoss
+        criterion = IncidenceLoss()
+    elif args.criterion == 'incidence_xent':
+        from torchreid.losses.incidence_xent_loss import IncidenceXentLoss
+        criterion = IncidenceXentLoss(num_classes, use_gpu, args.label_smooth)
     else:
         raise RuntimeError('Unknown criterion {!r}'.format(criterion))
 
@@ -50,6 +68,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
         fix_criterion = criterion
 
     return criterion, fix_criterion, switch_criterion
+
 
 def main():
     global args

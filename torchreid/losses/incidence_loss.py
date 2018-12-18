@@ -19,8 +19,12 @@ class IncidenceLoss(nn.Module):
             [1. if i == j else 0. for j in targets]
             for i in targets
         ]
-        A = torch.tensor(A).cuda()
+        A = torch.tensor(A, requires_grad=True).cuda()
         print('WWT', WWT.size())
         print('A', A.size())
+
+        result = torch.norm(WWT - A)
+        print(result)
+        return result
 
         return ((WWT - A)**2).sum() ** (1 / 2)

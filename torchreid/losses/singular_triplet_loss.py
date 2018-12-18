@@ -15,7 +15,7 @@ def SingularTripletLoss(num_classes: int, use_gpu: bool, args) -> 'func':
             loss = htri_loss(x, pids)
         else:
             loss = (
-                args.lambda_xent * xent_loss(y, pids) +
+                args.lambda_xent * xent_loss(x, pids) +
                 args.lambda_htri * htri_loss(v, pids)
             )
 

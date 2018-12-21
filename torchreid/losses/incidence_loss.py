@@ -16,7 +16,7 @@ class IncidenceLoss(nn.Module):
 
         targets = pids.data.cpu().numpy()
         # print(list(targets))
-        print('Kinds:', len(set(list(targets))))
+        # print('Kinds:', len(set(list(targets))))
         A = [
             [1. if i == j else 0. for j in targets]
             for i in targets

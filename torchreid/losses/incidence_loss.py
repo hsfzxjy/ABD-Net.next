@@ -14,7 +14,7 @@ class IncidenceLoss(nn.Module):
         W = F.normalize(W, p=2, dim=1)
         WWT = W @ W.permute(1, 0)
 
-        targets = pids.data.cpu()
+        targets = pids.data.cpu().numpy()
         print(list(targets))
         print('Kinds:', len(set(list(targets))))
         A = [

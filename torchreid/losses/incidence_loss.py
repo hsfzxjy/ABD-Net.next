@@ -15,6 +15,7 @@ class IncidenceLoss(nn.Module):
         WWT = W @ W.permute(1, 0)
 
         targets = pids.data.cpu()
+        print(list(targets))
         print('Kinds:', len(set(list(targets))))
         A = [
             [1. if i == j else 0. for j in targets]

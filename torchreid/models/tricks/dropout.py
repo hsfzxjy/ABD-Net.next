@@ -63,6 +63,7 @@ class DropoutOptimizer(nn.Module):
     def forward(self, x):
 
         p = self.p
+        print('Dropout p', p)
 
         if p > 0:
             return F.dropout(x, p=p, training=not self.args.evaluate)

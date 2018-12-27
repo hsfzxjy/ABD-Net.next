@@ -46,7 +46,7 @@ class DropoutOptimizer(nn.Module):
         if dropout_settings == 'fix':
             return .5
 
-        p = .2 + .1 * (self.epoch // 10)
+        p = .2 + .1 * (self.epoch // 1)
         p = min(p, .9)
 
         return p

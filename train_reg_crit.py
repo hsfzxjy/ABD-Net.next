@@ -165,6 +165,7 @@ def main():
         optimizer.load_state_dict(initial_optim_state)
 
     for epoch in range(args.start_epoch, args.max_epoch):
+        dropout_optimizer.set_epoch(epoch)
         start_train_time = time.time()
         print(epoch, args.switch_loss)
         print(criterion)

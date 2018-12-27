@@ -80,6 +80,7 @@ class DenseNet(nn.Module):
             *,
             fd_config=None,
             attention_config=None,
+            dropout_optimizer=None,
             **kwargs):
 
         super(DenseNet, self).__init__()
@@ -134,14 +135,20 @@ class DenseNet(nn.Module):
         self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
 
-        self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_p)
+        # Begin Dropout Module
+        if dropout_optimizer is None:
+            from .tricks.dropout import SimpleDropoutOptimizer
+            dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
+        # End Dropout Module
+
+        self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
 
         # Linear layer
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self._init_params()
 
-    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
+    def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
         """
         Construct fully connected layer
 
@@ -161,8 +168,9 @@ class DenseNet(nn.Module):
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
             layers.append(nn.ReLU(inplace=True))
-            if dropout_p is not None:
-                layers.append(nn.Dropout(p=dropout_p))
+            layers.append(dropout_optimizer)
+            # if dropout_p is not None:
+            #     layers.append(nn.Dropout(p=dropout_p))
             input_dim = dim
 
         self.feature_dim = fc_dims[-1]

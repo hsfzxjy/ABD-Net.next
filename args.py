@@ -97,6 +97,7 @@ def argument_parser():
     parser.add_argument('--switch-loss', type=int, default=0)
     parser.add_argument('--fix-custom-loss', action='store_true', default=False)
     parser.add_argument('--regularizer', type=str, default='none')
+    parser.add_argument('--dropout', type=str, default='none', choices=['none', 'incr', 'fix'])
 
     # ************************************************************
     # Cross entropy loss-specific setting

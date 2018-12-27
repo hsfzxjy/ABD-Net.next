@@ -26,9 +26,12 @@ from torchreid.eval_metrics import evaluate
 from torchreid.optimizers import init_optimizer
 from torchreid.regularizers import get_regularizer
 from torchreid.losses.wrapped_cross_entropy_loss import WrappedCrossEntropyLoss
+
+from torchreid.models.tricks.dropout import DropoutOptimizer
 # global variables
 parser = argument_parser()
 args = parser.parse_args()
+dropout_optimizer = DropoutOptimizer(args)
 
 
 def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_criterion', 'switch_criterion'):
@@ -71,7 +74,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
 
 
 def main():
-    global args
+    global args, dropout_optimizer
 
     torch.manual_seed(args.seed)
     if not args.use_avai_gpus:
@@ -95,7 +98,7 @@ def main():
     trainloader, testloader_dict = dm.return_dataloaders()
 
     print("Initializing model: {}".format(args.arch))
-    model = models.init_model(name=args.arch, num_classes=dm.num_train_pids, loss={'xent'}, use_gpu=use_gpu)
+    model = models.init_model(name=args.arch, num_classes=dm.num_train_pids, loss={'xent'}, use_gpu=use_gpu, dropout_optimizer=dropout_optimizer)
     print("Model size: {:.3f} M".format(count_num_param(model)))
 
     # criterion = WrappedCrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
@@ -107,6 +110,9 @@ def main():
     if args.load_weights and check_isfile(args.load_weights):
         # load pretrained weights but ignore layers that don't match in size
         checkpoint = torch.load(args.load_weights)
+
+        dropout_optimizer.set_p(checkpoint.get('dropout_p', 0))
+
         pretrain_dict = checkpoint['state_dict']
         model_dict = model.state_dict()
         pretrain_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
@@ -177,6 +183,7 @@ def main():
             'state_dict': state_dict,
             'rank1': 0,
             'epoch': epoch,
+            'dropout_p': dropout_optimizer.p,
         }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
 
         scheduler.step()
@@ -200,6 +207,7 @@ def main():
                 'state_dict': state_dict,
                 'rank1': rank1,
                 'epoch': epoch,
+                'dropout_p': dropout_optimizer.p,
             }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
 
     elapsed = round(time.time() - start_time)

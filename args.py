@@ -23,7 +23,7 @@ def argument_parser():
                         help="split index (note: 0-based)")
     parser.add_argument('--train-sampler', type=str, default='',
                         help="sampler for trainloader")
-
+    parser.add_argument('--data-augment', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter'], default='crop')
     # ************************************************************
     # Video datasets
     # ************************************************************
@@ -177,7 +177,8 @@ def image_dataset_kwargs(parsed_args):
         'train_sampler': parsed_args.train_sampler,
         'num_instances': parsed_args.num_instances,
         'cuhk03_labeled': parsed_args.cuhk03_labeled,
-        'cuhk03_classic_split': parsed_args.cuhk03_classic_split
+        'cuhk03_classic_split': parsed_args.cuhk03_classic_split,
+        'data_augment': parsed_args.data_augment,
     }
 
 

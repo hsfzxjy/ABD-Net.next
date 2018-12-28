@@ -7,6 +7,7 @@ import torch
 from PIL import Image
 import random
 import numpy as np
+import math
 
 
 class RandomErasing(object):

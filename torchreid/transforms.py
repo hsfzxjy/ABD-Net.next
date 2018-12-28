@@ -34,6 +34,7 @@ class RandomErasing(object):
             return img
 
         for attempt in range(100):
+            print(img.size())
             area = img.size()[1] * img.size()[2]
 
             target_area = random.uniform(self.sl, self.sh) * area

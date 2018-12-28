@@ -140,7 +140,7 @@ def build_training_transforms(height, width, data_augment):
         transforms.append(ColorJitter())
 
     transforms.append(ToTensor())
-    transforms.append(Normalize())
+    transforms.append(normalize)
 
     if 'random-erase' in data_augment:
         transforms.append(RandomErasing())

@@ -167,6 +167,7 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
     transforms += [normalize]
 
     transforms = Compose(transforms)
-    print('Using transform:', transforms)
+    if is_train:
+        print('Using transform:', transforms)
 
     return transforms

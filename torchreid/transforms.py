@@ -119,7 +119,7 @@ class Random2DTranslation(object):
 
 #     return transforms
 
-def build_augment_transform(height, width, data_augment):
+def build_augment_transforms(height, width, data_augment):
 
     data_augment = set(data_augment.split(','))
     print('Using augmentation:', data_augment)
@@ -128,7 +128,7 @@ def build_augment_transform(height, width, data_augment):
     if 'crop' in data_augment:
         transforms.append(Random2DTranslation(height, width))
     else:
-        transforms.append(Resize(height, width))
+        transforms.append(Resize((height, width)))
 
     if 'random-erase' in data_augment:
         transforms.append(RandomErasing())
@@ -157,7 +157,7 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
 
     if is_train:
 
-        transforms += build_augment_transform(height, width, data_augment)
+        transforms += build_augment_transforms(height, width, data_augment)
 
         transforms += [RandomHorizontalFlip()]
     else:

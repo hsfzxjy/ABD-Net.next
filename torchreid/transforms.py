@@ -34,7 +34,6 @@ class RandomErasing(object):
             return img
 
         for attempt in range(100):
-            print(img.size())
             area = img.size()[1] * img.size()[2]
 
             target_area = random.uniform(self.sl, self.sh) * area
@@ -120,7 +119,11 @@ class Random2DTranslation(object):
 
 #     return transforms
 
-def build_augment_transforms(height, width, data_augment):
+def build_training_transforms(height, width, data_augment):
+
+    imagenet_mean = [0.485, 0.456, 0.406]
+    imagenet_std = [0.229, 0.224, 0.225]
+    normalize = Normalize(mean=imagenet_mean, std=imagenet_std)
 
     data_augment = set(data_augment.split(','))
     print('Using augmentation:', data_augment)
@@ -131,10 +134,16 @@ def build_augment_transforms(height, width, data_augment):
     else:
         transforms.append(Resize((height, width)))
 
+    transforms.append(RandomHorizontalFlip())
+
+    if 'color-jitter' in data_augment:
+        transforms.append(ColorJitter())
+
+    transforms.append(ToTensor())
+    transforms.append(Normalize())
+
     if 'random-erase' in data_augment:
         transforms.append(RandomErasing())
-    elif 'color-jitter' in data_augment:
-        transforms.append(ColorJitter())
 
     return transforms
 
@@ -157,15 +166,12 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
     transforms = []
 
     if is_train:
-
-        transforms += build_augment_transforms(height, width, data_augment)
-
-        transforms += [RandomHorizontalFlip()]
+        transforms = build_training_transforms(height, width, data_augment)
     else:
         transforms += [Resize((height, width))]
 
-    transforms += [ToTensor()]
-    transforms += [normalize]
+        transforms += [ToTensor()]
+        transforms += [normalize]
 
     transforms = Compose(transforms)
     if is_train:

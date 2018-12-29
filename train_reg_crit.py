@@ -70,6 +70,9 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     if args.fix_custom_loss:
         fix_criterion = criterion
 
+    if args.switch_loss < 0:
+        criterion, switch_criterion = switch_criterion, criterion
+
     return criterion, fix_criterion, switch_criterion
 
 
@@ -169,7 +172,10 @@ def main():
         start_train_time = time.time()
         print(epoch, args.switch_loss)
         print(criterion)
-        if args.switch_loss and epoch >= args.switch_loss:
+
+        cond = args.switch_loss > 0 and epoch >= args.switch_loss
+        cond = cond or (args.switch_loss < 0 and args.switch_loss + args.max_epoch < epoch)
+        if cond:
             print('Switch!')
             criterion = switch_criterion
         train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu)

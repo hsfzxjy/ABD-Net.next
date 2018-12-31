@@ -267,7 +267,7 @@ densenet161: num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24)
 """
 
 
-def make_function(name, config):
+def make_function_121(name, config):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
 
@@ -283,6 +283,30 @@ def make_function(name, config):
         )
         if pretrained == 'imagenet':
             init_pretrained_weights(model, model_urls['densenet121'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
+
+def make_function_161(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+
+        model = DenseNet(
+            num_classes=num_classes,
+            loss=loss,
+            num_init_features=96,
+            growth_rate=48,
+            block_config=(6, 12, 36, 24),
+            dropout_p=None,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['densenet161'])
         return model
 
     _func.config = config
@@ -348,136 +372,14 @@ for fragment in fragments:
         name += name_frag
         config.update({key: sub_config})
 
-    make_function(name, config)
+    make_function_121(name, config)
 
-# All models
-# [
-#   "densenet121_fc512_fd_a_head_dan_cam_head",
-#   "densenet121_fc512_fd_a_head_dan_cam_nohead",
-#   "densenet121_fc512_fd_a_head_dan_cam_pam_head",
-#   "densenet121_fc512_fd_a_head_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_a_head_dan_none_head",
-#   "densenet121_fc512_fd_a_head_dan_none_nohead",
-#   "densenet121_fc512_fd_a_head_dan_pam_head",
-#   "densenet121_fc512_fd_a_head_dan_pam_nohead",
-#   "densenet121_fc512_fd_a_nohead_dan_cam_head",
-#   "densenet121_fc512_fd_a_nohead_dan_cam_nohead",
-#   "densenet121_fc512_fd_a_nohead_dan_cam_pam_head",
-#   "densenet121_fc512_fd_a_nohead_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_a_nohead_dan_none_head",
-#   "densenet121_fc512_fd_a_nohead_dan_none_nohead",
-#   "densenet121_fc512_fd_a_nohead_dan_pam_head",
-#   "densenet121_fc512_fd_a_nohead_dan_pam_nohead",
-#   "densenet121_fc512_fd_ab_c_head_dan_cam_head",
-#   "densenet121_fc512_fd_ab_c_head_dan_cam_nohead",
-#   "densenet121_fc512_fd_ab_c_head_dan_cam_pam_head",
-#   "densenet121_fc512_fd_ab_c_head_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_ab_c_head_dan_none_head",
-#   "densenet121_fc512_fd_ab_c_head_dan_none_nohead",
-#   "densenet121_fc512_fd_ab_c_head_dan_pam_head",
-#   "densenet121_fc512_fd_ab_c_head_dan_pam_nohead",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_cam_head",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_cam_nohead",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_cam_pam_head",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_none_head",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_none_nohead",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_pam_head",
-#   "densenet121_fc512_fd_ab_c_nohead_dan_pam_nohead",
-#   "densenet121_fc512_fd_ab_head_dan_cam_head",
-#   "densenet121_fc512_fd_ab_head_dan_cam_nohead",
-#   "densenet121_fc512_fd_ab_head_dan_cam_pam_head",
-#   "densenet121_fc512_fd_ab_head_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_ab_head_dan_none_head",
-#   "densenet121_fc512_fd_ab_head_dan_none_nohead",
-#   "densenet121_fc512_fd_ab_head_dan_pam_head",
-#   "densenet121_fc512_fd_ab_head_dan_pam_nohead",
-#   "densenet121_fc512_fd_ab_nohead_dan_cam_head",
-#   "densenet121_fc512_fd_ab_nohead_dan_cam_nohead",
-#   "densenet121_fc512_fd_ab_nohead_dan_cam_pam_head",
-#   "densenet121_fc512_fd_ab_nohead_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_ab_nohead_dan_none_head",
-#   "densenet121_fc512_fd_ab_nohead_dan_none_nohead",
-#   "densenet121_fc512_fd_ab_nohead_dan_pam_head",
-#   "densenet121_fc512_fd_ab_nohead_dan_pam_nohead",
-#   "densenet121_fc512_fd_none_head_dan_cam_head",
-#   "densenet121_fc512_fd_none_head_dan_cam_nohead",
-#   "densenet121_fc512_fd_none_head_dan_cam_pam_head",
-#   "densenet121_fc512_fd_none_head_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_none_head_dan_none_head",
-#   "densenet121_fc512_fd_none_head_dan_none_nohead",
-#   "densenet121_fc512_fd_none_head_dan_pam_head",
-#   "densenet121_fc512_fd_none_head_dan_pam_nohead",
-#   "densenet121_fc512_fd_none_nohead_dan_cam_head",
-#   "densenet121_fc512_fd_none_nohead_dan_cam_nohead",
-#   "densenet121_fc512_fd_none_nohead_dan_cam_pam_head",
-#   "densenet121_fc512_fd_none_nohead_dan_cam_pam_nohead",
-#   "densenet121_fc512_fd_none_nohead_dan_none_head",
-#   "densenet121_fc512_fd_none_nohead_dan_none_nohead",
-#   "densenet121_fc512_fd_none_nohead_dan_pam_head",
-#   "densenet121_fc512_fd_none_nohead_dan_pam_nohead",
-#   "densenet121_nofc_fd_a_head_dan_cam_head",
-#   "densenet121_nofc_fd_a_head_dan_cam_nohead",
-#   "densenet121_nofc_fd_a_head_dan_cam_pam_head",
-#   "densenet121_nofc_fd_a_head_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_a_head_dan_none_head",
-#   "densenet121_nofc_fd_a_head_dan_none_nohead",
-#   "densenet121_nofc_fd_a_head_dan_pam_head",
-#   "densenet121_nofc_fd_a_head_dan_pam_nohead",
-#   "densenet121_nofc_fd_a_nohead_dan_cam_head",
-#   "densenet121_nofc_fd_a_nohead_dan_cam_nohead",
-#   "densenet121_nofc_fd_a_nohead_dan_cam_pam_head",
-#   "densenet121_nofc_fd_a_nohead_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_a_nohead_dan_none_head",
-#   "densenet121_nofc_fd_a_nohead_dan_none_nohead",
-#   "densenet121_nofc_fd_a_nohead_dan_pam_head",
-#   "densenet121_nofc_fd_a_nohead_dan_pam_nohead",
-#   "densenet121_nofc_fd_ab_c_head_dan_cam_head",
-#   "densenet121_nofc_fd_ab_c_head_dan_cam_nohead",
-#   "densenet121_nofc_fd_ab_c_head_dan_cam_pam_head",
-#   "densenet121_nofc_fd_ab_c_head_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_ab_c_head_dan_none_head",
-#   "densenet121_nofc_fd_ab_c_head_dan_none_nohead",
-#   "densenet121_nofc_fd_ab_c_head_dan_pam_head",
-#   "densenet121_nofc_fd_ab_c_head_dan_pam_nohead",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_cam_head",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_cam_nohead",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_cam_pam_head",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_none_head",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_none_nohead",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_pam_head",
-#   "densenet121_nofc_fd_ab_c_nohead_dan_pam_nohead",
-#   "densenet121_nofc_fd_ab_head_dan_cam_head",
-#   "densenet121_nofc_fd_ab_head_dan_cam_nohead",
-#   "densenet121_nofc_fd_ab_head_dan_cam_pam_head",
-#   "densenet121_nofc_fd_ab_head_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_ab_head_dan_none_head",
-#   "densenet121_nofc_fd_ab_head_dan_none_nohead",
-#   "densenet121_nofc_fd_ab_head_dan_pam_head",
-#   "densenet121_nofc_fd_ab_head_dan_pam_nohead",
-#   "densenet121_nofc_fd_ab_nohead_dan_cam_head",
-#   "densenet121_nofc_fd_ab_nohead_dan_cam_nohead",
-#   "densenet121_nofc_fd_ab_nohead_dan_cam_pam_head",
-#   "densenet121_nofc_fd_ab_nohead_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_ab_nohead_dan_none_head",
-#   "densenet121_nofc_fd_ab_nohead_dan_none_nohead",
-#   "densenet121_nofc_fd_ab_nohead_dan_pam_head",
-#   "densenet121_nofc_fd_ab_nohead_dan_pam_nohead",
-#   "densenet121_nofc_fd_none_head_dan_cam_head",
-#   "densenet121_nofc_fd_none_head_dan_cam_nohead",
-#   "densenet121_nofc_fd_none_head_dan_cam_pam_head",
-#   "densenet121_nofc_fd_none_head_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_none_head_dan_none_head",
-#   "densenet121_nofc_fd_none_head_dan_none_nohead",
-#   "densenet121_nofc_fd_none_head_dan_pam_head",
-#   "densenet121_nofc_fd_none_head_dan_pam_nohead",
-#   "densenet121_nofc_fd_none_nohead_dan_cam_head",
-#   "densenet121_nofc_fd_none_nohead_dan_cam_nohead",
-#   "densenet121_nofc_fd_none_nohead_dan_cam_pam_head",
-#   "densenet121_nofc_fd_none_nohead_dan_cam_pam_nohead",
-#   "densenet121_nofc_fd_none_nohead_dan_none_head",
-#   "densenet121_nofc_fd_none_nohead_dan_none_nohead",
-#   "densenet121_nofc_fd_none_nohead_dan_pam_head",
-#   "densenet121_nofc_fd_none_nohead_dan_pam_nohead"
-# ]
+for fragment in fragments:
+
+    name = 'densenet161'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_161(name, config)

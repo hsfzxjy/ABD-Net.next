@@ -381,5 +381,5 @@ for fragment in fragments:
     for key, (sub_config, name_frag) in zip(keys, fragment):
         name += name_frag
         config.update({key: sub_config})
-
+    print(name)
     make_function_161(name, config)

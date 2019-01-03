@@ -39,7 +39,7 @@ class DropoutOptimizer(nn.Module):
     @property
     def p(self):
 
-        if self.__training:
+        if not self.__training:
             return self.__p
 
         dropout_settings = self.args.dropout

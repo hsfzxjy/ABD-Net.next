@@ -69,7 +69,7 @@ class DropoutOptimizer(nn.Module):
 
         p = self.p
         # print('Dropout p', p)
-        print(p, self.__training)
+        # print(p, self.__training)
         if p > 0:
             return F.dropout(x, p=p, training=self.__training)
         else:

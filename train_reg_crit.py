@@ -180,7 +180,7 @@ def main():
         if cond:
             print('Switch!')
             criterion = switch_criterion
-        train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu)
+        train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, cond)
         train_time += round(time.time() - start_train_time)
 
         if use_gpu:
@@ -232,7 +232,7 @@ def main():
     ranklogger.show_summary()
 
 
-def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False):
+def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False, switch_loss=False):
     losses = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -256,7 +256,8 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             loss = DeepSupervision(criterion, outputs, pids)
         else:
             loss = criterion(outputs, pids)
-        if not fixbase or (args.switch_loss and epoch >= args.switch_loss):
+        if not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
+            print('use reg')
             loss += regularizer(model)
         optimizer.zero_grad()
         loss.backward()

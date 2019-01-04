@@ -180,7 +180,7 @@ def main():
         if cond:
             print('Switch!')
             criterion = switch_criterion
-        train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, cond)
+        train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False, switch_loss=cond)
         train_time += round(time.time() - start_train_time)
 
         if use_gpu:
@@ -256,8 +256,8 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             loss = DeepSupervision(criterion, outputs, pids)
         else:
             loss = criterion(outputs, pids)
-        # if True or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
-        if True:
+        if True or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
+        # if True:
             reg = regularizer(model)
             print('use reg', reg)
             loss += reg

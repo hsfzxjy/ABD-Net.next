@@ -28,7 +28,7 @@ class DropoutOptimizer(nn.Module):
 
         self.args = args
         self.epoch = self.__p = 0
-        self.__training = args.evaluate
+        self.__training = not args.evaluate
 
     def set_epoch(self, epoch):
         self.epoch = epoch

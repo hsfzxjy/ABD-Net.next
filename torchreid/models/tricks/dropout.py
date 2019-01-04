@@ -58,7 +58,7 @@ class DropoutOptimizer(nn.Module):
 
     def set_p(self, p):
 
-        if not self.__training:
+        if self.__training:
             raise RuntimeError('Cannot explicitly set dropout during training')
 
         assert isinstance(p, (int, float))
@@ -69,7 +69,7 @@ class DropoutOptimizer(nn.Module):
 
         p = self.p
         # print('Dropout p', p)
-        # print(p, self.__training)
+        print(p, self.__training)
         if p > 0:
             return F.dropout(x, p=p, training=self.__training)
         else:

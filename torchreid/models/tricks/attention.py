@@ -23,7 +23,7 @@ class AttentionModule(nn.Module):
         use_avg_pool: bool=False
     ):
         super().__init__()
-
+        print(module_names)
         self.modules = []
         for name in module_names:
             module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head)

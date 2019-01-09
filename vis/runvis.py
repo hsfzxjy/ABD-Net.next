@@ -19,7 +19,7 @@ if __name__ == '__main__':
     for fn in glob.glob('vis_input/**/*'):
         params.append(get_param(fn, 4))
 
-    splitted = [params[i:i + 5] for i in range(0, len(params), 5)]
+    splitted = [params[i:i + 1] for i in range(0, len(params), 1)]
     import subprocess
 
     for group in splitted:

@@ -209,6 +209,8 @@ class DenseNet(nn.Module):
         v = v.view(v.size(0), -1)
 
         v = torch.cat([v, *attention_parts], 1)
+        print(v.size())
+        print(self.fc)
 
         v_before_fc = v
         if self.fc is not None:

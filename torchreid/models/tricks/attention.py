@@ -42,7 +42,6 @@ class AttentionModule(nn.Module):
     def forward(self, x):
 
         xs = {}
-        print(x)
         for name, module, pool in self.modules:
             f = module(x)
             if pool is not None:
@@ -150,7 +149,7 @@ class PAM_Module(Module):
         attention_mask = out.view(m_batchsize, C, height, width)
 
         out = self.gamma * attention_mask + x
-        return out, attention_mask
+        return out  # , attention_mask
 
 
 class CAM_Module(Module):

@@ -23,13 +23,13 @@ from torchreid.utils.iotools import check_isfile
 class args:
     height = 256
     width = 128
-    arch = 'densenet121'
+    arch = 'resnet50'
     root = 'data'
     dataset = 'market1501'
     split_id = 0
     cuhk03_labeled = False
     cuhk03_classic_split = False
-    load_weights = resolve('..', 'data/densenet121_fc512_market_xent/densenet121_fc512_market_xent.pth.tar')
+    load_weights = resolve('..', 'data/resnet50_fc512_market_xent/resnet50_fc512_market_xent.pth.tar')
 
 
 use_gpu = True
@@ -119,6 +119,8 @@ if __name__ == '__main__':
 
     for i in range(0, 1024):
         model = get_model()
+        print(model)
+        raise RuntimeError
         # model.features = model.base
         ir = InvertedRepresentation(model, path)
         ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)), i, (256, 128), options.layer)

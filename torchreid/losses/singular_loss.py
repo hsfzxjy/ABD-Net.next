@@ -16,7 +16,7 @@ print('CONSTRAINT_WEIGHTS:', CONSTRAINT_WEIGHTS)
 
 class SingularLoss(nn.Module):
 
-    def __init__(self, num_classes, *, use_gpu=True, label_smooth=True, beta=None):
+    def __init__(self, num_classes, *, use_gpu=True, label_smooth=True, beta=None, penalty_position='before'):
         super().__init__()
 
         os_beta = None
@@ -39,6 +39,7 @@ class SingularLoss(nn.Module):
         print('beta', self.beta)
         # self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
         self.xent_loss = nn.CrossEntropyLoss()
+        self.penalty_position = frozenset(penalty_position.split(','))
 
     def dominant_eigenvalue(self, A):
 
@@ -69,22 +70,29 @@ class SingularLoss(nn.Module):
         tmp = self.dominant_eigenvalue(AAT - I)
         return tmp + largest, largest
 
-    def forward(self, inputs, pids):
+    def apply_penalty(self, x):
 
-        x, y, _, weights = inputs
-
-        if CONSTRAINT_WEIGHTS:
-            height, width = weights.size()
-            batches = 1
-            W = weights.view(1, height, width)
-        else:
-            batches, channels, height, width = x.size()
-            W = x.view(batches, channels, -1)
+        batches, channels, height, width = x.size()
+        W = x.view(batches, channels, -1)
         smallest, largest = self.get_singular_values(W)
         if not USE_LOG:
             singular_penalty = (largest - smallest) * self.beta
         else:
             singular_penalty = (torch.log1p(largest) - torch.log1p(smallest)) * self.beta
+
+        return singular_penalty.sum()
+
+    def forward(self, inputs, pids):
+
+        _, y, _, feature_dict = inputs
+
+        existed_positions = frozenset(feature_dict.keys())
+        missing = self.penalty_position - existed_positions
+        if missing:
+            raise RuntimeError('Cannot apply singular loss, as positions {!r} are missing.'.format(list(missing)))
+
+        singular_penalty = sum([self.apply_penalty(x) for x in feature_dict.values()])
+
         xloss = self.xent_loss(y, pids)
         # print(xloss)
-        return singular_penalty.sum() + xloss
+        return singular_penalty + xloss

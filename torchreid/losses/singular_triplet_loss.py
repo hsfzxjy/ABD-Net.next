@@ -4,7 +4,7 @@ from .singular_loss import SingularLoss
 
 def SingularTripletLoss(num_classes: int, use_gpu: bool, args) -> 'func':
 
-    xent_loss = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+    xent_loss = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth, penalty_position=args.penalty_position)
     htri_loss = WrappedTripletLoss(num_classes, use_gpu, args, htri_only=True)
 
     def _loss(x, pids):

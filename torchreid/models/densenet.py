@@ -197,10 +197,12 @@ class DenseNet(nn.Module):
     def forward(self, x):
         f = self.feature_distilation(x)
 
+        feature_dict = self.attention_module(f)
         attention_parts = [
             part.view(part.size(0), -1) for part in
-            self.attention_module(f)
+            feature_dict.values()
         ]
+        feature_dict['before'] = f
 
         f = F.relu(f, inplace=True)
         v = self.global_avgpool(f)
@@ -219,7 +221,7 @@ class DenseNet(nn.Module):
 
         y = self.classifier(v)
 
-        return f, y, v, self.classifier.weight
+        return f, y, v, feature_dict
 
         if self.loss == {'xent'}:
             return y

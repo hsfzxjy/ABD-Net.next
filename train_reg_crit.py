@@ -52,7 +52,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
         criterion = LowRankLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
     elif args.criterion == 'singular':
         from torchreid.losses.singular_loss import SingularLoss
-        criterion = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
+        criterion = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth, penalty_position=args.penalty_position)
     elif args.criterion == 'htri':
         criterion = WrappedTripletLoss(num_classes=num_classes, use_gpu=use_gpu, args=args)
     elif args.criterion == 'singular_htri':

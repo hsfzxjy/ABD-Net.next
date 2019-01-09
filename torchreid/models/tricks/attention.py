@@ -35,18 +35,19 @@ class AttentionModule(nn.Module):
             else:
                 pool = None
 
-            self.modules.append((module, pool))
+            self.modules.append((name, module, pool))
 
         self.output_dim = len(self.modules) * dim
 
     def forward(self, x):
 
-        xs = []
-        for module, pool in self.modules:
+        xs = {}
+        for name, module, pool in self.modules:
             f = module(x)
             if pool is not None:
                 f = pool(f)
-            xs.append(f.view(f.size(0), -1))
+            xs[name] = f
+            # xs.append(f.view(f.size(0), -1))
         return xs
 
 

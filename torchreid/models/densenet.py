@@ -105,7 +105,6 @@ class DenseNet(nn.Module):
                 trans = _Transition(num_input_features=num_features, num_output_features=num_features // 2)
                 self.features.add_module('transition%d' % (i + 1), trans)
                 num_features = num_features // 2
-        print('NUM FEATURE', num_features)
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
@@ -209,8 +208,6 @@ class DenseNet(nn.Module):
         v = v.view(v.size(0), -1)
 
         v = torch.cat([v, *attention_parts], 1)
-        print(v.size())
-        print(self.fc)
 
         v_before_fc = v
         if self.fc is not None:

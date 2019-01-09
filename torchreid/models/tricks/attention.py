@@ -48,6 +48,7 @@ class AttentionModule(nn.Module):
                 f = pool(f)
             xs[name] = f
             # xs.append(f.view(f.size(0), -1))
+        print(xs)
         return xs
 
 

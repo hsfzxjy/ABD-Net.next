@@ -20,7 +20,7 @@ class AttentionModule(nn.Module):
         dim: int,
         *,
         use_conv_head: bool=False,
-        use_avg_pool: bool=False
+        use_avg_pool: bool=True
     ):
         super().__init__()
         print(module_names)

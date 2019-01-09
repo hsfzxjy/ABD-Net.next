@@ -19,7 +19,7 @@ if __name__ == '__main__':
     for fn in glob.glob('vis_input/**/*'):
         params.append(get_param(fn, 4))
 
-    for param in parms:
+    for param in params:
         os.system(' '.join(['python', 'vis.py', *param]))
 
     # splitted = [params[i:i + 1] for i in range(0, len(params), 1)]

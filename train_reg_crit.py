@@ -102,6 +102,7 @@ def main():
 
     print("Initializing model: {}".format(args.arch))
     model = models.init_model(name=args.arch, num_classes=dm.num_train_pids, loss={'xent'}, use_gpu=use_gpu, dropout_optimizer=dropout_optimizer)
+    print(model)
     print("Model size: {:.3f} M".format(count_num_param(model)))
 
     # criterion = WrappedCrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)

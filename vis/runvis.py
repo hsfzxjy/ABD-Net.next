@@ -19,19 +19,16 @@ if __name__ == '__main__':
     for fn in glob.glob('vis_input/**/*'):
         params.append(get_param(fn, 4))
 
-    for param in params:
-        os.system(' '.join(['python', 'vis.py', *param]))
+    splitted = [params[i:i + 5] for i in range(0, len(params), 5)]
+    import subprocess
 
-    # splitted = [params[i:i + 1] for i in range(0, len(params), 1)]
-    # import subprocess
-
-    # for group in splitted:
-    #     ps = []
-    #     for param in group:
-    #         p = subprocess.Popen([
-    #             'python', 'vis.py',
-    #             *param
-    #         ])
-    #         ps.append(p)
-    #     for p in ps:
-    #         p.communicate()
+    for group in splitted:
+        ps = []
+        for param in group:
+            p = subprocess.Popen([
+                'python', 'vis.py',
+                *param
+            ])
+            ps.append(p)
+        for p in ps:
+            p.communicate()

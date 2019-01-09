@@ -272,7 +272,7 @@ densenet161: num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24)
 def make_function_121(name, config):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
-
+        print(kwargs)
         model = DenseNet(
             num_classes=num_classes,
             loss=loss,

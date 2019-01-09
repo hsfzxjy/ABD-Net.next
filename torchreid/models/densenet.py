@@ -167,7 +167,7 @@ class DenseNet(nn.Module):
         for dim in fc_dims:
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
-            layers.append(nn.ReLU(inplace=True))
+            layers.append(nn.ReLU(inplace=False))
             layers.append(dropout_optimizer)
             # if dropout_p is not None:
             #     layers.append(nn.Dropout(p=dropout_p))

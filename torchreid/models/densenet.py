@@ -167,7 +167,7 @@ class DenseNet(nn.Module):
         for dim in fc_dims:
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
-            layers.append(nn.ReLU(inplace=False))
+            layers.append(nn.ReLU(inplace=True))
             layers.append(dropout_optimizer)
             # if dropout_p is not None:
             #     layers.append(nn.Dropout(p=dropout_p))
@@ -204,7 +204,7 @@ class DenseNet(nn.Module):
         ]
         feature_dict['before'] = f
 
-        f = F.relu(f, inplace=True)
+        f = F.relu(f, inplace=False)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 

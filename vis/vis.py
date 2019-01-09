@@ -119,8 +119,6 @@ if __name__ == '__main__':
 
     for i in range(0, 1024):
         model = get_model()
-        print(model)
-        raise RuntimeError
         # model.features = model.base
         ir = InvertedRepresentation(model, path)
         ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)), i, (256, 128), options.layer)

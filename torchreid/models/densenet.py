@@ -335,8 +335,12 @@ configurations = OrderedDict([
                 },
                 f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
             )
-            for parts in (('ab', 'c'), ('ab',), ('a',), ())
-            for parts_name in ('ab_c', 'ab', 'a', 'none')
+            for parts, parts_name in [
+                [('ab', 'c'), 'ab_c'],
+                [('ab',), 'ab'],
+                [('a',), 'a'],
+                [(), 'none']
+            ]
             for use_conv_head in (True, False)
         ],
     ),
@@ -350,8 +354,12 @@ configurations = OrderedDict([
                 },
                 f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
             )
-            for parts in (('cam', 'pam'), ('cam',), ('pam',), ())
-            for parts_name in ('cam_pam', 'cam', 'pam', 'none')
+            for parts, parts_name in [
+                [('cam', 'pam'), 'cam_pam'],
+                [('cam',), 'cam'],
+                [('pam',), 'pam'],
+                [(), 'none'],
+            ]
             for use_conv_head in (True, False)
         ]
     )

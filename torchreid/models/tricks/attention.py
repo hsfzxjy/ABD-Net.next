@@ -42,6 +42,7 @@ class AttentionModule(nn.Module):
     def forward(self, x):
 
         xs = {}
+        print(x)
         for name, module, pool in self.modules:
             f = module(x)
             if pool is not None:

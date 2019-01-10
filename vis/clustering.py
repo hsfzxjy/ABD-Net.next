@@ -27,6 +27,7 @@ def load_dataset(root_directory):
     for i, fn in enumerate(pics):
 
         image = cv2.imread(fn)
+        print(fn)
         shape = image.shape
         # image = cv2.resize(image, (32, 64))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

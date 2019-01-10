@@ -46,14 +46,14 @@ def load_dataset(root_directory):
         #     plt.imshow(image)
         #     plt.show()
         if image.sum() > 1e-9:
-            result.append((j, image.flatten() / 255))
+            result.append(image.flatten() / 255)
         else:
             print(j, 'omitted')
 
         dct[len(result) - 1] = int(j)
 
-    result.sort()
-    result = [x[1] for x in result]
+    # result.sort()
+    # result = [x[1] for x in result]
     return result, dct
 
 

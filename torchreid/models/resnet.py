@@ -169,7 +169,7 @@ class ResNet(nn.Module):
             dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
         # End Dropout Module
 
-        self.fc = self._construct_fc_layer(fc_dims, 512 * block.expansion, dropout_optimizer)
+        self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self._init_params()

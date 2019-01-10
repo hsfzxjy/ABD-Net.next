@@ -31,7 +31,7 @@ def load_dataset(root_directory):
 
         image = cv2.imread(fn)
         import re
-        j = int(re.findall(r'/(\d+)/')[0])
+        j = int(re.findall(r'/(\d+)/', fn)[0])
         # print(fn)
         shape = image.shape
         # image = cv2.resize(image, (32, 64))

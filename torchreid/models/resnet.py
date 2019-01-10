@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 
+import os
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -10,6 +11,12 @@ import torch.utils.model_zoo as model_zoo
 
 __all__ = ['resnet50', 'resnet50_fc512']
 
+channels = {
+    'a': [4, 40, 64, 68, 70, 71, 101, 102, 127, 141, 152, 158, 162, 164, 171, 172, 175, 186, 201, 209, 225, 227, 246],
+    'b': [2, 4, 11, 12, 17, 23, 24, 28, 30, 36, 39, 40, 47, 48, 49, 57, 59, 60, 61, 64, 66, 68, 70, 71, 77, 78, 83, 87, 88, 89, 91, 93, 99, 101, 102, 107, 110, 117, 120, 121, 123, 124, 126, 127, 133, 139, 140, 141, 145, 151, 152, 155, 158, 162, 164, 165, 168, 171, 172, 174, 175, 180, 185, 186, 192, 199, 201, 202, 209, 211, 216, 217, 219, 222, 225, 227, 230, 239, 245, 246, 247, 249, 251],
+    'c': [0, 1, 3, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 18, 19, 20, 21, 22, 25, 26, 27, 29, 31, 32, 33, 34, 35, 37, 38, 41, 42, 43, 44, 45, 46, 50, 51, 52, 53, 54, 55, 56, 58, 62, 63, 65, 67, 69, 72, 73, 74, 75, 76, 79, 80, 81, 82, 84, 85, 86, 90, 92, 94, 95, 96, 97, 98, 100, 103, 104, 105, 106, 108, 109, 111, 112, 113, 114, 115, 116, 118, 119, 122, 125, 128, 129, 130, 131, 132, 134, 135, 136, 137, 138, 142, 143, 144, 146, 147, 148, 149, 150, 153, 154, 156, 157, 159, 160, 161, 163, 166, 167, 169, 170, 173, 176, 177, 178, 179, 181, 182, 183, 184, 187, 188, 189, 190, 191, 193, 194, 195, 196, 197, 198, 200, 203, 204, 205, 206, 207, 208, 210, 212, 213, 214, 215, 218, 220, 221, 223, 224, 226, 228, 229, 231, 232, 233, 234, 235, 236, 237, 238, 240, 241, 242, 243, 244, 248, 250, 252, 253, 254],
+
+}
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -109,6 +116,10 @@ class ResNet(nn.Module):
                  last_stride=2,
                  fc_dims=None,
                  dropout_p=None,
+                 *,
+                 fd_config=None,
+                 attention_config=None,
+                 dropout_optimizer=None,
                  **kwargs):
         self.inplanes = 64
         super(ResNet, self).__init__()
@@ -125,8 +136,40 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=last_stride)
 
+        # Begin Feature Distilation
+        if fd_config is None:
+            fd_config = {'parts': (), 'use_conv_head': False}
+        from .tricks.feature_distilation import FeatureDistilationTrick
+        self.feature_distilation = FeatureDistilationTrick(
+            fd_config['parts'],
+            channels=channels,
+            use_conv_head=fd_config['use_conv_head']
+        )
+        # End Feature Distilation
+
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
-        self.fc = self._construct_fc_layer(fc_dims, 512 * block.expansion, dropout_p)
+
+        num_features = 512 * block.expansion
+        # Begin Attention Module
+        if attention_config is None:
+            attention_config = {'parts': (), 'use_conv_head': False}
+        from .tricks.attention import AttentionModule
+
+        self.attention_module = AttentionModule(
+            attention_config['parts'],
+            num_features,
+            use_conv_head=attention_config['use_conv_head']
+        )
+        self.feature_dim = num_features = num_features + self.attention_module.output_dim
+        # End Attention Module
+
+        # Begin Dropout Module
+        if dropout_optimizer is None:
+            from .tricks.dropout import SimpleDropoutOptimizer
+            dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
+        # End Dropout Module
+
+        self.fc = self._construct_fc_layer(fc_dims, 512 * block.expansion, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self._init_params()
@@ -148,7 +191,29 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
+    def forward_feature_distilation(self, x):
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        x = self.layer1(x)
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.feature_distilation.cam_modules:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        return x
+
+    def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
         """
         Construct fully connected layer
 
@@ -168,8 +233,9 @@ class ResNet(nn.Module):
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
             layers.append(nn.ReLU(inplace=True))
-            if dropout_p is not None:
-                layers.append(nn.Dropout(p=dropout_p))
+            layers.append(dropout_optimizer)
+            # if dropout_p is not None:
+            #     layers.append(nn.Dropout(p=dropout_p))
             input_dim = dim
 
         self.feature_dim = fc_dims[-1]
@@ -205,17 +271,32 @@ class ResNet(nn.Module):
         return x
 
     def forward(self, x):
-        f = self.featuremaps(x)
+        f = self.forward_feature_distilation(x)
+
+        feature_dict = self.attention_module(f)
+        attention_parts = [
+            part.view(part.size(0), -1) for part in
+            feature_dict.values()
+        ]
+        feature_dict['before'] = f
+
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
+        v = torch.cat([v, *attention_parts], 1)
+
+        v_before_fc = v
         if self.fc is not None:
             v = self.fc(v)
-
         if not self.training:
-            return v
+            if os.environ.get('NOFC'):
+                return v_before_fc
+            else:
+                return v
 
         y = self.classifier(v)
+
+        return f, y, v, feature_dict
 
         if self.loss == {'xent'}:
             return y
@@ -264,6 +345,32 @@ def resnet50(num_classes, loss, pretrained='imagenet', **kwargs):
         init_pretrained_weights(model, model_urls['resnet50'])
     return model
 
+#
+
+
+def make_function_50(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+        print(config)
+        model = ResNet(
+            num_classes=num_classes,
+            loss=loss,
+            block=Bottleneck,
+            layers=[3, 4, 6, 3],
+            last_stride=2,
+            dropout_p=None,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['resnet50'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
 
 def resnet50_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
     model = ResNet(
@@ -279,3 +386,73 @@ def resnet50_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
     if pretrained == 'imagenet':
         init_pretrained_weights(model, model_urls['resnet50'])
     return model
+
+
+from collections import OrderedDict
+
+configurations = OrderedDict([
+    (
+        'fc_dims',
+        [
+            (None, '_nofc'),
+            ([512], '_fc512'),
+        ],
+    ),
+    (
+        'fd_config',
+        [
+            (
+                {
+                    'parts': parts,
+                    'use_conv_head': use_conv_head
+                },
+                f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
+            )
+            for parts, parts_name in [
+                [('ab', 'c'), 'ab_c'],
+                [('ab',), 'ab'],
+                [('a',), 'a'],
+                [(), 'none']
+            ]
+            for use_conv_head in (True, False)
+        ],
+    ),
+    (
+        'attention_config',
+        [
+            (
+                {
+                    'parts': parts,
+                    'use_conv_head': use_conv_head
+                },
+                f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
+            )
+            for parts, parts_name in [
+                [('cam', 'pam'), 'cam_pam'],
+                [('cam',), 'cam'],
+                [('pam',), 'pam'],
+                [(), 'none'],
+            ]
+            for use_conv_head in (True, False)
+        ]
+    )
+])
+
+configurations: 'Dict[str, List[Tuple[config, name_frag]]]'
+
+import itertools
+
+fragments = list(itertools.product(*configurations.values()))
+keys = list(configurations.keys())
+
+name_function_mapping = {}
+
+for fragment in fragments:
+
+    name = 'resnet50'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_50(name, config)

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .resnet import *
+# from .resnet import *
 from .resnetmid import *
 from .resnext import *
 from .senet import *
@@ -25,13 +25,14 @@ from .mlfn import *
 # from .densenet_CAM_cat import *
 # from .cltmp.densenet_cl import *
 
-from . import densenet
+from . import densenet, resnet
 
 __model_factory = {
     **densenet.name_function_mapping,
+    **resnet.name_function_mapping,
     # image classification models
-    'resnet50': resnet50,
-    'resnet50_fc512': resnet50_fc512,
+    # 'resnet50': resnet50,
+    # 'resnet50_fc512': resnet50_fc512,
     'resnext50_32x4d': resnext50_32x4d,
     'resnext101_32x4d': resnext101_32x4d,
     'se_resnet50': se_resnet50,

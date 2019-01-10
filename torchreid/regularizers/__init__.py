@@ -22,7 +22,7 @@ class ConvRegularizer(nn.Module):
 
     def get_all_conv_layers(self, module):
 
-        if isinstance(module, nn.Sequential):
+        if isinstance(module, (nn.Sequential, list)):
             for m in module:
                 yield from self.get_all_conv_layers(m)
 
@@ -36,7 +36,7 @@ class ConvRegularizer(nn.Module):
         if ignore:
             return accumulator
 
-        for conv in self.get_all_conv_layers(net.module.features):
+        for conv in self.get_all_conv_layers(net.module.backbone_convs()):
             accumulator += self.reg_instance(conv.weight)
 
         # print(accumulator.data)

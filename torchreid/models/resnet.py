@@ -191,6 +191,19 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def backbone_convs(self):
+
+        return [
+            self.conv1,
+            self.bn1,
+            self.relu,
+            self.maxpool,
+            self.layer1,
+            self.layer2,
+            self.layer3,
+            self.layer4,
+        ]
+
     def forward_feature_distilation(self, x):
 
         x = self.conv1(x)

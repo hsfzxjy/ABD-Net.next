@@ -218,6 +218,10 @@ class DenseNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
+    def backbone_convs(self):
+
+        return self.features
+
     def forward(self, x):
         f = self.forward_feature_distilation(x)
 

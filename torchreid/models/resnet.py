@@ -40,7 +40,7 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU(inplace=False)
         self.conv2 = conv3x3(planes, planes)
         self.bn2 = nn.BatchNorm2d(planes)
         self.downsample = downsample
@@ -293,12 +293,11 @@ class ResNet(nn.Module):
         ]
         feature_dict['before'] = f
 
-        f = F.relu(f, inplace=False)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
-        v = torch.cat([v, *attention_parts], 1)
-        # v = torch.cat([v, v, v], 1)
+        # v = torch.cat([v, *attention_parts], 1)
+        v = torch.cat([v, v, v], 1)
 
         v_before_fc = v
         if self.fc is not None:

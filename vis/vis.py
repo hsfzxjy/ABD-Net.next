@@ -23,13 +23,13 @@ from torchreid.utils.iotools import check_isfile
 class args:
     height = 256
     width = 128
-    arch = 'resnet50'
+    arch = 'densenet121_fc512_fd_none_nohead_dan_none_nohead'
     root = 'data'
     dataset = 'market1501'
     split_id = 0
     cuhk03_labeled = False
     cuhk03_classic_split = False
-    load_weights = resolve('..', 'data/resnet50_fc512_market_xent/resnet50_fc512_market_xent.pth.tar')
+    # load_weights = resolve('..', 'data/resnet50_fc512_market_xent/resnet50_fc512_market_xent.pth.tar')
 
 
 use_gpu = True
@@ -110,7 +110,9 @@ if __name__ == '__main__':
     parser.add_argument('-l', dest='layer', type=int)
     parser.add_argument('-p', dest='path', default=None)
     parser.add_argument('-i', dest='input', default='')
+    parser.add_argument('-w', dest='weights')
     options = parser.parse_args()
+    args.load_weights = options.w
 
     path = options.path or resolve('..', 'generated_' + str(options.layer))
     img = read_image(options.input or resolve('1.jpg'))

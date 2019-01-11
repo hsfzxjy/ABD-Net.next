@@ -56,13 +56,13 @@ class InvertedRepresentation():
             This operation could be done with a forward hook too
             but this one is simpler (I think)
         """
-        layer_output = None
-        x = self.model.conv1(x)
-        x = self.model.bn1(x)
-        x = self.model.relu(x)
-        x = self.model.maxpool(x)
-        x = self.model.layer1(x)
-        return x[0, index_, :, :]
+        # layer_output = None
+        # x = self.model.conv1(x)
+        # x = self.model.bn1(x)
+        # x = self.model.relu(x)
+        # x = self.model.maxpool(x)
+        # x = self.model.layer1(x)
+        # return x[0, index_, :, :]
 
         for index, layer in enumerate(self.model.features):
             x = layer(x)

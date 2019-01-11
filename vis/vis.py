@@ -112,7 +112,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', dest='input', default='')
     parser.add_argument('-w', dest='weights')
     options = parser.parse_args()
-    args.load_weights = options.w
+    args.load_weights = options.weights
 
     path = options.path or resolve('..', 'generated_' + str(options.layer))
     img = read_image(options.input or resolve('1.jpg'))

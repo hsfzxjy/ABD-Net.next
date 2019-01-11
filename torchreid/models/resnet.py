@@ -293,11 +293,12 @@ class ResNet(nn.Module):
         ]
         feature_dict['before'] = f
 
+        f = F.ReLU(f, inplace=False)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
-        # v = torch.cat([v, *attention_parts], 1)
-        v = torch.cat([v,v,v],1)
+        v = torch.cat([v, *attention_parts], 1)
+        # v = torch.cat([v, v, v], 1)
 
         v_before_fc = v
         if self.fc is not None:

@@ -297,6 +297,7 @@ class ResNet(nn.Module):
         v = v.view(v.size(0), -1)
 
         # v = torch.cat([v, *attention_parts], 1)
+        v = torch.cat([v,v,v],1)
 
         v_before_fc = v
         if self.fc is not None:

@@ -293,7 +293,7 @@ class ResNet(nn.Module):
         ]
         feature_dict['before'] = f
 
-        f = F.ReLU(f, inplace=False)
+        f = F.relu(f, inplace=False)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 

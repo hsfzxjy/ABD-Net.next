@@ -85,8 +85,8 @@ def evaluate(model, loader):
             dct[pid][1024].append(ff1024)
 
         for mapping in dct.values():
-            mapping[512] = torch.cat(mapping[512], 0).numpy()
-            mapping[1024] = torch.cat(mapping[1024], 0).numpy()
+            mapping[512] = torch.stack(mapping[512], 0).numpy()
+            mapping[1024] = torch.stack(mapping[1024], 0).numpy()
 
             import numpy as np
             print(mapping[512].shape, mapping[1024].shape)
@@ -111,7 +111,7 @@ def main():
     dm = ImageDataManager(use_gpu, **image_dataset_kwargs(args))
     trainloader, testloader_dict = dm.return_dataloaders()
 
-    evaluate(model, testloader_dict['market1501']['gallery'])
+    evaluate(model, testloader_dict['market1501']['query'])
 
 
 if __name__ == '__main__':

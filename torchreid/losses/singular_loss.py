@@ -37,7 +37,7 @@ class SingularLoss(nn.Module):
         print('USE_GPU', use_gpu)
         self.beta = beta if not os_beta else os_beta
         print('beta', self.beta)
-        self.xent_loss = CrossEntropyLoss(num_classes, use_gpu, label_smooth)
+        self.xent_loss = CrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=label_smooth)
         # self.xent_loss = nn.CrossEntropyLoss()
         self.penalty_position = frozenset(penalty_position.split(','))
 

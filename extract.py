@@ -13,6 +13,7 @@ def get_args():
     parser.add_argument('--dest')
     parser.add_argument('--gpu', type=int, default=1)
 
+    # Mock
     parser.add_argument('--root', type=str, default='data',
                         help="root path to data directory")
     parser.add_argument('-s', '--source-names', type=str, required=True, nargs='+',
@@ -30,6 +31,10 @@ def get_args():
     parser.add_argument('--train-sampler', type=str, default='',
                         help="sampler for trainloader")
     parser.add_argument('--data-augment', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter'], default='crop')
+    parser.add_argument('--train-batch-size', default=32, type=int,
+                        help="training batch size")
+    parser.add_argument('--test-batch-size', default=100, type=int,
+                        help="test batch size")
 
     return parser.parse_args()
 

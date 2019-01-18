@@ -68,12 +68,12 @@ def evaluate(model, loader):
 
             os.environ['NOFC'] = '1'
             features = model(imgs).data.cpu()
-            features = features.div(torch.norm(features, p=2, dim=1, keepdim=True).expand_as(ff))
+            features = features.div(torch.norm(features, p=2, dim=1, keepdim=True).expand_as(features))
             f_1024.append(features)
 
             os.environ['NOFC'] = ''
             features = model(imgs).data.cpu()
-            features = features.div(torch.norm(features, p=2, dim=1, keepdim=True).expand_as(ff))
+            features = features.div(torch.norm(features, p=2, dim=1, keepdim=True).expand_as(features))
             f_512.append(features)
 
         f_512 = torch.cat(f_512, 0)

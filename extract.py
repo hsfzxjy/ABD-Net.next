@@ -97,3 +97,7 @@ def main():
     trainloader, testloader_dict = dm.return_dataloaders()
 
     evaluate(model, testloader_dict['market1501']['query'])
+
+
+if __name__ == '__main__':
+    main()

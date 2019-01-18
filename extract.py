@@ -88,7 +88,9 @@ def evaluate(model, loader):
             mapping[512] = torch.cat(mapping[512], 0).numpy()
             mapping[1024] = torch.cat(mapping[1024], 0).numpy()
 
-            print(mapping.shape)
+            import numpy as np
+            print(mapping[512].shape, mapping[1024].shape)
+            print(np.linalg.norm(mapping[512], axis=1), np.linalg.norm(mapping[1024], axis=1))
 
 
 def main():

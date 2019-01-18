@@ -81,7 +81,7 @@ def evaluate(model, loader):
 def main():
 
     global args
-    args = get_args
+    args = get_args()
     use_gpu = True
 
     model = models.init_model(name=args.arch, num_classes=751, loss={'xent'}, use_gpu=args.gpu).cuda()

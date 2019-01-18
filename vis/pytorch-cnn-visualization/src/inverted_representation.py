@@ -12,6 +12,12 @@ import os.path as osp
 
 from misc_functions import get_params, recreate_image
 
+import numpy
+
+
+class NaNError(Exception):
+    pass
+
 
 class InvertedRepresentation():
     def __init__(self, model, path):
@@ -114,6 +120,8 @@ class InvertedRepresentation():
             optimizer.step()
             # Generate image every 5 iterations
             if i % 10 == 0:
+                if numpy.isnan(loss.data.numpy()).any():
+                    raise NaNError
                 print('Iteration:', str(i), 'Loss:', loss.data.numpy())
                 x = recreate_image(opt_img)
                 cv2.imwrite(

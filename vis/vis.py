@@ -100,7 +100,7 @@ def flatten(f):
 from torchreid.dataset_loader import read_image
 
 
-from inverted_representation import InvertedRepresentation
+from inverted_representation import InvertedRepresentation, NaNError
 
 
 if __name__ == '__main__':
@@ -124,4 +124,11 @@ if __name__ == '__main__':
         # model.features = model.featuresmap
         # model.features = model.base
         ir = InvertedRepresentation(model, path)
-        ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)), i, (256, 128), options.layer)
+        for _ in range(10):
+            try:
+                ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)), i, (256, 128), options.layer)
+            except NaNError:
+                continue
+                print('restart')
+            else:
+                break

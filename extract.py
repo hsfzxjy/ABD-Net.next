@@ -35,6 +35,8 @@ def get_args():
                         help="training batch size")
     parser.add_argument('--test-batch-size', default=100, type=int,
                         help="test batch size")
+    parser.add_argument('--num-instances', type=int, default=4,
+                        help="number of instances per identity")
 
     return parser.parse_args()
 

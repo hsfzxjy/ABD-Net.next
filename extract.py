@@ -37,6 +37,12 @@ def get_args():
                         help="test batch size")
     parser.add_argument('--num-instances', type=int, default=4,
                         help="number of instances per identity")
+    parser.add_argument('--cuhk03-labeled', action='store_true',
+                        help="use labeled images, if false, use detected images")
+    parser.add_argument('--cuhk03-classic-split', action='store_true',
+                        help="use classic split by Li et al. CVPR'14")
+    parser.add_argument('--use-metric-cuhk03', action='store_true',
+                        help="use cuhk03's metric for evaluation")
 
     return parser.parse_args()
 

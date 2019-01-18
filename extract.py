@@ -111,7 +111,7 @@ def main():
     dm = ImageDataManager(use_gpu, **image_dataset_kwargs(args))
     trainloader, testloader_dict = dm.return_dataloaders()
 
-    evaluate(model, testloader_dict['market1501']['query'])
+    evaluate(model, testloader_dict['market1501']['gallery'])
 
 
 if __name__ == '__main__':

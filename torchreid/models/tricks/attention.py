@@ -55,13 +55,15 @@ def get_attention_module_instance(
     name: 'cam|pam',
     dim: int,
     *,
-    use_conv_head: bool=False
+    use_conv_head: bool=False  # DEPRECATED
 ):
 
     name = name.lower()
     assert name in ('cam', 'pam')
 
     module_class = {'cam': CAM_Module, 'pam': PAM_Module}[name]
+
+    use_conv_head = name == 'pam'
 
     if use_conv_head:
         return DANetHead(dim, dim, nn.BatchNorm2d, module_class)

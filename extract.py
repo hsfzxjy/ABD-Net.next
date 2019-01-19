@@ -50,7 +50,7 @@ def get_args():
 from args import image_dataset_kwargs
 from torchreid.data_manager import ImageDataManager
 import os
-
+import numpy as np
 args = None
 
 from collections import defaultdict
@@ -82,6 +82,7 @@ def evaluate(model, loader):
         dct = defaultdict(lambda: {512: [], 1024: []})
         print(f_512.size(), f_1024.size())
         for pid, ff512, ff1024 in zip(pids_lst, f_512, f_1024):
+            pid = np.asscalar(pid.cpu().numpy())
             print(pid, ff512.size(), ff1024.size())
             dct[pid][512].append(ff512)
             dct[pid][1024].append(ff1024)

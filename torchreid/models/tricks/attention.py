@@ -63,7 +63,7 @@ def get_attention_module_instance(
 
     module_class = {'cam': CAM_Module, 'pam': PAM_Module}[name]
 
-    use_conv_head = name == 'pam'
+    use_conv_head = name == 'cam'
 
     if use_conv_head:
         return DANetHead(dim, dim, nn.BatchNorm2d, module_class)

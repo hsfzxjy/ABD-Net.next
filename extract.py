@@ -111,7 +111,27 @@ def main():
     dm = ImageDataManager(use_gpu, **image_dataset_kwargs(args))
     trainloader, testloader_dict = dm.return_dataloaders()
 
-    evaluate(model, testloader_dict['market1501']['query'])
+    q = evaluate(model, testloader_dict['market1501']['query'])
+    g = evaluate(model, testloader_dict['market1501']['gallery'])
+
+    import os
+    import os.path as osp
+    import scipy.io
+
+    os.makedirs(args.dest, exist_ok=True)
+    os.makedirs(osp.join(args.dest, 'query'), exist_ok=True)
+
+    for pid, mapping in q.items():
+        os.makedirs(osp.join(args.dest, 'query', str(pid)))
+        scipy.io.savemat(osp.join(args.dest, 'query', str(pid), '512.mat'), mapping[512])
+        scipy.io.savemat(osp.join(args.dest, 'query', str(pid), '1024.mat'), mapping[1024])
+
+    os.makedirs(osp.join(args.dest, 'gallery'), exist_ok=True)
+
+    for pid, mapping in g.items():
+        os.makedirs(osp.join(args.dest, 'gallery', str(pid)))
+        scipy.io.savemat(osp.join(args.dest, 'gallery', str(pid), '512.mat'), mapping[512])
+        scipy.io.savemat(osp.join(args.dest, 'gallery', str(pid), '1024.mat'), mapping[1024])
 
 
 if __name__ == '__main__':

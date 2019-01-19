@@ -82,15 +82,16 @@ def evaluate(model, loader):
         dct = defaultdict(lambda: {512: [], 1024: []})
         print(f_512.size(), f_1024.size())
         for pid, ff512, ff1024 in zip(pids_lst, f_512, f_1024):
+            print(pid, ff512.size(), ff1024.size())
             dct[pid][512].append(ff512)
             dct[pid][1024].append(ff1024)
 
-        for mapping in dct.values():
+        for pid, mapping in dct.items():
             mapping[512] = torch.stack(mapping[512], 0).numpy()
             mapping[1024] = torch.stack(mapping[1024], 0).numpy()
 
             import numpy as np
-            print(mapping[512].shape, mapping[1024].shape)
+            print('dct', pid, mapping[512].shape, mapping[1024].shape)
             print(np.linalg.norm(mapping[512], axis=1), np.linalg.norm(mapping[1024], axis=1))
 
     return dct

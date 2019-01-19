@@ -92,6 +92,8 @@ def evaluate(model, loader):
             print(mapping[512].shape, mapping[1024].shape)
             print(np.linalg.norm(mapping[512], axis=1), np.linalg.norm(mapping[1024], axis=1))
 
+    return dct
+
 
 def main():
 

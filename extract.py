@@ -91,7 +91,6 @@ def evaluate(model, loader):
             mapping[512] = torch.stack(mapping[512], 0).numpy()
             mapping[1024] = torch.stack(mapping[1024], 0).numpy()
 
-            import numpy as np
             print('dct', pid, mapping[512].shape, mapping[1024].shape)
             print(np.linalg.norm(mapping[512], axis=1), np.linalg.norm(mapping[1024], axis=1))
 

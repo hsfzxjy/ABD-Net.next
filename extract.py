@@ -80,6 +80,7 @@ def evaluate(model, loader):
         f_1024 = torch.cat(f_1024, 0)
 
         dct = defaultdict(lambda: {512: [], 1024: []})
+        print(f_512.size(), f_1024.size())
         for pid, ff512, ff1024 in zip(pids_lst, f_512, f_1024):
             dct[pid][512].append(ff512)
             dct[pid][1024].append(ff1024)

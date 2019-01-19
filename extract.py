@@ -79,20 +79,20 @@ def evaluate(model, loader):
         f_512 = torch.cat(f_512, 0)
         f_1024 = torch.cat(f_1024, 0)
 
-        dct = defaultdict(lambda: {512: [], 1024: []})
+        dct = defaultdict(lambda: {'512': [], '1024': []})
         print(f_512.size(), f_1024.size())
         for pid, ff512, ff1024 in zip(pids_lst, f_512, f_1024):
             pid = np.asscalar(pid.cpu().numpy())
             print(pid, ff512.size(), ff1024.size())
-            dct[pid][512].append(ff512)
-            dct[pid][1024].append(ff1024)
+            dct[pid]['512'].append(ff512)
+            dct[pid]['1024'].append(ff1024)
 
         for pid, mapping in dct.items():
-            mapping[512] = torch.stack(mapping[512], 0).numpy()
-            mapping[1024] = torch.stack(mapping[1024], 0).numpy()
+            mapping['512'] = torch.stack(mapping['512'], 0).numpy()
+            mapping['1024'] = torch.stack(mapping['1024'], 0).numpy()
 
-            print('dct', pid, mapping[512].shape, mapping[1024].shape)
-            print(np.linalg.norm(mapping[512], axis=1), np.linalg.norm(mapping[1024], axis=1))
+            print('dct', pid, mapping['512'].shape, mapping['1024'].shape)
+            print(np.linalg.norm(mapping['512'], axis=1), np.linalg.norm(mapping['1024'], axis=1))
 
     return dct
 

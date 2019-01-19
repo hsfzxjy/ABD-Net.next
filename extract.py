@@ -127,15 +127,13 @@ def main():
 
     for pid, mapping in q.items():
         os.makedirs(osp.join(args.dest, 'query', str(pid)))
-        scipy.io.savemat(osp.join(args.dest, 'query', str(pid), '512.mat'), mapping[512])
-        scipy.io.savemat(osp.join(args.dest, 'query', str(pid), '1024.mat'), mapping[1024])
+        scipy.io.savemat(osp.join(args.dest, 'query', str(pid), '512_1024.mat'), mapping)
 
     os.makedirs(osp.join(args.dest, 'gallery'), exist_ok=True)
 
     for pid, mapping in g.items():
         os.makedirs(osp.join(args.dest, 'gallery', str(pid)))
-        scipy.io.savemat(osp.join(args.dest, 'gallery', str(pid), '512.mat'), mapping[512])
-        scipy.io.savemat(osp.join(args.dest, 'gallery', str(pid), '1024.mat'), mapping[1024])
+        scipy.io.savemat(osp.join(args.dest, 'gallery', str(pid), '512_1024.mat'), mapping)
 
 
 if __name__ == '__main__':

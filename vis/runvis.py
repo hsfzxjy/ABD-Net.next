@@ -24,8 +24,8 @@ if __name__ == '__main__':
     #     params.append(get_param(fn, 5))
     for fn in glob.glob('vis_input/**/*'):
         params.extend(get_param(fn, 4))
-    for fn in glob.glob('vis_input/**/*'):
-        params.extend(get_param(fn, 5))
+    # for fn in glob.glob('vis_input/**/*'):
+    #     params.extend(get_param(fn, 5))
 
     splitted = [params[i:i + 5] for i in range(0, len(params), 5)]
     import subprocess

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from .attention import get_attention_module_instance
+from .attention import get_attention_module_instance, CAM_Module
 
 
 class FeatureDistilationTrick(nn.Module):
@@ -29,11 +29,7 @@ class FeatureDistilationTrick(nn.Module):
                 cs.extend(channels[key])
             cs.sort()
 
-            cam_module = get_attention_module_instance(
-                'cam',
-                len(cs),
-                use_conv_head=use_conv_head
-            )
+            cam_module = CAM_Module(len(cs))
             setattr(self, f'_cam_module_{part}', cam_module)  # force gpu
 
             self.cam_modules.append((cs, cam_module))

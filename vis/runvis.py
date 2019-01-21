@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # for fn in glob.glob('vis_input/**/*'):
     #     params.append(get_param(fn, 5))
     for fn in glob.glob('vis_input/**/*'):
-        params.extend(get_param(fn, 4))
+        params.extend(get_param(fn, 5))
     # for fn in glob.glob('vis_input/**/*'):
     #     params.extend(get_param(fn, 5))
 

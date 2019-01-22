@@ -111,21 +111,13 @@ class DenseNet(nn.Module):
                 trans = _Transition(num_input_features=num_features, num_output_features=num_features // 2)
                 self.features.add_module('transition%d' % (i + 1), trans)
                 num_features = num_features // 2
-        # Begin Feature Distilation
-        if fd_config is None:
-            fd_config = {'parts': (), 'use_conv_head': False}
-        from .tricks.feature_distilation import FeatureDistilationTrick
-        self.feature_distilation = FeatureDistilationTrick(
-            fd_config['parts'],
-            channels=channels,
-            use_conv_head=fd_config['use_conv_head']
-        )
-        # End Feature Distilation
 
         # Final batch norm
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
+
+        self.init_fd(fd_config)
 
         # Begin Attention Module
         if attention_config is None:
@@ -152,6 +144,18 @@ class DenseNet(nn.Module):
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self._init_params()
+
+    def init_fd(self, fd_config):
+        # Begin Feature Distilation
+        if fd_config is None:
+            fd_config = {'parts': (), 'use_conv_head': False}
+        from .tricks.feature_distilation import FeatureDistilationTrick
+        self.feature_distilation = FeatureDistilationTrick(
+            fd_config['parts'],
+            channels=channels,
+            use_conv_head=fd_config['use_conv_head']
+        )
+        # End Feature Distilation
 
     def forward_feature_distilation(self, x):
 
@@ -257,6 +261,44 @@ class DenseNet(nn.Module):
             # raise KeyError("Unsupported loss: {}".format(self.loss))
 
 
+class NewFDDenseNet(DenseNet):
+
+    def init_fd(self, fd_config):
+
+        from .tricks.feature_distilation import FeatureDistilationTrick
+
+        self.feature_distilation = nn.Sequential()
+        for _ in range(6):
+            if fd_config is None:
+                fd_config = {'parts': (), 'use_conv_head': False}
+            fd = FeatureDistilationTrick(
+                fd_config['parts'],
+                channels=channels,
+                use_conv_head=fd_config['use_conv_head']
+            )
+            self.feature_distilation.add_module(fd)
+
+    def forward_feature_distilation(self, x):
+
+        for index, layer in enumerate(self.features):
+            if index != 5:
+                x = layer(x)
+                continue
+
+            for fd, dense_layer in zip(self.feature_distilation, layer):
+
+                x = dense_layer(x)
+
+                for cs, cam in fd.cam_modules:
+                    c_tensor = torch.tensor(cs).cuda()
+
+                    new_x = x[:, c_tensor]
+                    new_x = cam(new_x)
+                    x[:, c_tensor] = new_x
+
+        return x
+
+
 def init_pretrained_weights(model, model_url):
     """
     Initialize model with pretrained weights.
@@ -299,6 +341,30 @@ def make_function_121(name, config):
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
         model = DenseNet(
+            num_classes=num_classes,
+            loss=loss,
+            num_init_features=64,
+            growth_rate=32,
+            block_config=(6, 12, 24, 16),
+            dropout_p=None,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['densenet121'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
+
+def make_function_121_new_fd(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+        print(config)
+        model = NewFDDenseNet(
             num_classes=num_classes,
             loss=loss,
             num_init_features=64,
@@ -418,3 +484,14 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_161(name, config)
+
+
+for fragment in fragments:
+
+    name = 'densenet121_newfd'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_121_new_fd(name, config)

@@ -261,6 +261,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         # if True or (fixbase and args.fix_custom_loss) or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
         if not fixbase:
             reg = regularizer(model)
+            print('use reg', reg)
             # print('use reg', reg)
             loss += reg
         optimizer.zero_grad()

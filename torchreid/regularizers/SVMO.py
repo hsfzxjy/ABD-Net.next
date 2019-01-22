@@ -71,5 +71,5 @@ class SVMORegularizer(nn.Module):
 
         smallest, largest = self.get_singular_values(W)
         return (
-            self.param_controller.get_value() * (largest - smallest)
+            self.param_controller._value * 10 * (largest - smallest)
         ).squeeze()

@@ -107,7 +107,7 @@ def main():
 
     # criterion = WrappedCrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
     criterion, fix_criterion, switch_criterion = get_criterions(dm.num_train_pids, use_gpu, args)
-    regularizer = get_regularizer(args.regularizer)
+    regularizer, reg_param_controller = get_regularizer(args.regularizer)
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
 
@@ -171,6 +171,7 @@ def main():
 
     for epoch in range(args.start_epoch, args.max_epoch):
         dropout_optimizer.set_epoch(epoch)
+        reg_param_controller.set_epoch(epoch)
         dropout_optimizer.set_training(True)
         start_train_time = time.time()
         print(epoch, args.switch_loss)
@@ -257,7 +258,8 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             loss = DeepSupervision(criterion, outputs, pids)
         else:
             loss = criterion(outputs, pids)
-        if (fixbase and args.fix_custom_loss) or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
+        # if True or (fixbase and args.fix_custom_loss) or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
+        if not fixbase:
             reg = regularizer(model)
             # print('use reg', reg)
             loss += reg

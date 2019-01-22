@@ -11,16 +11,17 @@ w_rate = 1e-4
 
 class SORegularizer(nn.Module):
 
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
 
         os_beta = None
 
-        try:
-            os_beta = float(os.environ.get('beta'))
-        except (ValueError, TypeError):
-            raise RuntimeError('No beta specified. ABORTED.')
-        self.beta = os_beta
+        # try:
+        #     os_beta = float(os.environ.get('beta'))
+        # except (ValueError, TypeError):
+        #     raise RuntimeError('No beta specified. ABORTED.')
+        # self.beta = os_beta
+        self.param_controller = controller
 
     def dominant_eigenvalue(self, A: 'N x N'):
 
@@ -44,5 +45,5 @@ class SORegularizer(nn.Module):
             W.permute(1, 0) @ W - torch.eye(old_size[0]).cuda()
         )
         return (
-            self.beta * d_ev
+            self.param_controller.get_value() * d_ev
         ).squeeze()

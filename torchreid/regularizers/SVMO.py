@@ -11,16 +11,18 @@ w_rate = 1e-4
 
 class SVMORegularizer(nn.Module):
 
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
 
         os_beta = None
 
-        try:
-            os_beta = float(os.environ.get('beta'))
-        except (ValueError, TypeError):
-            raise RuntimeError('No beta specified. ABORTED.')
-        self.beta = os_beta
+        # try:
+        #     os_beta = float(os.environ.get('beta'))
+        # except (ValueError, TypeError):
+        #     raise RuntimeError('No beta specified. ABORTED.')
+        # self.beta = os_beta
+        #
+        self.param_controller = controller
 
     def dominant_eigenvalue(self, A: 'N x N'):
 
@@ -69,5 +71,5 @@ class SVMORegularizer(nn.Module):
 
         smallest, largest = self.get_singular_values(W)
         return (
-            self.beta * (largest - smallest)
+            self.param_controller.get_value() * (largest - smallest)
         ).squeeze()

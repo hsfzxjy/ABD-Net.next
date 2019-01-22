@@ -16,9 +16,9 @@ mapping = {
 
 class ConvRegularizer(nn.Module):
 
-    def __init__(self, klass):
+    def __init__(self, klass, controller):
         super().__init__()
-        self.reg_instance = klass()
+        self.reg_instance = klass(controller)
 
     def get_all_conv_layers(self, module):
 
@@ -45,4 +45,13 @@ class ConvRegularizer(nn.Module):
 
 def get_regularizer(name):
 
-    return ConvRegularizer(mapping[name])
+    from .param_controller import ParamController
+    import os
+
+    try:
+        os_beta = float(os.environ.get('beta'))
+        controller = ParamController(os_beta)
+    except (ValueError, TypeError):
+        controller = ParamController()
+
+    return ConvRegularizer(mapping[name], controller), controller

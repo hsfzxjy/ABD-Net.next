@@ -276,7 +276,7 @@ class NewFDDenseNet(DenseNet):
                 channels=channels,
                 use_conv_head=fd_config['use_conv_head']
             )
-            self.feature_distilation.add_module(fd)
+            self.feature_distilation.add_module('_fd_%s' % _, fd)
 
     def forward_feature_distilation(self, x):
 

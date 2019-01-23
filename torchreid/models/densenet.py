@@ -159,6 +159,8 @@ class DenseNet(nn.Module):
 
     def forward_feature_distilation(self, x):
 
+        layer_5_feature = None
+
         for index, layer in enumerate(self.features):
             x = layer(x)
             if index == 5:
@@ -171,7 +173,9 @@ class DenseNet(nn.Module):
                     new_x = cam(new_x)
                     x[:, c_tensor] = new_x
 
-        return x
+                layer_5_feature = x
+
+        return x, layer_5_feature
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
         """
@@ -224,7 +228,7 @@ class DenseNet(nn.Module):
         return self.features
 
     def forward(self, x):
-        f = self.forward_feature_distilation(x)
+        f, layer_5_feature = self.forward_feature_distilation(x)
 
         feature_dict = self.attention_module(f)
         attention_parts = [
@@ -232,6 +236,7 @@ class DenseNet(nn.Module):
             feature_dict.values()
         ]
         feature_dict['before'] = f
+        feature_dict['layer5'] = layer_5_feature
 
         f = F.relu(f, inplace=False)
         v = self.global_avgpool(f)
@@ -280,6 +285,8 @@ class NewFDDenseNet(DenseNet):
 
     def forward_feature_distilation(self, x):
 
+        layer_5_feature = None
+
         for index, layer in enumerate(self.features):
             if index != 5:
                 x = layer(x)
@@ -296,7 +303,9 @@ class NewFDDenseNet(DenseNet):
                     new_x = cam(new_x)
                     x[:, c_tensor] = new_x
 
-        return x
+                layer_5_feature = x
+
+        return x, layer_5_feature
 
 
 def init_pretrained_weights(model, model_url):

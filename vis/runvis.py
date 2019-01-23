@@ -10,6 +10,7 @@ def get_param(input_fn, layer, args):
     os.makedirs(osp.join(args.path, 'layer_' + str(layer), dir, name), 0o777, True)
     path = osp.join(args.path, dir, name)
     a = ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', str(layer), '-w', args.model, '-a', args.arch]
+    print(a)
     # _, dir, name = input_fn.split('/')
     # os.makedirs(osp.join('without_orth_vis_output', dir, name), 0o777, True)
     # path = osp.join('without_orth_vis_output', dir, name)

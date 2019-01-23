@@ -1,14 +1,15 @@
 import os
 import glob
 import os.path as osp
+import argparse
 
 
-def get_param(input_fn, layer):
+def get_param(input_fn, layer, args):
 
     _, dir, name = input_fn.split('/')
-    os.makedirs(osp.join('densenet121_fc512_vis_output', 'layer_' + str(layer), dir, name), 0o777, True)
-    path = osp.join('densenet121_fc512_vis_output', dir, name)
-    a = ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', str(layer), '-w', 'log/densenet121_fc512_fd_none_nohead_dan_none_nohead__crit_xent__sb___b___sl_0__fcl_False__reg_none__dropout_none__dau_crop__pp_before__size_256__0/checkpoint_ep60.pth.tar']
+    os.makedirs(osp.join(args.path, 'layer_' + str(layer), dir, name), 0o777, True)
+    path = osp.join(args.path, dir, name)
+    a = ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', str(layer), '-w', args.model, '-a', args.arch]
     # _, dir, name = input_fn.split('/')
     # os.makedirs(osp.join('without_orth_vis_output', dir, name), 0o777, True)
     # path = osp.join('without_orth_vis_output', dir, name)
@@ -19,11 +20,17 @@ def get_param(input_fn, layer):
 
 if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('arch')
+    parser.add_argument('path')
+    parser.add_argument('model')
+    options = parser.parse_args()
+
     params = []
     # for fn in glob.glob('vis_input/**/*'):
     #     params.append(get_param(fn, 5))
     for fn in glob.glob('vis_input/**/*'):
-        params.extend(get_param(fn, 5))
+        params.extend(get_param(fn, 5, options))
     # for fn in glob.glob('vis_input/**/*'):
     #     params.extend(get_param(fn, 5))
 

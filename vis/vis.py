@@ -23,7 +23,7 @@ from torchreid.utils.iotools import check_isfile
 class args:
     height = 256
     width = 128
-    arch = 'densenet121_fc512_fd_none_nohead_dan_none_nohead'
+    arch = 'densenet121_nofc_fd_none_nohead_dan_none_nohead'
     root = 'data'
     dataset = 'market1501'
     split_id = 0
@@ -111,8 +111,11 @@ if __name__ == '__main__':
     parser.add_argument('-p', dest='path', default=None)
     parser.add_argument('-i', dest='input', default='')
     parser.add_argument('-w', dest='weights')
+    parser.add_argument('-a', dest='arch')
     options = parser.parse_args()
     args.load_weights = options.weights
+    if options.arch:
+        args.arch = options.arch
 
     path = options.path or resolve('..', 'generated_' + str(options.layer))
     img = read_image(options.input or resolve('1.jpg'))

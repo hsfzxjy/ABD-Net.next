@@ -72,6 +72,7 @@ class InvertedRepresentation():
 
         for index, layer in enumerate(self.model.features):
             x = layer(x)
+            print(index, layer_id)
             if str(index) == str(layer_id):
                 layer_output = x[0]
                 break

@@ -116,6 +116,7 @@ if __name__ == '__main__':
     args.load_weights = options.weights
     if options.arch:
         args.arch = options.arch
+    print(options)
 
     path = options.path or resolve('..', 'generated_' + str(options.layer))
     img = read_image(options.input or resolve('1.jpg'))

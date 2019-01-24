@@ -72,7 +72,7 @@ class InvertedRepresentation():
 
         for index, layer in enumerate(self.model.features):
             x = layer(x)
-            print(index, layer_id)
+            # print(index, layer_id)
             if str(index) == str(layer_id):
                 layer_output = x[0]
                 break
@@ -122,9 +122,9 @@ class InvertedRepresentation():
             optimizer.step()
             # Generate image every 5 iterations
             if i % 10 == 0:
-                if numpy.isnan(loss.data.numpy()).any():
+                if numpy.isnan(loss.data.cpu().numpy()).any():
                     raise NaNError
-                print('Iteration:', str(i), 'Loss:', loss.data.numpy())
+                print('Iteration:', str(i), 'Loss:', loss.data.cpu().numpy())
                 x = recreate_image(opt_img)
                 cv2.imwrite(
                     osp.join(self.path, str(index), 'Inv_Image_Layer_' + str(target_layer) +

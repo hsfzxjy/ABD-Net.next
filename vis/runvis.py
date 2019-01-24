@@ -25,13 +25,14 @@ if __name__ == '__main__':
     parser.add_argument('arch')
     parser.add_argument('path')
     parser.add_argument('model')
+    parser.add_argument('--layer', type=int, default=5)
     options = parser.parse_args()
 
     params = []
     # for fn in glob.glob('vis_input/**/*'):
     #     params.append(get_param(fn, 5))
     for fn in glob.glob('vis_input/**/*'):
-        params.extend(get_param(fn, 5, options))
+        params.extend(get_param(fn, params.layer, options))
     # for fn in glob.glob('vis_input/**/*'):
     #     params.extend(get_param(fn, 5))
 

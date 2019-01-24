@@ -52,11 +52,12 @@ class SingularLoss(nn.Module):
             torch.bmm(A, x).view(B, 1, N),
             x
         ).squeeze()
-        denominator = torch.bmm(
-            x.view(B, 1, N),
-            x
-        ).squeeze()
-        # print(denominator)
+        denominator = (torch.norm(x.view(B, N), p=2, dim=1) ** 2).squeeze()
+        # denominator = torch.norm(
+        #     x.view(B, 1, N),
+        #     x
+        # ).squeeze()
+        # # print(denominator)
 
         return numerator / denominator
 

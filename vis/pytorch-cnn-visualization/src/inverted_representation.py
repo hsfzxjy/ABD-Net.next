@@ -82,7 +82,7 @@ class InvertedRepresentation():
         print('index =', index)
         os.makedirs(osp.join(self.path, str(index)), exist_ok=True)
         # Generate a random image which we will optimize
-        opt_img = Variable(1e-1 * torch.randn(1, 3, *img_size), requires_grad=True).cuda()
+        opt_img = torch.tensor(1e-1 * torch.randn(1, 3, *img_size), requires_grad=True).cuda()
         # Define optimizer for previously created image
         optimizer = SGD([opt_img], lr=1e3, momentum=0.9)
         # Get the output from the model after a forward pass until target_layer

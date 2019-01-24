@@ -124,7 +124,7 @@ if __name__ == '__main__':
     print(img.shape)
 
     for i in range(0, 1024):
-        model = get_model()
+        model = get_model().cuda()
         model.train()
         # model.features = model.featuresmap
         # model.features = model.base

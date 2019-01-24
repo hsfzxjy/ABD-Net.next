@@ -43,16 +43,17 @@ class SingularLoss(nn.Module):
     def dominant_eigenvalue(self, A):
 
         B, N, _ = A.size()
-        x = torch.ones(B, N, 1).cuda()
+        x = torch.randn(B, N, 1).cuda()
 
         for _ in range(1):
             x = torch.bmm(A, x)
+        x: 'B x N x 1'
         numerator = torch.bmm(
-            torch.bmm(A, x).permute(0, 2, 1),
+            torch.bmm(A, x).view(B, 1, N),
             x
         ).squeeze()
         denominator = torch.bmm(
-            x.permute(0, 2, 1),
+            x.view(B, 1, N),
             x
         ).squeeze()
         # print(denominator)

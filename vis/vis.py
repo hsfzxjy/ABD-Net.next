@@ -125,6 +125,7 @@ if __name__ == '__main__':
 
     for i in range(0, 1024):
         model = get_model()
+        model.train()
         # model.features = model.featuresmap
         # model.features = model.base
         ir = InvertedRepresentation(model, path)

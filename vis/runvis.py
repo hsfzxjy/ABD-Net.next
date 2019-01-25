@@ -9,7 +9,7 @@ def get_param(input_fn, layer, args):
     _, dir, name = input_fn.split('/')
     os.makedirs(osp.join(args.path, 'layer_' + str(layer), dir, name), 0o777, True)
     path = osp.join(args.path, dir, name)
-    a = ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', str(layer), '-w', args.model, '-a', args.arch]
+    a = ['-i', osp.abspath(input_fn), '-p', osp.abspath(path), '-l', str(layer), '-w', args.model, '-a', args.arch, '--iter', str(args.iter)]
     print(a)
     # _, dir, name = input_fn.split('/')
     # os.makedirs(osp.join('without_orth_vis_output', dir, name), 0o777, True)
@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('path')
     parser.add_argument('model')
     parser.add_argument('--layer', type=int, default=5)
+    parser.add_argument('--iter', type=int, default=50)
     options = parser.parse_args()
 
     params = []

@@ -112,6 +112,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', dest='input', default='')
     parser.add_argument('-w', dest='weights')
     parser.add_argument('-a', dest='arch')
+    parser.add_argument('--iter', type=int, default=50)
     options = parser.parse_args()
     args.load_weights = options.weights
     if options.arch:
@@ -131,7 +132,7 @@ if __name__ == '__main__':
         ir = InvertedRepresentation(model, path)
         for _ in range(10):
             try:
-                ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)).cuda(), i, (256, 128), options.layer)
+                ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)).cuda(), i, (256, 128), options.layer, steps=args.iter)
             except NaNError:
                 continue
                 print('restart')

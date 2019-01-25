@@ -132,7 +132,7 @@ if __name__ == '__main__':
         ir = InvertedRepresentation(model, path)
         for _ in range(10):
             try:
-                ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)).cuda(), i, (256, 128), options.layer, steps=args.iter)
+                ir.generate_inverted_image_specific_layer(img.reshape((1, *img.shape)).cuda(), i, (256, 128), options.layer, steps=options.iter)
             except NaNError:
                 continue
                 print('restart')

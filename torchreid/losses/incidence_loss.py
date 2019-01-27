@@ -36,7 +36,9 @@ class IncidenceLoss(nn.Module):
 
         norm_p = {'inf': float('inf'), 'l2': 2}[NORM]
 
+        W = torch.clamp(torch.abs(W), min=THRESHOLD)
+
         p = torch.norm(W, p=norm_p, dim=1)
-        return torch.clamp(p, min=THRESHOLD).sum()
+        return p.sum()
 
         # return ((WWT - A)**2).sum() ** (1 / 2)

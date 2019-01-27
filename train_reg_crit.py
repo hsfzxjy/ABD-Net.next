@@ -128,7 +128,7 @@ def main():
     if args.resume and check_isfile(args.resume):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['state_dict'])
-        args.start_epoch = checkpoint['epoch'] + 1
+        # args.start_epoch = checkpoint['epoch'] + 1
         print("Loaded checkpoint from '{}'".format(args.resume))
         print("- start_epoch: {}\n- rank1: {}".format(args.start_epoch, checkpoint['rank1']))
 

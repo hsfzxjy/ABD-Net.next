@@ -25,16 +25,21 @@ channels = {
     'c': [0, 1, 2, 3, 4, 6, 7, 9, 12, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 45, 48, 50, 52, 53, 55, 57, 59, 61, 62, 65, 68, 69, 71, 72, 75, 76, 77, 78, 80, 81, 82, 83, 85, 86, 87, 88, 89, 91, 93, 95, 98, 101, 102, 103, 104, 106, 108, 109, 110, 111, 113, 114, 115, 116, 118, 119, 121, 122, 123, 124, 125, 127]
 }
 
+if os.environ.get('relu_inplace', ''):
+    relu_inplace = True
+else:
+    relu_inplace = False
+
 
 class _DenseLayer(nn.Sequential):
     def __init__(self, num_input_features, growth_rate, bn_size, drop_rate):
         super(_DenseLayer, self).__init__()
         self.add_module('norm1', nn.BatchNorm2d(num_input_features)),
-        self.add_module('relu1', nn.ReLU(inplace=False)),
+        self.add_module('relu1', nn.ReLU(inplace=relu_inplace)),
         self.add_module('conv1', nn.Conv2d(num_input_features, bn_size *
                                            growth_rate, kernel_size=1, stride=1, bias=False)),
         self.add_module('norm2', nn.BatchNorm2d(bn_size * growth_rate)),
-        self.add_module('relu2', nn.ReLU(inplace=False)),
+        self.add_module('relu2', nn.ReLU(inplace=relu_inplace)),
         self.add_module('conv2', nn.Conv2d(bn_size * growth_rate, growth_rate,
                                            kernel_size=3, stride=1, padding=1, bias=False)),
         self.drop_rate = drop_rate
@@ -58,7 +63,7 @@ class _Transition(nn.Sequential):
     def __init__(self, num_input_features, num_output_features):
         super(_Transition, self).__init__()
         self.add_module('norm', nn.BatchNorm2d(num_input_features))
-        self.add_module('relu', nn.ReLU(inplace=False))
+        self.add_module('relu', nn.ReLU(inplace=relu_inplace))
         self.add_module('conv', nn.Conv2d(num_input_features, num_output_features,
                                           kernel_size=1, stride=1, bias=False))
         self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
@@ -96,7 +101,7 @@ class DenseNet(nn.Module):
         self.features = nn.Sequential(OrderedDict([
             ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
             ('norm0', nn.BatchNorm2d(num_init_features)),
-            ('relu0', nn.ReLU(inplace=False)),
+            ('relu0', nn.ReLU(inplace=relu_inplace)),
             ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
         ]))
 
@@ -196,7 +201,7 @@ class DenseNet(nn.Module):
         for dim in fc_dims:
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
-            layers.append(nn.ReLU(inplace=False))
+            layers.append(nn.ReLU(inplace=relu_inplace))
             layers.append(dropout_optimizer)
             # if dropout_p is not None:
             #     layers.append(nn.Dropout(p=dropout_p))
@@ -238,7 +243,7 @@ class DenseNet(nn.Module):
         feature_dict['before'] = f
         feature_dict['layer5'] = layer_5_feature
 
-        f = F.relu(f, inplace=False)
+        f = F.relu(f, inplace=relu_inplace)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 

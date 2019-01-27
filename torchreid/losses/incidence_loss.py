@@ -7,6 +7,7 @@ from torchreid.utils.environ import get_env_or_raise
 
 THRESHOLD = get_env_or_raise(float, 'IL_THRESHOLD')
 NORM = get_env_or_raise(str, 'IL_NORM')
+print(THRESHOLD, NORM)
 
 
 class IncidenceLoss(nn.Module):

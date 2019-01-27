@@ -3,6 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+from torchreid.utils.environ import get_env_or_raise
+
+THRESHOLD = get_env_or_raise(float, 'IL_THRESHOLD')
+NORM = get_env_or_raise(str, 'IL_NORM')
+
+
 class IncidenceLoss(nn.Module):
 
     def forward(self, x, pids):
@@ -24,5 +30,13 @@ class IncidenceLoss(nn.Module):
         A = torch.tensor(A, requires_grad=True).cuda()
         # print('WWT', WWT.size())
         # print('A', A.size())
+        #
 
-        return ((WWT - A)**2).sum() ** (1 / 2)
+        W = WWT - A
+
+        norm_p = {'inf': float('inf'), 'l2': 2}[NORM]
+
+        p = torch.norm(W, p=norm_p, dim=1)
+        return torch.clamp(p, min=THRESHOLD).sum()
+
+        # return ((WWT - A)**2).sum() ** (1 / 2)

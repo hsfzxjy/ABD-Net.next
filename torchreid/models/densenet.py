@@ -243,7 +243,7 @@ class DenseNet(nn.Module):
         feature_dict['before'] = f
         feature_dict['layer5'] = layer_5_feature
 
-        f = F.relu(f, inplace=relu_inplace)
+        f = F.relu(f, inplace=False)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 

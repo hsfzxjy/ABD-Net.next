@@ -275,6 +275,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         losses.update(loss.item(), pids.size(0))
 
         del loss
+        del outputs
 
         if (batch_idx + 1) % args.print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'

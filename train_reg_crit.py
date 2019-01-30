@@ -73,7 +73,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     if args.switch_loss < 0:
         criterion, switch_criterion = switch_criterion, criterion
 
-    return criterion, fix_criterion, switch_criterion
+    return criterion.cuda(), fix_criterion.cuda(), switch_criterion.cuda()
 
 
 def main():
@@ -263,7 +263,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         # if True or (fixbase and args.fix_custom_loss) or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
         if not fixbase:
             reg = regularizer(model)
-            print('use reg', reg)
+            # print('use reg', reg)
             # print('use reg', reg)
             loss += reg
         optimizer.zero_grad()

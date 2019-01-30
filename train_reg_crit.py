@@ -73,7 +73,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     if args.switch_loss < 0:
         criterion, switch_criterion = switch_criterion, criterion
 
-    return criterion.cuda(), fix_criterion.cuda(), switch_criterion.cuda()
+    return criterion, fix_criterion, switch_criterion
 
 
 def main():

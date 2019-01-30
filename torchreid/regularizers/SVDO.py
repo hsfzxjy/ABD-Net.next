@@ -27,7 +27,7 @@ class SVDORegularizer(nn.Module):
     def dominant_eigenvalue(self, A: 'N x N'):
 
         N, _ = A.size()
-        x = torch.rand(N, 1).cuda()
+        x = torch.rand(N, 1, device='cuda')
 
         # Ax = (A @ x).squeeze()
         # AAx = (A @ Ax).squeeze()
@@ -57,7 +57,7 @@ class SVDORegularizer(nn.Module):
         ATA = A.permute(1, 0) @ A
         N, _ = ATA.size()
         largest = self.dominant_eigenvalue(ATA)
-        I = torch.eye(N).cuda()  # noqa
+        I = torch.eye(N, device='cuda')  # noqa
         I = I * largest  # noqa
         tmp = self.dominant_eigenvalue(ATA - I)
         return tmp + largest, largest

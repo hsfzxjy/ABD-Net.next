@@ -26,7 +26,7 @@ class SORegularizer(nn.Module):
     def dominant_eigenvalue(self, A: 'N x N'):
 
         N, _ = A.size()
-        x = torch.rand(N, 1).cuda()
+        x = torch.rand(N, 1, device='cuda')
 
         Ax = (A @ x).squeeze()
         AAx = (A @ Ax).squeeze()
@@ -42,7 +42,7 @@ class SORegularizer(nn.Module):
         # W = W.permute(2, 3, 0, 1).view(old_size[0] * old_size[2] * old_size[3], old_size[1])
 
         d_ev = self.dominant_eigenvalue(
-            W.permute(1, 0) @ W - torch.eye(old_size[0]).cuda()
+            W.permute(1, 0) @ W - torch.eye(old_size[0], device='cuda')
         )
         return (
             self.param_controller.get_value() * d_ev

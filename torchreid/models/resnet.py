@@ -292,22 +292,25 @@ class ResNet(nn.Module):
     def forward(self, x):
         f = self.forward_feature_distilation(x)
 
-        feature_dict = self.attention_module(f)
-        attention_parts = [
-            part.view(part.size(0), -1) for part in
-            feature_dict.values()
-        ]
-        for k, feature in feature_dict.items():
-            print(k, feature.size())
-        feature_dict['before'] = f
+        feature_dict, pooling = self.attention_module(f)
 
-        v = self.global_avgpool(f)
-        v = v.view(v.size(0), -1)
+        if not self.sum_fusion:
+            attention_parts = []
+            for k in feature_dict:
+                pool = pooling[k]
+                _f = pool(feature_dict[k])
+                attention_parts.append(_f.view(_f.size(0), -1))
 
-        if self.sum_fusion:
-            v = sum([v, *attention_parts])
-        else:
+            feature_dict['before'] = f
+            v = self.global_avgpool(f)
+            v = v.view(v.size(0), -1)
+
             v = torch.cat([v, *attention_parts], 1)
+        else:
+            feature_dict['before'] = f
+            f = sum(feature_dict.values())
+            v = self.global_avgpool(f)
+            v = v.view(v.size(0), -1)
 
         v_before_fc = v
         if self.fc is not None:

@@ -43,13 +43,13 @@ class AttentionModule(nn.Module):
     def forward(self, x):
 
         xs = {}
+        pooling = {}
         for name, module, pool in self.modules:
             f = module(x)
-            if pool is not None:
-                f = pool(f)
             xs[name] = f
+            pooling[name] = pool
             # xs.append(f.view(f.size(0), -1))
-        return xs
+        return xs, pooling
 
 
 def get_attention_module_instance(

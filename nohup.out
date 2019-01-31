@@ -1,4 +1,0 @@
-  File "train_reg_crit.py", line 37
-    def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_criterion', 'switch_criterion'):
-                                  ^
-SyntaxError: invalid syntax

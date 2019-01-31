@@ -165,7 +165,8 @@ class ResNet(nn.Module):
             use_conv_head=attention_config['use_conv_head'],
             sum_fusion=self.sum_fusion
         )
-        self.feature_dim = num_features = num_features + self.attention_module.output_dim
+        if not sum_fusion:
+            self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
 
         # Begin Dropout Module

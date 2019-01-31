@@ -90,9 +90,12 @@ class DenseNet(nn.Module):
             dropout_p=None,
             *,
             fd_config=None,
+            sum_fusion=False,
             attention_config=None,
             dropout_optimizer=None,
             **kwargs):
+
+        self.sum_fusion = sum_fusion
 
         super(DenseNet, self).__init__()
         self.loss = loss
@@ -132,9 +135,11 @@ class DenseNet(nn.Module):
         self.attention_module = AttentionModule(
             attention_config['parts'],
             num_features,
-            use_conv_head=attention_config['use_conv_head']
+            use_conv_head=attention_config['use_conv_head'],
+            sum_fusion=self.sum_fusion
         )
-        self.feature_dim = num_features = num_features + self.attention_module.output_dim
+        if not sum_fusion:
+            self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
 
         # Begin Dropout Module
@@ -235,19 +240,42 @@ class DenseNet(nn.Module):
     def forward(self, x):
         f, layer_5_feature = self.forward_feature_distilation(x)
 
-        feature_dict = self.attention_module(f)
-        attention_parts = [
-            part.view(part.size(0), -1) for part in
-            feature_dict.values()
-        ]
-        feature_dict['before'] = f
-        feature_dict['layer5'] = layer_5_feature
+        # feature_dict = self.attention_module(f)
+        # attention_parts = [
+        #     part.view(part.size(0), -1) for part in
+        #     feature_dict.values()
+        # ]
+        # feature_dict['before'] = f
+        # feature_dict['layer5'] = layer_5_feature
 
-        f = F.relu(f, inplace=False)
-        v = self.global_avgpool(f)
-        v = v.view(v.size(0), -1)
+        # f = F.relu(f, inplace=False)
+        # v = self.global_avgpool(f)
+        # v = v.view(v.size(0), -1)
 
-        v = torch.cat([v, *attention_parts], 1)
+        # v = torch.cat([v, *attention_parts], 1)
+
+        feature_dict, pooling = self.attention_module(f)
+
+        if not self.sum_fusion:
+            attention_parts = []
+            for k in feature_dict:
+                pool = pooling[k]
+                _f = pool(feature_dict[k])
+                attention_parts.append(_f.view(_f.size(0), -1))
+
+            feature_dict['before'] = f
+
+            f = F.relu(f, inplace=False)
+            v = self.global_avgpool(f)
+            v = v.view(v.size(0), -1)
+
+            v = torch.cat([v, *attention_parts], 1)
+        else:
+            feature_dict['before'] = f
+            f = sum(feature_dict.values())
+            feature_dict['after'] = f
+            v = self.global_avgpool(f)
+            v = v.view(v.size(0), -1)
 
         v_before_fc = v
         if self.fc is not None:

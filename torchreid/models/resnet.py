@@ -120,7 +120,11 @@ class ResNet(nn.Module):
                  fd_config=None,
                  attention_config=None,
                  dropout_optimizer=None,
+                 sum_fusion=False,
                  **kwargs):
+
+        self.sum_fusion = sum_fusion
+
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.loss = loss
@@ -158,7 +162,8 @@ class ResNet(nn.Module):
         self.attention_module = AttentionModule(
             attention_config['parts'],
             num_features,
-            use_conv_head=attention_config['use_conv_head']
+            use_conv_head=attention_config['use_conv_head'],
+            sum_fusion=self.sum_fusion
         )
         self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
@@ -296,7 +301,10 @@ class ResNet(nn.Module):
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
 
-        v = torch.cat([v, *attention_parts], 1)
+        if self.sum_fusion:
+            v = sum([v, *attention_parts])
+        else:
+            v = torch.cat([v, *attention_parts], 1)
 
         v_before_fc = v
         if self.fc is not None:
@@ -372,6 +380,31 @@ def make_function_50(name, config):
             layers=[3, 4, 6, 3],
             last_stride=2,
             dropout_p=None,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['resnet50'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
+
+def make_function_sf_50(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+        print(config)
+        model = ResNet(
+            num_classes=num_classes,
+            loss=loss,
+            block=Bottleneck,
+            layers=[3, 4, 6, 3],
+            last_stride=2,
+            dropout_p=None,
+            sum_fusion=True,
             **config,
             **kwargs
         )
@@ -469,3 +502,13 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_50(name, config)
+
+for fragment in fragments:
+
+    name = 'resnet50_sf'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_sf_50(name, config)

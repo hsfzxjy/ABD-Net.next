@@ -20,7 +20,8 @@ class AttentionModule(nn.Module):
         dim: int,
         *,
         use_conv_head: bool=False,
-        use_avg_pool: bool=True
+        use_avg_pool: bool=True,
+        sum_fusion: bool=False
     ):
         super().__init__()
         print(module_names)
@@ -37,7 +38,7 @@ class AttentionModule(nn.Module):
 
             self.modules.append((name, module, pool))
 
-        self.output_dim = len(self.modules) * dim
+        self.output_dim = len(self.modules) * dim if not sum_fusion else dim
 
     def forward(self, x):
 

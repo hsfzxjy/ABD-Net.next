@@ -297,6 +297,8 @@ class ResNet(nn.Module):
             part.view(part.size(0), -1) for part in
             feature_dict.values()
         ]
+        for k, feature in feature_dict.items():
+            print(k, feature.size())
         feature_dict['before'] = f
 
         v = self.global_avgpool(f)

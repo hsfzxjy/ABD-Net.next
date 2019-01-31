@@ -309,6 +309,7 @@ class ResNet(nn.Module):
         else:
             feature_dict['before'] = f
             f = sum(feature_dict.values())
+            feature_dict['after'] = f
             v = self.global_avgpool(f)
             v = v.view(v.size(0), -1)
 

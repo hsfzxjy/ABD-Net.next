@@ -9,7 +9,7 @@ if __name__ == '__main__':
     parser.add_argument('--dan', default='none_nohead', choices=['%s_%s' % (i, j) for i in ['cam_pam', 'cam', 'pam', 'none'] for j in ['head', 'nohead']])
     parser.add_argument('--arch', default='densenet121_fc512')
     parser.add_argument('--size', default='256', choices=['256', '384'])
-    parser.add_argument('--pp', type=str, default='before', choices=['before', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5'], help='penalty position')
+    parser.add_argument('--pp', type=str, default='before', choices=['before', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5', 'after'], help='penalty position')
     parser.add_argument('--reg', default='none', choices=['none', 'so', 'svmo', 'svdo'])
     parser.add_argument('--dropout', type=str, default='none', choices=['none', 'incr', 'fix'])
     parser.add_argument('--dau', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter'], default='crop')

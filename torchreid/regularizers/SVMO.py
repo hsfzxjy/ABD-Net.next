@@ -59,15 +59,16 @@ class SVMORegularizer(nn.Module):
         largest = self.dominant_eigenvalue(ATA)
         I = torch.eye(N, device='cuda')  # noqa
         I = I * largest  # noqa
+        print(I)
         tmp = self.dominant_eigenvalue(ATA - I)
         return tmp + largest, largest
 
-    def forward(self, W: 'C x S x H x W'):
+    def forward(self, W: 'S x C x H x W'):
 
         # old_W = W
         old_size = W.size()
 
-        W = W.view(old_size[0], -1).permute(1, 0)
+        W = W.view(old_size[0], -1).permute(1, 0)  # (C x H x W) x S
 
         smallest, largest = self.get_singular_values(W)
         return (

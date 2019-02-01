@@ -212,11 +212,11 @@ def main():
                 print('!!!!!!!!FC!!!!!!!!')
                 os.environ['NOFC'] = ''
                 rank1 = test(model, queryloader, galleryloader, use_gpu)
+                ranklogger.write(name, epoch + 1, rank1)
                 if 'nofc' not in args.arch:
                     print('!!!!!!!!NOFC!!!!!!')
                     os.environ['NOFC'] = '1'
                     test(model, queryloader, galleryloader, use_gpu)
-                    ranklogger.write(name, epoch + 1, rank1)
 
             if use_gpu:
                 state_dict = model.module.state_dict()

@@ -67,6 +67,7 @@ class SVMORegularizer(nn.Module):
 
         # old_W = W
         old_size = W.size()
+        print(old_size)
 
         W = W.view(old_size[0], -1).permute(1, 0)  # (C x H x W) x S
 

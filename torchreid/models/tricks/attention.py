@@ -27,7 +27,7 @@ class AttentionModule(nn.Module):
         print(module_names)
         self.modules = []
         for name in module_names:
-            module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head)
+            module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head, sum_fusion=sum_fusion)
             setattr(self, f'_{name}_module', module)  # force gpu
 
             if use_avg_pool:
@@ -56,7 +56,8 @@ def get_attention_module_instance(
     name: 'cam|pam',
     dim: int,
     *,
-    use_conv_head: bool=False  # DEPRECATED
+    use_conv_head: bool=False,  # DEPRECATED
+    sum_fusion: bool=True
 ):
 
     name = name.lower()
@@ -64,7 +65,7 @@ def get_attention_module_instance(
 
     module_class = {'cam': CAM_Module, 'pam': PAM_Module}[name]
 
-    use_conv_head = name == 'cam'
+    use_conv_head = not sum_fusion and name == 'cam'
 
     if use_conv_head:
         return DANetHead(dim, dim, nn.BatchNorm2d, module_class)

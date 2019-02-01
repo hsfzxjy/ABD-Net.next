@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     options = parser.parse_args()
 
-    template = '''sing_beta={sing_beta} beta={beta} nohup python train_reg_crit.py --root data -s market1501 -t market1501 -j 4 --height {size} --width 128 --optim adam --label-smooth --lr 0.0003 --max-epoch {epoch} --stepsize 20 40  --open-layers classifier fc --fixbase-epoch 10  --train-batch-size 32 --test-batch-size 100 -a {model} --save-dir {dir}/{model}__crit_{crit}__sb_{sing_beta}__b_{beta}__sl_{sl}__fcl_{fcl}__reg_{reg}__dropout_{dropout}__dau_{dau}__pp_{pp}__size_{size}__ep_{epoch}__{index} --gpu-devices {gpu} --criterion {crit} {fcl_command} --switch-loss {sl} --regularizer {reg} --dropout {dropout} --data-augment {dau} --penalty-position {pp} &'''
+    template = '''sing_beta={sing_beta} beta={beta} nohup python train_reg_crit.py --root data -s market1501 -t market1501 -j 4 --height {size} --width 128 --eval-freq 3 --optim adam --label-smooth --lr 0.0003 --max-epoch {epoch} --stepsize 20 40  --open-layers classifier fc --fixbase-epoch 10  --train-batch-size 32 --test-batch-size 100 -a {model} --save-dir {dir}/{model}__crit_{crit}__sb_{sing_beta}__b_{beta}__sl_{sl}__fcl_{fcl}__reg_{reg}__dropout_{dropout}__dau_{dau}__pp_{pp}__size_{size}__ep_{epoch}__{index} --gpu-devices {gpu} --criterion {crit} {fcl_command} --switch-loss {sl} --regularizer {reg} --dropout {dropout} --data-augment {dau} --penalty-position {pp} &'''
 
     gpu_start = options.gpu_start
 

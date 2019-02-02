@@ -72,6 +72,8 @@ def argument_parser():
     # ************************************************************
     # Training hyperparameters
     # ************************************************************
+    parser.add_argument('--clip-grad', default=0.5, type=float)
+    parser.add_argument('--use-clip-grad', default=False, action='store_true')
     parser.add_argument('--max-epoch', default=60, type=int,
                         help="maximum epochs to run")
     parser.add_argument('--start-epoch', default=0, type=int,

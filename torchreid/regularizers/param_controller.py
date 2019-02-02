@@ -11,6 +11,8 @@ class ParamController:
 
     def get_value(self):
 
+        return self._value
+
         if self._epoch <= 35:
             return self._value
         elif self._epoch <= 60:

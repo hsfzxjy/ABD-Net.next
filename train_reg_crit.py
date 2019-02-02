@@ -271,6 +271,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         loss.backward()
 
         if args.use_clip_grad and (args.switch_loss < 0 and switch_loss):
+            print('Clip!')
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad)
 
         optimizer.step()

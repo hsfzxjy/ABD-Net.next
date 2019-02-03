@@ -315,8 +315,6 @@ class ResNet(nn.Module):
 
         feature_dict, pooling = self.attention_module(f)
 
-        feature_dict['layer5'] = layer5
-
         if not self.sum_fusion:
             attention_parts = []
             for k in feature_dict:
@@ -335,6 +333,9 @@ class ResNet(nn.Module):
             feature_dict['after'] = f
             v = self.global_avgpool(f)
             v = v.view(v.size(0), -1)
+
+        feature_dict['layer5'] = layer5
+
 
         if self.tricky:
             v = self.feature_bn(v)

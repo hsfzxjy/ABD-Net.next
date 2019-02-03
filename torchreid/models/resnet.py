@@ -235,6 +235,8 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
         x = self.layer1(x)
 
+        layer5 = x
+
         B, C, H, W = x.shape
 
         for cs, cam in self.feature_distilation.cam_modules:

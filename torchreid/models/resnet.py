@@ -188,23 +188,11 @@ class ResNet(nn.Module):
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
-            if self.tricky and stride == 2:
-                downsample = nn.Sequential(
-                    nn.AvgPool2d(kernel_size=2, stride=2),
-                    nn.Conv2d(
-                        self.inplanes,
-                        planes * block.expansion,
-                        kernel_size=1,
-                        bias=False
-                    ),
-                    nn.BatchNorm2d(planes * block.expansion),
-                )
-            else:
-                downsample = nn.Sequential(
-                    nn.Conv2d(self.inplanes, planes * block.expansion,
-                              kernel_size=1, stride=stride, bias=False),
-                    nn.BatchNorm2d(planes * block.expansion),
-                )
+            downsample = nn.Sequential(
+                nn.Conv2d(self.inplanes, planes * block.expansion,
+                          kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
 
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))

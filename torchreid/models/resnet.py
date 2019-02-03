@@ -14,7 +14,7 @@ __all__ = ['resnet50', 'resnet50_fc512']
 channels = {
     'a': [4, 40, 64, 68, 70, 71, 101, 102, 127, 141, 152, 158, 162, 164, 171, 172, 175, 186, 201, 209, 225, 227, 246],
     'b': [2, 11, 12, 17, 23, 24, 28, 30, 36, 39, 47, 48, 49, 57, 59, 60, 61, 66, 77, 78, 83, 87, 88, 89, 91, 93, 99, 107, 110, 117, 120, 121, 123, 124, 126, 133, 139, 140, 145, 151, 155, 165, 168, 174, 180, 185, 192, 199, 202, 211, 216, 217, 219, 222, 230, 239, 245, 247, 249, 251],
-    'c': [0, 1, 3, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 18, 19, 20, 21, 22, 25, 26, 27, 29, 31, 32, 33, 34, 35, 37, 38, 41, 42, 43, 44, 45, 46, 50, 51, 52, 53, 54, 55, 56, 58, 62, 63, 65, 67, 69, 72, 73, 74, 75, 76, 79, 80, 81, 82, 84, 85, 86, 90, 92, 94, 95, 96, 97, 98, 100, 103, 104, 105, 106, 108, 109, 111, 112, 113, 114, 115, 116, 118, 119, 122, 125, 128, 129, 130, 131, 132, 134, 135, 136, 137, 138, 142, 143, 144, 146, 147, 148, 149, 150, 153, 154, 156, 157, 159, 160, 161, 163, 166, 167, 169, 170, 173, 176, 177, 178, 179, 181, 182, 183, 184, 187, 188, 189, 190, 191, 193, 194, 195, 196, 197, 198, 200, 203, 204, 205, 206, 207, 208, 210, 212, 213, 214, 215, 218, 220, 221, 223, 224, 226, 228, 229, 231, 232, 233, 234, 235, 236, 237, 238, 240, 241, 242, 243, 244, 248, 250, 252, 253, 254],
+    'c': [0, 1, 3, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 18, 19, 20, 21, 22, 25, 26, 27, 29, 31, 32, 33, 34, 35, 37, 38, 41, 42, 43, 44, 45, 46, 50, 51, 52, 53, 54, 55, 56, 58, 62, 63, 65, 67, 69, 72, 73, 74, 75, 76, 79, 80, 81, 82, 84, 85, 86, 90, 92, 94, 95, 96, 97, 98, 100, 103, 104, 105, 106, 108, 109, 111, 112, 113, 114, 115, 116, 118, 119, 122, 125, 128, 129, 130, 131, 132, 134, 135, 136, 137, 138, 142, 143, 144, 146, 147, 148, 149, 150, 153, 154, 156, 157, 159, 160, 161, 163, 166, 167, 169, 170, 173, 176, 177, 178, 179, 181, 182, 183, 184, 187, 188, 189, 190, 191, 193, 194, 195, 196, 197, 198, 200, 203, 204, 205, 206, 207, 208, 210, 212, 213, 214, 215, 218, 220, 221, 223, 224, 226, 228, 229, 231, 232, 233, 234, 235, 236, 237, 238, 240, 241, 242, 243, 244, 248, 250, 252, 253, 254, 255],
 
 }
 
@@ -120,10 +120,12 @@ class ResNet(nn.Module):
                  fd_config=None,
                  attention_config=None,
                  dropout_optimizer=None,
-                 sum_fusion=False,
+                 sum_fusion: bool=False,
+                 tricky: bool=False,
                  **kwargs):
 
         self.sum_fusion = sum_fusion
+        self.tricky = tricky
 
         self.inplanes = 64
         super(ResNet, self).__init__()
@@ -169,6 +171,9 @@ class ResNet(nn.Module):
             self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
 
+        if self.tricky:
+            self.feature_bn = nn.BatchNorm1d(num_features)
+
         # Begin Dropout Module
         if dropout_optimizer is None:
             from .tricks.dropout import SimpleDropoutOptimizer
@@ -183,11 +188,23 @@ class ResNet(nn.Module):
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
-            downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                          kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(planes * block.expansion),
-            )
+            if self.tricky:
+                downsample = nn.Sequential(
+                    nn.AvgPool2d(kernel_size=2, stride=2),
+                    nn.Conv2d(
+                        self.inplanes,
+                        planes * block.expansion,
+                        kernel_size=1,
+                        bias=False
+                    ),
+                    nn.BatchNorm2d(planes * block.expansion),
+                )
+            else:
+                downsample = nn.Sequential(
+                    nn.Conv2d(self.inplanes, planes * block.expansion,
+                              kernel_size=1, stride=stride, bias=False),
+                    nn.BatchNorm2d(planes * block.expansion),
+                )
 
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
@@ -230,7 +247,7 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        return x
+        return x, layer5
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
         """
@@ -241,6 +258,7 @@ class ResNet(nn.Module):
         - input_dim (int): input dimension
         - dropout_p (float): dropout probability, if None, dropout is unused
         """
+
         if fc_dims is None:
             self.feature_dim = input_dim
             return None
@@ -248,6 +266,7 @@ class ResNet(nn.Module):
         assert isinstance(fc_dims, (list, tuple)), "fc_dims must be either list or tuple, but got {}".format(type(fc_dims))
 
         layers = []
+
         for dim in fc_dims:
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
@@ -290,9 +309,11 @@ class ResNet(nn.Module):
         return x
 
     def forward(self, x):
-        f = self.forward_feature_distilation(x)
+        f, layer5 = self.forward_feature_distilation(x)
 
         feature_dict, pooling = self.attention_module(f)
+
+        feature_dict['layer5'] = layer5
 
         if not self.sum_fusion:
             attention_parts = []
@@ -312,6 +333,9 @@ class ResNet(nn.Module):
             feature_dict['after'] = f
             v = self.global_avgpool(f)
             v = v.view(v.size(0), -1)
+
+        if self.tricky:
+            v = self.feature_bn(v)
 
         v_before_fc = v
         if self.fc is not None:
@@ -425,6 +449,32 @@ def make_function_sf_50(name, config):
     globals()[name] = _func
 
 
+def make_function_sf_tricky_50(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+        print(config)
+        model = ResNet(
+            num_classes=num_classes,
+            loss=loss,
+            block=Bottleneck,
+            layers=[3, 4, 6, 3],
+            last_stride=2,
+            dropout_p=None,
+            sum_fusion=True,
+            tricky=True,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['resnet50'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
+
 def resnet50_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
     model = ResNet(
         num_classes=num_classes,
@@ -519,3 +569,14 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_sf_50(name, config)
+
+
+for fragment in fragments:
+
+    name = 'resnet50_sf_tr'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_sf_tricky_50(name, config)

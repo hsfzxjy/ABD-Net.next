@@ -188,7 +188,7 @@ class ResNet(nn.Module):
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
-            if self.tricky and stride != 1:
+            if self.tricky and stride == 2:
                 downsample = nn.Sequential(
                     nn.AvgPool2d(kernel_size=2, stride=2),
                     nn.Conv2d(

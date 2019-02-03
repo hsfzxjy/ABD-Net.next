@@ -17,12 +17,15 @@ def load_dataset(root_directory):
 
     global shape
     result = []
-    out_dir = root_directory.rstrip('/') + '_output'
-    os.makedirs(out_dir, exist_ok=True)
+    nowrite = '_output' in root_directory
+    if nowrite:
+        out_dir = root_directory
+    else:
+        out_dir = root_directory.rstrip('/') + '_output'
+        os.makedirs(out_dir, exist_ok=True)
 
     pics = glob(osp.join(root_directory, '**', '**50.jpg'))
     if not pics:
-        raise RuntimeError
         pics = glob(osp.join(root_directory, '*.jpg'))
 
     dct = {}
@@ -31,7 +34,10 @@ def load_dataset(root_directory):
 
         image = cv2.imread(fn)
         import re
-        j = int(re.findall(r'/(\d+)/', fn)[0])
+        if nowrite:
+            j = int(re.findall(r'(\d+)\.', fn)[-1])
+        else:
+            j = int(re.findall(r'/(\d+)/', fn)[0])
         # print(fn)
         shape = image.shape
         # image = cv2.resize(image, (32, 64))
@@ -41,20 +47,21 @@ def load_dataset(root_directory):
         # image = cv2.filter2D(image, -1, kernel)
         # image = 255 - image
         # image = cv2.Canny(image, 100, 200)
-        cv2.imwrite(osp.join(out_dir, str(j) + '.jpg'), image)
+        if not nowrite:
+            cv2.imwrite(osp.join(out_dir, str(j) + '.jpg'), image)
         # if i == 8:
         #     plt.imshow(image)
         #     plt.show()
-        if image.sum() > 1e-9:
+        if image.sum() > 1e7:
             result.append(image.flatten() / 255)
+            dct[len(result) - 1] = int(j)
         else:
             print(j, 'omitted')
 
-        dct[len(result) - 1] = int(j)
 
     # result.sort()
     # result = [x[1] for x in result]
-    return result, dct
+    return result, dct, out_dir
 
 
 def load_from_h5(fn, dset):
@@ -79,7 +86,7 @@ if __name__ == '__main__':
         dataset = load_from_h5(options.ROOT, options.dset)
         options.ROOT += 'output/' + options.dset
     else:
-        dataset, dct = load_dataset(options.ROOT)
+        dataset, dct, out_dir = load_dataset(options.ROOT)
         dataset = np.array(dataset)
     # from skimage.measure import compare_ssim as ssim
     # from itertools import product
@@ -102,8 +109,8 @@ if __name__ == '__main__':
     else:
         target = 0
     indices = [i for i, x in enumerate(result) if x == target]
-    print(indices)
-    print([dct[i] for i in indices])
+    target_indices = sorted([dct[i] for i in indices])
+    nontarget_indices = sorted(set(range(256)) - set(target_indices))
     # out_dir = options.ROOT.rstrip('/') + '_output'
     # for x in (0, 1):
     #     im0 = np.average(dataset[result == x], axis=0)
@@ -111,9 +118,16 @@ if __name__ == '__main__':
     #     plt.imshow(im0)
     #     plt.show()
     #     cv2.imwrite(osp.join(out_dir, 'cluster_%d_avg.jpg' % x), im0, )
-    # with open(osp.join(out_dir, 'cluster_0.list'), 'w') as f0, open(osp.join(out_dir, 'cluster_1.list'), 'w') as f1:
-    #     for i, x in enumerate(result):
-    #         print(str(i) + '.jpg', file=f1 if x == 1 else f0)
+    print(target_indices)
+    print(nontarget_indices)
+    with open(osp.join(out_dir, 'cluster_0.list'), 'w') as f0:
+        for i in target_indices:
+            print(str(i) + '.jpg', file=f0)
+    #
+    with open(osp.join(out_dir, 'cluster_0.list'), 'w') as f0:
+        for i in nontarget_indices:
+            print(str(i) + '.jpg', file=f0)
+
     # clusterer = cluster.KMeans(2)
 
     # print(clusterer.fit_predict(dataset))

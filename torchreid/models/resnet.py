@@ -235,6 +235,8 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
         x = self.layer1(x)
 
+        all_layers = [x]
+
         layer5 = x
 
         B, C, H, W = x.shape
@@ -247,9 +249,12 @@ class ResNet(nn.Module):
             x[:, c_tensor] = new_x
 
         x = self.layer2(x)
+        all_layers.append(x)
         x = self.layer3(x)
+        all_layers.append(x)
         x = self.layer4(x)
-        return x, layer5
+        all_layers.append(x)
+        return x, layer5, tuple(all_layers)
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
         """
@@ -311,7 +316,7 @@ class ResNet(nn.Module):
         return x
 
     def forward(self, x):
-        f, layer5 = self.forward_feature_distilation(x)
+        f, layer5, all_layers = self.forward_feature_distilation(x)
 
         feature_dict, pooling = self.attention_module(f)
 
@@ -335,7 +340,7 @@ class ResNet(nn.Module):
             v = v.view(v.size(0), -1)
 
         feature_dict['layer5'] = layer5
-
+        feature_dict['all_layers'] = all_layers
 
         if self.tricky:
             v = self.feature_bn(v)

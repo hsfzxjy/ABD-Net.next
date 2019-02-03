@@ -73,6 +73,9 @@ class SingularLoss(nn.Module):
 
     def apply_penalty(self, x):
 
+        if isinstance(x, tuple):
+            return sum([self.apply_penalty(xx) for xx in x]) / len(x)
+
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)
         smallest, largest = self.get_singular_values(W)
@@ -92,7 +95,7 @@ class SingularLoss(nn.Module):
         if missing:
             raise RuntimeError('Cannot apply singular loss, as positions {!r} are missing.'.format(list(missing)))
 
-        singular_penalty = sum([self.apply_penalty(x) for x in feature_dict.values()])
+        singular_penalty = sum([self.apply_penalty(x) for x in feature_dict.values()]) / len(feature_dict)
 
         xloss = self.xent_loss(y, pids)
         # print(xloss)

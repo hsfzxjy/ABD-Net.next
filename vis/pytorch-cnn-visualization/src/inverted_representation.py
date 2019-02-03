@@ -70,7 +70,12 @@ class InvertedRepresentation():
         # x = self.model.layer1(x)
         # return x[0, index_, :, :]
 
-        for index, layer in enumerate(self.model.features):
+        try:
+            features = self.model.features
+        except AttributeError:
+            features = self.model.backbone_convs()
+
+        for index, layer in enumerate(features):
             x = layer(x)
             # print(index, layer_id)
             if str(index) == str(layer_id):

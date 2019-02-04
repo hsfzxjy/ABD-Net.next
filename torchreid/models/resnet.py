@@ -171,9 +171,6 @@ class ResNet(nn.Module):
             self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
 
-        if self.tricky and self.sum_fusion:
-            self.feature_bn = nn.BatchNorm2d(num_features)
-
         # Begin Dropout Module
         if dropout_optimizer is None:
             from .tricks.dropout import SimpleDropoutOptimizer
@@ -181,7 +178,7 @@ class ResNet(nn.Module):
         # End Dropout Module
 
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
-        self.classifier = nn.Linear(self.feature_dim, num_classes)
+        self.classifier = nn.Linear(self.feature_dim, num_classes, bias=not self.tricky)
 
         self._init_params()
 
@@ -323,8 +320,6 @@ class ResNet(nn.Module):
         else:
             feature_dict['before'] = f
             f = sum(feature_dict.values())
-            if self.tricky and self.sum_fusion:
-                f = self.feature_bn(f)
             feature_dict['after'] = f
             v = self.global_avgpool(f)
             v = v.view(v.size(0), -1)
@@ -336,6 +331,14 @@ class ResNet(nn.Module):
         if self.fc is not None:
             v = self.fc(v)
         if not self.training:
+            if os.environ.get('CAT') and self.sum_fusion:
+                part_names = ['after', 'cam', 'pam']
+                parts = []
+                for name in part_names:
+                    fff = feature_dict[name]
+                    parts.append(fff.view(fff.size(0), -1))
+                return torch.cat(parts, 1)
+                return
             if os.environ.get('NOFC'):
                 return v_before_fc
             else:

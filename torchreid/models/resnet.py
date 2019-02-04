@@ -332,13 +332,12 @@ class ResNet(nn.Module):
             v = self.fc(v)
         if not self.training:
             if os.environ.get('CAT') and self.sum_fusion:
-                part_names = ['after', 'cam', 'pam']
+                part_names = ['after', 'before', 'cam', 'pam']
                 parts = []
                 for name in part_names:
                     fff = self.global_avgpool(feature_dict[name])
                     parts.append(fff.view(fff.size(0), -1))
                 return torch.cat(parts, 1)
-                return
             if os.environ.get('NOFC'):
                 return v_before_fc
             else:

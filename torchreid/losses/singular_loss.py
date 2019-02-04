@@ -95,7 +95,7 @@ class SingularLoss(nn.Module):
         if missing:
             raise RuntimeError('Cannot apply singular loss, as positions {!r} are missing.'.format(list(missing)))
 
-        singular_penalty = sum([self.apply_penalty(x) for x in feature_dict.values()]) / len(feature_dict)
+        singular_penalty = sum([self.apply_penalty(x) for k, x in feature_dict.items() if k in self.penalty_position])
 
         xloss = self.xent_loss(y, pids)
         # print(xloss)

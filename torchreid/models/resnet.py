@@ -121,7 +121,7 @@ class ResNet(nn.Module):
                  attention_config=None,
                  dropout_optimizer=None,
                  sum_fusion: bool=False,
-                 tricky: bool=False,
+                 tricky: int=0,
                  **kwargs):
 
         self.sum_fusion = sum_fusion
@@ -177,8 +177,11 @@ class ResNet(nn.Module):
             dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
         # End Dropout Module
 
+        if self.tricky == 1:
+            self.classifier2 = nn.Linear(num_features, num_classes)
+
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
-        self.classifier = nn.Linear(self.feature_dim, num_classes, bias=not self.tricky)
+        self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self._init_params()
 
@@ -331,21 +334,17 @@ class ResNet(nn.Module):
         if self.fc is not None:
             v = self.fc(v)
         if not self.training:
-            if os.environ.get('CAT') and self.sum_fusion:
-                part_names = ['after', 'before', 'cam', 'pam']
-                parts = []
-                for name in part_names:
-                    fff = self.global_avgpool(feature_dict[name])
-                    parts.append(fff.view(fff.size(0), -1))
-                # if self.fc is not None:
-                #     parts = [v] + parts
-                return torch.cat(parts, 1)
+            if self.tricky == 1:
+                return torch.cat(v, v_before_fc)
             if os.environ.get('NOFC'):
                 return v_before_fc
             else:
                 return v
 
         y = self.classifier(v)
+
+        if self.tricky == 1:
+            y = (y, self.classifier2(v_before_fc))
 
         return f, y, v, feature_dict
 
@@ -448,7 +447,32 @@ def make_function_sf_50(name, config):
     globals()[name] = _func
 
 
-def make_function_sf_tricky_50(name, config):
+def make_function_sf_ls1_50(name, config):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+        print(config)
+        model = ResNet(
+            num_classes=num_classes,
+            loss=loss,
+            block=Bottleneck,
+            layers=[3, 4, 6, 3],
+            last_stride=1,
+            dropout_p=None,
+            sum_fusion=True,
+            **config,
+            **kwargs
+        )
+        if pretrained == 'imagenet':
+            init_pretrained_weights(model, model_urls['resnet50'])
+        return model
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
+
+def make_function_sf_tricky_50(name, config, tricky):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
@@ -460,7 +484,7 @@ def make_function_sf_tricky_50(name, config):
             last_stride=2,
             dropout_p=None,
             sum_fusion=True,
-            tricky=True,
+            tricky=tricky,
             **config,
             **kwargs
         )
@@ -498,6 +522,7 @@ configurations = OrderedDict([
         [
             (None, '_nofc'),
             ([512], '_fc512'),
+            ([1024], '_fc1024'),
         ],
     ),
     (
@@ -570,12 +595,24 @@ for fragment in fragments:
     make_function_sf_50(name, config)
 
 
+#
 for fragment in fragments:
 
-    name = 'resnet50_sf_tr'
+    name = 'resnet50_sf_ls1'
     config = {}
     for key, (sub_config, name_frag) in zip(keys, fragment):
         name += name_frag
         config.update({key: sub_config})
 
-    make_function_sf_tricky_50(name, config)
+    make_function_sf_ls1_50(name, config)
+
+
+for fragment in fragments:
+
+    name = 'resnet50_sf_tr1'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_sf_tricky_50(name, config, 1)

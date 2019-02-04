@@ -33,10 +33,19 @@ class CrossEntropyLoss(nn.Module):
         - inputs: prediction matrix (before softmax) with shape (batch_size, num_classes)
         - targets: ground truth labels with shape (num_classes)
         """
-        log_probs = self.logsoftmax(inputs)
-        targets = torch.zeros(log_probs.size()).scatter_(1, targets.unsqueeze(1).data.cpu(), 1)
-        if self.use_gpu:
-            targets = targets.cuda()
-        targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
-        loss = (- targets * log_probs).mean(0).sum()
-        return loss
+
+        if not isinstance(inputs, tuple):
+            inputs_tuple = (inputs,)
+        else:
+            inputs_tuple = inputs
+
+        losses = []
+        for inputs in inputs_tuple:
+            log_probs = self.logsoftmax(inputs)
+            targets = torch.zeros(log_probs.size()).scatter_(1, targets.unsqueeze(1).data.cpu(), 1)
+            if self.use_gpu:
+                targets = targets.cuda()
+            targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+            loss = (- targets * log_probs).mean(0).sum()
+            losses.append(loss)
+        return sum(losses) / len(inputs_tuple)

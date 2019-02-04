@@ -335,7 +335,7 @@ class ResNet(nn.Module):
             v = self.fc(v)
         if not self.training:
             if self.tricky == 1:
-                return torch.cat(v, v_before_fc)
+                return torch.cat([v, v_before_fc], 1)
             if os.environ.get('NOFC'):
                 return v_before_fc
             else:

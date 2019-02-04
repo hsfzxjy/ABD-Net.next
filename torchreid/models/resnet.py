@@ -171,8 +171,8 @@ class ResNet(nn.Module):
             self.feature_dim = num_features = num_features + self.attention_module.output_dim
         # End Attention Module
 
-        if self.tricky:
-            self.feature_bn = nn.BatchNorm1d(num_features)
+        if self.tricky and self.sum_fusion:
+            self.feature_bn = nn.BatchNorm2d(num_features)
 
         # Begin Dropout Module
         if dropout_optimizer is None:
@@ -323,15 +323,14 @@ class ResNet(nn.Module):
         else:
             feature_dict['before'] = f
             f = sum(feature_dict.values())
+            if self.tricky and self.sum_fusion:
+                f = self.feature_bn(f)
             feature_dict['after'] = f
             v = self.global_avgpool(f)
             v = v.view(v.size(0), -1)
 
         feature_dict['layer5'] = layer5
         feature_dict['all_layers'] = all_layers
-
-        if self.tricky:
-            v = self.feature_bn(v)
 
         v_before_fc = v
         if self.fc is not None:

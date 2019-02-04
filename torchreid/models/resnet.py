@@ -337,8 +337,8 @@ class ResNet(nn.Module):
                 for name in part_names:
                     fff = self.global_avgpool(feature_dict[name])
                     parts.append(fff.view(fff.size(0), -1))
-                if self.fc is not None:
-                    parts = [v] + parts
+                # if self.fc is not None:
+                #     parts = [v] + parts
                 return torch.cat(parts, 1)
             if os.environ.get('NOFC'):
                 return v_before_fc

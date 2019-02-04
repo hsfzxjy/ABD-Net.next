@@ -335,7 +335,7 @@ class ResNet(nn.Module):
                 part_names = ['after', 'cam', 'pam']
                 parts = []
                 for name in part_names:
-                    fff = feature_dict[name]
+                    fff = self.global_avgpool(feature_dict[name])
                     parts.append(fff.view(fff.size(0), -1))
                 return torch.cat(parts, 1)
                 return

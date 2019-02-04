@@ -27,6 +27,16 @@ class CrossEntropyLoss(nn.Module):
         self.use_gpu = use_gpu
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
+    def apply_loss(self, inputs, targets):
+
+        log_probs = self.logsoftmax(inputs)
+        targets = torch.zeros(log_probs.size()).scatter_(1, targets.unsqueeze(1).data.cpu(), 1)
+        if self.use_gpu:
+            targets = targets.cuda()
+        targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+        loss = (- targets * log_probs).mean(0).sum()
+        return loss
+
     def forward(self, inputs, targets):
         """
         Args:
@@ -39,14 +49,4 @@ class CrossEntropyLoss(nn.Module):
         else:
             inputs_tuple = inputs
 
-        losses = []
-        for inputs in inputs_tuple:
-            print(inputs)
-            log_probs = self.logsoftmax(inputs)
-            targets = torch.zeros(log_probs.size()).scatter_(1, targets.unsqueeze(1).data.cpu(), 1)
-            if self.use_gpu:
-                targets = targets.cuda()
-            targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
-            loss = (- targets * log_probs).mean(0).sum()
-            losses.append(loss)
-        return sum(losses) / len(inputs_tuple)
+        return sum([self.apply_loss(x, targets) for x in inputs_tuple]) / len(inputs_tuple)

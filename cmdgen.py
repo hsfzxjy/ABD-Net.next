@@ -12,7 +12,7 @@ if __name__ == '__main__':
     parser.add_argument('--pp', type=str, default='before', choices=['before', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5', 'after', 'all_layers', 'before,layer5', 'after,layer5', 'after,cam'], help='penalty position')
     parser.add_argument('--reg', default='none', choices=['none', 'so', 'svmo', 'svdo'])
     parser.add_argument('--dropout', type=str, default='none', choices=['none', 'incr', 'fix'])
-    parser.add_argument('--dau', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter'], default='crop')
+    parser.add_argument('--dau', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter', 'crop,color-jitter,random-erase'], default='crop')
     parser.add_argument('--crit', type=str, default='xent')
 
     parser.add_argument('--num', default=4, type=int)

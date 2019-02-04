@@ -23,7 +23,7 @@ def argument_parser():
                         help="split index (note: 0-based)")
     parser.add_argument('--train-sampler', type=str, default='',
                         help="sampler for trainloader")
-    parser.add_argument('--data-augment', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter'], default='crop')
+    parser.add_argument('--data-augment', type=str, choices=['none', 'crop', 'random-erase', 'color-jitter', 'crop,random-erase', 'crop,color-jitter', 'crop,color-jitter,random-erase'], default='crop')
     # ************************************************************
     # Video datasets
     # ************************************************************

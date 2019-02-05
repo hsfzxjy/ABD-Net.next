@@ -330,6 +330,12 @@ class ResNet(nn.Module):
         feature_dict['layer5'] = layer5
         feature_dict['all_layers'] = all_layers
 
+        if self.tricky == 2:
+            triplet_feature = self.global_avgpool(feature_dict['before'])
+            triplet_feature = triplet_feature.view(triplet_feature.size(0), -1)
+        else:
+            triplet_feature = v
+
         v_before_fc = v
         if self.fc is not None:
             v = self.fc(v)
@@ -616,3 +622,13 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_sf_tricky_50(name, config, 1)
+
+for fragment in fragments:
+
+    name = 'resnet50_sf_tr2'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_sf_tricky_50(name, config, 2)

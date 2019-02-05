@@ -330,12 +330,6 @@ class ResNet(nn.Module):
         feature_dict['layer5'] = layer5
         feature_dict['all_layers'] = all_layers
 
-        if self.tricky == 2:
-            triplet_feature = self.global_avgpool(feature_dict['before'])
-            triplet_feature = triplet_feature.view(triplet_feature.size(0), -1)
-        else:
-            triplet_feature = v
-
         v_before_fc = v
         if self.fc is not None:
             v = self.fc(v)
@@ -347,12 +341,18 @@ class ResNet(nn.Module):
             else:
                 return v
 
+        if self.tricky == 2:
+            triplet_feature = self.global_avgpool(feature_dict['before'])
+            triplet_feature = triplet_feature.view(triplet_feature.size(0), -1)
+        else:
+            triplet_feature = v
+
         y = self.classifier(v)
 
         if self.tricky == 1:
             y = (y, self.classifier2(v_before_fc))
 
-        return f, y, v, feature_dict
+        return f, y, triplet_feature, feature_dict
 
         if self.loss == {'xent'}:
             return y

@@ -29,6 +29,7 @@ def load_dataset(root_directory):
         pics = glob(osp.join(root_directory, '*.jpg'))
 
     dct = {}
+    s = set(range(256))
 
     for i, fn in enumerate(pics):
 
@@ -38,6 +39,7 @@ def load_dataset(root_directory):
             j = int(re.findall(r'(\d+)\.', fn)[-1])
         else:
             j = int(re.findall(r'/(\d+)/', fn)[0])
+        s = s - set([j])
         # print(fn)
         shape = image.shape
         # image = cv2.resize(image, (32, 64))
@@ -58,7 +60,7 @@ def load_dataset(root_directory):
         else:
             print(j, 'omitted')
 
-
+    print(s)
     # result.sort()
     # result = [x[1] for x in result]
     return result, dct, out_dir
@@ -124,7 +126,7 @@ if __name__ == '__main__':
         for i in target_indices:
             print(str(i) + '.jpg', file=f0)
     #
-    with open(osp.join(out_dir, 'cluster_0.list'), 'w') as f0:
+    with open(osp.join(out_dir, 'cluster_1.list'), 'w') as f0:
         for i in nontarget_indices:
             print(str(i) + '.jpg', file=f0)
 

@@ -5,6 +5,7 @@ parser.add_argument('arch')
 parser.add_argument('ckpt')
 parser.add_argument('gpu')
 parser.add_argument('--height', default='256')
+parser.add_argument('--dataset', default='market1501')
 
 parsed = parser.parse_args()
 
@@ -13,7 +14,7 @@ subprocess.Popen(
     [
         'python', 'train_reg_crit.py',
         '-s', 'market1501',
-        '-t', 'market1501',
+        '-t', *parser.dataset.split(','),
         '--height', parsed.height,
         '--width', '128',
         '--test-batch-size', '100',

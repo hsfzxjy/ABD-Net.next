@@ -9,6 +9,8 @@ import random
 import numpy as np
 import math
 
+RandomCrop = Random2DTranslation
+
 
 class RandomErasing(object):
     '''
@@ -131,7 +133,7 @@ def build_training_transforms(height, width, data_augment):
 
     transforms = []
     if 'crop' in data_augment:
-        transforms.append(Random2DTranslation(height, width))
+        transforms.append(RandomCrop(height, width))
     else:
         transforms.append(Resize((height, width)))
 

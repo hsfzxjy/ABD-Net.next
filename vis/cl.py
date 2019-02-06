@@ -17,7 +17,7 @@ def load_dataset(root_directory):
 
     global shape
     result = []
-    nowrite = '_output' in root_directory
+    nowrite = root_directory.rstrip('/').endswith('_output')
     if nowrite:
         out_dir = root_directory
     else:

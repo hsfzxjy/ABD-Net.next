@@ -14,7 +14,7 @@ subprocess.Popen(
     [
         'python', 'train_reg_crit.py',
         '-s', 'market1501',
-        '-t', *parser.dataset.split(','),
+        '-t', *parsed.dataset.split(','),
         '--height', parsed.height,
         '--width', '128',
         '--test-batch-size', '100',

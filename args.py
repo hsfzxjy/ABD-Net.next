@@ -138,6 +138,7 @@ def argument_parser():
                         help="evaluation frequency (set to -1 to test only in the end)")
     parser.add_argument('--start-eval', type=int, default=0,
                         help="start to evaluate after a specific epoch")
+    parser.add_argument('--flip-eval', action='store_true')
 
     # ************************************************************
     # Miscs
@@ -182,6 +183,7 @@ def image_dataset_kwargs(parsed_args):
         'cuhk03_labeled': parsed_args.cuhk03_labeled,
         'cuhk03_classic_split': parsed_args.cuhk03_classic_split,
         'data_augment': parsed_args.data_augment,
+        'flip_eval': parsed_args.flip_eval,
     }
 
 

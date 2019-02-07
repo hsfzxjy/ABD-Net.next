@@ -29,7 +29,8 @@ class BaseDataManager(object):
         """
         Return query and gallery, each containing a list of (img_path, pid, camid).
         """
-        return self.testdataset_dict[name]['query'], self.testdataset_dict[name]['gallery']
+        return self.testdataset_dict[name]['query'], self.testdataset_dict[name]['gallery'],\
+            self.testdataset_dict[name]['query_flip'], self.testdataset_dict[name]['gallery_flip']
 
 
 class ImageDataManager(BaseDataManager):
@@ -74,6 +75,7 @@ class ImageDataManager(BaseDataManager):
         # Build train and test transform functions
         transform_train = build_transforms(self.height, self.width, is_train=True, data_augment=data_augment)
         transform_test = build_transforms(self.height, self.width, is_train=False, data_augment=data_augment)
+        transform_test_flip = build_transforms(self.height, self.width, is_train=False, data_augment=data_augment, flip=True)
 
         print("=> Initializing TRAIN (source) datasets")
         self.train = []
@@ -127,6 +129,18 @@ class ImageDataManager(BaseDataManager):
 
             self.testloader_dict[name]['gallery'] = DataLoader(
                 ImageDataset(dataset.gallery, transform=transform_test),
+                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                pin_memory=self.pin_memory, drop_last=False
+            )
+
+            self.testloader_dict[name]['query_flip'] = DataLoader(
+                ImageDataset(dataset.query, transform=transform_test_flip),
+                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                pin_memory=self.pin_memory, drop_last=False
+            )
+
+            self.testloader_dict[name]['gallery_flip'] = DataLoader(
+                ImageDataset(dataset.gallery, transform=transform_test_flip),
                 batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
                 pin_memory=self.pin_memory, drop_last=False
             )

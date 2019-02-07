@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 from torchvision.transforms import *
+import torchvision.transforms.functional as TF
 import torch
 
 from PIL import Image
@@ -170,6 +171,9 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
         transforms = build_training_transforms(height, width, data_augment)
     else:
         transforms += [Resize((height, width))]
+
+        if kwargs.get('flip', False):
+            transforms += [Lambda(lambda img: TF.hflip(img))]
 
         transforms += [ToTensor()]
         transforms += [normalize]

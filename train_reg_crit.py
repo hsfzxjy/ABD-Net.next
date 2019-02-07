@@ -142,8 +142,8 @@ def main():
 
         for name in args.target_names:
             print("Evaluating {} ...".format(name))
-            queryloader = testloader_dict[name]['query']
-            galleryloader = testloader_dict[name]['gallery']
+            queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
+            galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
             distmat = test(model, queryloader, galleryloader, use_gpu, return_distmat=True)
 
             if args.visualize_ranks:
@@ -207,8 +207,8 @@ def main():
 
             for name in args.target_names:
                 print("Evaluating {} ...".format(name))
-                queryloader = testloader_dict[name]['query']
-                galleryloader = testloader_dict[name]['gallery']
+                queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
+                galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
                 print('!!!!!!!!FC!!!!!!!!')
                 os.environ['NOFC'] = ''
                 rank1 = test(model, queryloader, galleryloader, use_gpu)
@@ -295,18 +295,42 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
 
 
 def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], return_distmat=False):
+
+    if os.environ.get('flip_eval'):
+        flip_eval = True
+    else:
+        flip_eval = args.flip_eval
+
+    if flip_eval:
+        print('Flip Eval!')
+
     batch_time = AverageMeter()
 
     model.eval()
 
     with torch.no_grad():
         qf, q_pids, q_camids = [], [], []
-        for batch_idx, (imgs, pids, camids, _) in enumerate(queryloader):
-            if use_gpu:
-                imgs = imgs.cuda()
 
+        if flip_eval:
+            enumerator = enumerate(zip(queryloader[0], queryloader[1]))
+        else:
+            enumerator = enumerate(queryloader[0])
+
+        for batch_idx, package in enumerator:
             end = time.time()
-            features = model(imgs)
+
+            if flip_eval:
+                (imgs0, pids, camids, _), (imgs1, _, _, _) = package
+                if use_gpu:
+                    imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
+                features = (model(imgs0) + model(imgs1)) / 2.0
+            else:
+                (imgs, pids, camids, _) = package
+                if use_gpu:
+                    imgs = imgs.cuda()
+
+                features = model(imgs)
+
             batch_time.update(time.time() - end)
 
             features = features.data.cpu()
@@ -320,13 +344,26 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
         print("Extracted features for query set, obtained {}-by-{} matrix".format(qf.size(0), qf.size(1)))
 
         gf, g_pids, g_camids = [], [], []
-        end = time.time()
-        for batch_idx, (imgs, pids, camids, _) in enumerate(galleryloader):
-            if use_gpu:
-                imgs = imgs.cuda()
+        if flip_eval:
+            enumerator = enumerate(zip(galleryloader[0], galleryloader[1]))
+        else:
+            enumerator = enumerate(galleryloader[0])
 
+        for batch_idx, package in enumerator:
             end = time.time()
-            features = model(imgs)
+
+            if flip_eval:
+                (imgs0, pids, camids, _), (imgs1, _, _, _) = package
+                if use_gpu:
+                    imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
+                features = (model(imgs0) + model(imgs1)) / 2.0
+            else:
+                (imgs, pids, camids, _) = package
+                if use_gpu:
+                    imgs = imgs.cuda()
+
+                features = model(imgs)
+
             batch_time.update(time.time() - end)
 
             features = features.data.cpu()

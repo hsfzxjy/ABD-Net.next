@@ -120,6 +120,10 @@ class ImageDataManager(BaseDataManager):
                 root=self.root, name=name, split_id=self.split_id, cuhk03_labeled=self.cuhk03_labeled,
                 cuhk03_classic_split=self.cuhk03_classic_split
             )
+            flip_dataset = init_imgreid_dataset(
+                root=self.root, name=name, split_id=self.split_id, cuhk03_labeled=self.cuhk03_labeled,
+                cuhk03_classic_split=self.cuhk03_classic_split
+            )
 
             self.testloader_dict[name]['query'] = DataLoader(
                 ImageDataset(dataset.query, transform=transform_test),
@@ -134,19 +138,21 @@ class ImageDataManager(BaseDataManager):
             )
 
             self.testloader_dict[name]['query_flip'] = DataLoader(
-                ImageDataset(dataset.query, transform=transform_test_flip),
+                ImageDataset(flip_dataset.query, transform=transform_test_flip),
                 batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
                 pin_memory=self.pin_memory, drop_last=False
             )
 
             self.testloader_dict[name]['gallery_flip'] = DataLoader(
-                ImageDataset(dataset.gallery, transform=transform_test_flip),
+                ImageDataset(flip_dataset.gallery, transform=transform_test_flip),
                 batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
                 pin_memory=self.pin_memory, drop_last=False
             )
 
             self.testdataset_dict[name]['query'] = dataset.query
             self.testdataset_dict[name]['gallery'] = dataset.gallery
+            self.testdataset_dict[name]['query_flip'] = flip_dataset.query
+            self.testdataset_dict[name]['gallery_flip'] = flip_dataset.gallery
 
         print("\n")
         print("  **************** Summary ****************")

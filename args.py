@@ -183,7 +183,7 @@ def image_dataset_kwargs(parsed_args):
         'cuhk03_labeled': parsed_args.cuhk03_labeled,
         'cuhk03_classic_split': parsed_args.cuhk03_classic_split,
         'data_augment': parsed_args.data_augment,
-        'flip_eval': parsed_args.flip_eval,
+        # 'flip_eval': parsed_args.flip_eval,
     }
 
 

@@ -112,7 +112,7 @@ class ResNetBackbone(nn.Module):
 
     def __init__(self, block, layers, last_stride=2):
         self.inplanes = 64
-        super(ResNet, self).__init__()
+        super().__init__()
 
         # backbone network
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)

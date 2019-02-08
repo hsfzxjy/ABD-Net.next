@@ -25,7 +25,7 @@ class AttentionModule(nn.Module):
     ):
         super().__init__()
         print(module_names)
-        self.modules = []
+        self.modules_list = []
         for name in module_names:
             module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head, sum_fusion=sum_fusion)
             setattr(self, f'_{name}_module', module)  # force gpu
@@ -36,15 +36,15 @@ class AttentionModule(nn.Module):
             else:
                 pool = None
 
-            self.modules.append((name, module, pool))
+            self.modules_list.append((name, module, pool))
 
-        self.output_dim = len(self.modules) * dim if not sum_fusion else dim
+        self.output_dim = len(self.modules_list) * dim if not sum_fusion else dim
 
     def forward(self, x):
 
         xs = {}
         pooling = {}
-        for name, module, pool in self.modules:
+        for name, module, pool in self.modules_list:
             f = module(x)
             xs[name] = f
             pooling[name] = pool

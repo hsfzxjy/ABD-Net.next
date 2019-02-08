@@ -11,6 +11,10 @@ class ParamController:
 
     def get_value(self):
 
+        import os
+        if os.environ.get('reg_const') is not None:
+            return self._value
+
         if self._epoch <= 20:
             return self._value
         elif self._epoch <= 60:

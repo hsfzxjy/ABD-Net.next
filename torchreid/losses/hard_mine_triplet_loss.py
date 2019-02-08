@@ -28,7 +28,8 @@ class TripletLoss(nn.Module):
         else:
             inputs_tuple = inputs
 
-        return sum([self.apply_loss(x, targets) for x in inputs_tuple]) / len(inputs_tuple)
+        result = sum([self.apply_loss(x, targets) for x in inputs_tuple])
+        return result / len(inputs_tuple)
 
     def apply_loss(self, inputs, targets):
         """

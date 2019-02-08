@@ -241,7 +241,7 @@ class ResNet(nn.Module):
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
         self.reduction = nn.Sequential(
-            nn.Conv1d(2048, 512, kernel_size=1, bias=False),
+            nn.Conv2d(2048, 512, kernel_size=1, bias=False),
         )
         self.classifier2 = nn.Linear(512, num_classes)
 
@@ -386,11 +386,12 @@ class ResNet(nn.Module):
         f = sum(feature_dict.values())
         feature_dict['after'] = f
         v = self.global_avgpool(f)
-        v = v.view(v.size(0), -1)
+        # v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
 
         print(v.size())
-        v = self.reduction(v.view(*v.size(), 1))
+        v = self.reduction(v).squeeze()
+        print(v.size())
         triplet_features.append(v)
         predict_features.append(v)
         v = self.classifier2(v)

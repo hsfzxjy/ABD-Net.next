@@ -166,7 +166,8 @@ class ResNet(nn.Module):
         self.tricky = tricky
 
         if self.tricky == 1:
-            assert self.sum_fusion and last_stride == 1 and fc_dims
+            last_stride = 1
+            assert self.sum_fusion and fc_dims
 
         # self.inplanes = 64
         super(ResNet, self).__init__()

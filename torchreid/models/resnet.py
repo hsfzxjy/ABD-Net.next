@@ -240,17 +240,29 @@ class ResNet(nn.Module):
 
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
-        self.reduction = nn.Sequential(
-            nn.Conv2d(2048, 512, kernel_size=1, bias=False),
-        )
-        self.classifier2 = nn.Linear(512, num_classes)
+
+        if self.tricky == 1:
+            self.reduction = nn.Sequential(
+                nn.Conv2d(2048, 512, kernel_size=1, bias=False),
+            )
+            self.classifier2 = nn.Linear(512, num_classes)
+            self._init_params(self.reduction)
+            self._init_params(self.classifier2)
+
+        if self.tricky == 2:
+            self.reduction = nn.Sequential(
+                nn.Conv2d(2048, 1024, kernel_size=1, bias=False),
+                nn.BatchNorm2d(1024),
+                nn.ReLU(inplace=True),
+            )
+            self.classifier2 = nn.Linear(512, num_classes)
+            self._init_params(self.reduction)
+            self._init_params(self.classifier2)
 
         self._init_params(self.feature_distilation)
         self._init_params(self.attention_module)
         self._init_params(self.fc)
         self._init_params(self.classifier)
-        self._init_params(self.reduction)
-        self._init_params(self.classifier2)
 
     def backbone_convs(self):
 
@@ -332,10 +344,10 @@ class ResNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
+                nn.init.normal_(m.weight, 1, 0.02)
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm1d):
-                nn.init.constant_(m.weight, 1)
+                nn.init.normal_(m.weight, 1, 0.02)
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.normal_(m.weight, 0, 0.01)
@@ -401,7 +413,7 @@ class ResNet(nn.Module):
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):
-        if self.tricky == 1:
+        if self.tricky in [1, 2]:
             return self.forward_tricky1(x)
 
         f, layer5 = self.forward_feature_distilation(x)

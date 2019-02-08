@@ -185,7 +185,7 @@ class ResNet(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        if self.tricky == 1:
+        if self.tricky in [1, 2]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
                     1024,
@@ -277,7 +277,7 @@ class ResNet(nn.Module):
             self.layer4,
         ]
 
-        if self.tricky == 1:
+        if self.tricky in [1, 2]:
             convs.append(self.layer4_normal_branch)
 
         return convs

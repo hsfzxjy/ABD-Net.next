@@ -255,7 +255,7 @@ class ResNet(nn.Module):
                 nn.BatchNorm2d(1024),
                 nn.ReLU(inplace=True),
             )
-            self.classifier2 = nn.Linear(512, num_classes)
+            self.classifier2 = nn.Linear(1024, num_classes)
             self._init_params(self.reduction)
             self._init_params(self.classifier2)
 

@@ -9,8 +9,6 @@ import torchvision
 import torch.utils.model_zoo as model_zoo
 
 
-__all__ = ['resnet50', 'resnet50_fc512']
-
 channels = {
     'a': [4, 40, 64, 68, 70, 71, 101, 102, 127, 141, 152, 158, 162, 164, 171, 172, 175, 186, 201, 209, 225, 227, 246],
     'b': [2, 11, 12, 17, 23, 24, 28, 30, 36, 39, 47, 48, 49, 57, 59, 60, 61, 66, 77, 78, 83, 87, 88, 89, 91, 93, 99, 107, 110, 117, 120, 121, 123, 124, 126, 133, 139, 140, 145, 151, 155, 165, 168, 174, 180, 185, 192, 199, 202, 211, 216, 217, 219, 222, 230, 239, 245, 247, 249, 251],
@@ -104,6 +102,46 @@ class Bottleneck(nn.Module):
         return out
 
 
+class ResNetBackbone(nn.Module):
+    """
+    Residual network
+
+    Reference:
+    He et al. Deep Residual Learning for Image Recognition. CVPR 2016.
+    """
+
+    def __init__(self, block, layers, last_stride=2):
+        self.inplanes = 64
+        super(ResNet, self).__init__()
+
+        # backbone network
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=last_stride)
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                nn.Conv2d(self.inplanes, planes * block.expansion,
+                          kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample))
+        self.inplanes = planes * block.expansion
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
+
+        return nn.Sequential(*layers)
+
+
 class ResNet(nn.Module):
     """
     Residual network
@@ -112,7 +150,7 @@ class ResNet(nn.Module):
     He et al. Deep Residual Learning for Image Recognition. CVPR 2016.
     """
 
-    def __init__(self, num_classes, loss, block, layers,
+    def __init__(self, num_classes,
                  last_stride=2,
                  fc_dims=None,
                  dropout_p=None,
@@ -127,20 +165,42 @@ class ResNet(nn.Module):
         self.sum_fusion = sum_fusion
         self.tricky = tricky
 
-        self.inplanes = 64
+        if self.tricky == 1:
+            assert self.sum_fusion and last_stride == 1 and fc_dims
+
+        # self.inplanes = 64
         super(ResNet, self).__init__()
-        self.loss = loss
-        self.feature_dim = 512 * block.expansion
+        self.feature_dim = 2048  # 512 * block.expansion
 
         # backbone network
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
-        self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=last_stride)
+        backbone = ResNetBackbone(Bottleneck, [3, 4, 6, 3], last_stride)
+        init_pretrained_weights(backbone, model_urls['resnet50'])
+        self.conv1 = backbone.conv1
+        self.bn1 = backbone.bn1
+        self.relu = backbone.relu
+        self.maxpool = backbone.maxpool
+        self.layer1 = backbone.layer1
+        self.layer2 = backbone.layer2
+        self.layer3 = backbone.layer3
+        self.layer4 = backbone.layer4
+
+        if self.tricky == 1:
+            self.layer4_normal_branch = nn.Sequential(
+                Bottleneck(
+                    1024,
+                    512,
+                    stride=2,
+                    downsample=nn.Sequential(
+                        nn.Conv2d(
+                            1024, 2048, kernel_size=1, stride=2, bias=False
+                        ),
+                        nn.BatchNorm2d(2048)
+                    )
+                ),
+                Bottleneck(2048, 512),
+                Bottleneck(2048, 512)
+            )
+            self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
 
         # Begin Feature Distilation
         if fd_config is None:
@@ -155,7 +215,7 @@ class ResNet(nn.Module):
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
 
-        num_features = 512 * block.expansion
+        num_features = 2048
         # Begin Attention Module
         if attention_config is None:
             attention_config = {'parts': (), 'use_conv_head': False}
@@ -177,34 +237,23 @@ class ResNet(nn.Module):
             dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
         # End Dropout Module
 
-        if self.tricky == 1:
-            self.classifier2 = nn.Linear(num_features, num_classes)
-
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
+        self.reduction = nn.Sequential(
+            nn.Conv1d(2048, 512, kernel_size=1, bias=False),
+        )
+        self.classifier2 = nn.Linear(512, num_classes)
 
-        self._init_params()
-
-    def _make_layer(self, block, planes, blocks, stride=1):
-        downsample = None
-        if stride != 1 or self.inplanes != planes * block.expansion:
-            downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                          kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(planes * block.expansion),
-            )
-
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
-        self.inplanes = planes * block.expansion
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
-
-        return nn.Sequential(*layers)
+        self._init_params(self.feature_distilation)
+        self._init_params(self.attention_module)
+        self._init_params(self.fc)
+        self._init_params(self.classifier)
+        self._init_params(self.reduction)
+        self._init_params(self.classifier2)
 
     def backbone_convs(self):
 
-        return [
+        convs = [
             self.conv1,
             self.bn1,
             self.relu,
@@ -215,6 +264,11 @@ class ResNet(nn.Module):
             self.layer4,
         ]
 
+        if self.tricky == 1:
+            convs.append(self.layer4_normal_branch)
+
+        return convs
+
     def forward_feature_distilation(self, x):
 
         x = self.conv1(x)
@@ -222,8 +276,6 @@ class ResNet(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
         x = self.layer1(x)
-
-        all_layers = [x]
 
         layer5 = x
 
@@ -237,12 +289,9 @@ class ResNet(nn.Module):
             x[:, c_tensor] = new_x
 
         x = self.layer2(x)
-        all_layers.append(x)
         x = self.layer3(x)
-        all_layers.append(x)
         x = self.layer4(x)
-        all_layers.append(x)
-        return x, layer5, tuple(all_layers)
+        return x, layer5
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
         """
@@ -275,9 +324,8 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _init_params(self):
-        for m in self.modules():
-            print('hhhh', m)
+    def _init_params(self, x):
+        for m in x.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
@@ -293,20 +341,69 @@ class ResNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def featuremaps(self, x):
+    def forward_tricky1(self, x):
+
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
         x = self.layer1(x)
+
+        layer5 = x
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.feature_distilation.cam_modules:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
         x = self.layer2(x)
         x = self.layer3(x)
-        x = self.layer4(x)
-        return x
+
+        triplet_features = []
+        xent_features = []
+        predict_features = []
+
+        # normal branch
+        x1 = x
+        x1 = self.layer4_normal_branch(x1)
+        x1 = self.global_avgpool(x1).squeeze()
+        x1 = self.fc(x1)
+        triplet_features.append(x1)
+        predict_features.append(x1)
+        x1 = self.classifier(x1)
+        xent_features.append(x1)
+
+        # our branch
+        x2 = x
+        f = self.layer4(x2)
+        feature_dict, _ = self.attention_module(f)
+        feature_dict['before'] = f
+        f = sum(feature_dict.values())
+        feature_dict['after'] = f
+        v = self.global_avgpool(f)
+        v = v.view(v.size(0), -1)
+        feature_dict['layer5'] = layer5
+
+        v = self.reduction(v)
+        triplet_features.append(v)
+        predict_features.append(v)
+        v = self.classifier2(v)
+        xent_features.append(v)
+
+        if not self.training:
+            return torch.cat(predict_features, 1)
+
+        return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):
-        f, layer5, all_layers = self.forward_feature_distilation(x)
-        print(f.size())
+        if self.tricky == 1:
+            return self.forward_tricky1(x)
+
+        f, layer5 = self.forward_feature_distilation(x)
 
         feature_dict, pooling = self.attention_module(f)
 
@@ -330,40 +427,21 @@ class ResNet(nn.Module):
             v = v.view(v.size(0), -1)
 
         feature_dict['layer5'] = layer5
-        feature_dict['all_layers'] = all_layers
 
         v_before_fc = v
         if self.fc is not None:
             v = self.fc(v)
         if not self.training:
-            if self.tricky == 1:
-                return torch.cat([v, v_before_fc], 1)
             if os.environ.get('NOFC'):
                 return v_before_fc
             else:
                 return v
 
-        if self.tricky == 2:
-            triplet_feature = self.global_avgpool(feature_dict['before'])
-            triplet_feature = triplet_feature.view(triplet_feature.size(0), -1)
-        elif self.tricky == 3:
-            triplet_feature = v_before_fc
-        else:
-            triplet_feature = v
+        triplet_feature = v
 
         y = self.classifier(v)
 
-        if self.tricky == 1:
-            y = (y, self.classifier2(v_before_fc))
-
         return f, y, triplet_feature, feature_dict
-
-        if self.loss == {'xent'}:
-            return y
-        elif self.loss == {'xent', 'htri'}:
-            return y, v
-        else:
-            raise KeyError("Unsupported loss: {}".format(self.loss))
 
 
 def init_pretrained_weights(model, model_url):
@@ -390,41 +468,17 @@ resnet152: block=Bottleneck, layers=[3, 8, 36, 3]
 """
 
 
-def resnet50(num_classes, loss, pretrained='imagenet', **kwargs):
-    model = ResNet(
-        num_classes=num_classes,
-        loss=loss,
-        block=Bottleneck,
-        layers=[3, 4, 6, 3],
-        last_stride=2,
-        fc_dims=None,
-        dropout_p=None,
-        **kwargs
-    )
-    if pretrained == 'imagenet':
-        init_pretrained_weights(model, model_urls['resnet50'])
-    return model
-
-#
-
-
 def make_function_50(name, config):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
-        model = ResNet(
+        return ResNet(
             num_classes=num_classes,
-            loss=loss,
-            block=Bottleneck,
-            layers=[3, 4, 6, 3],
             last_stride=2,
             dropout_p=None,
             **config,
             **kwargs
         )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['resnet50'])
-        return model
 
     _func.config = config
 
@@ -436,20 +490,14 @@ def make_function_sf_50(name, config):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
-        model = ResNet(
+        return ResNet(
             num_classes=num_classes,
-            loss=loss,
-            block=Bottleneck,
-            layers=[3, 4, 6, 3],
             last_stride=2,
             dropout_p=None,
             sum_fusion=True,
             **config,
             **kwargs
         )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['resnet50'])
-        return model
 
     _func.config = config
 
@@ -461,20 +509,14 @@ def make_function_sf_ls1_50(name, config):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
-        model = ResNet(
+        return ResNet(
             num_classes=num_classes,
-            loss=loss,
-            block=Bottleneck,
-            layers=[3, 4, 6, 3],
             last_stride=1,
             dropout_p=None,
             sum_fusion=True,
             **config,
             **kwargs
         )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['resnet50'])
-        return model
 
     _func.config = config
 
@@ -486,11 +528,8 @@ def make_function_sf_tricky_50(name, config, tricky):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
-        model = ResNet(
+        return ResNet(
             num_classes=num_classes,
-            loss=loss,
-            block=Bottleneck,
-            layers=[3, 4, 6, 3],
             last_stride=2,
             dropout_p=None,
             sum_fusion=True,
@@ -498,30 +537,11 @@ def make_function_sf_tricky_50(name, config, tricky):
             **config,
             **kwargs
         )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['resnet50'])
-        return model
 
     _func.config = config
 
     name_function_mapping[name] = _func
     globals()[name] = _func
-
-
-def resnet50_fc512(num_classes, loss, pretrained='imagenet', **kwargs):
-    model = ResNet(
-        num_classes=num_classes,
-        loss=loss,
-        block=Bottleneck,
-        layers=[3, 4, 6, 3],
-        last_stride=1,
-        fc_dims=[512],
-        dropout_p=None,
-        **kwargs
-    )
-    if pretrained == 'imagenet':
-        init_pretrained_weights(model, model_urls['resnet50'])
-    return model
 
 
 from collections import OrderedDict

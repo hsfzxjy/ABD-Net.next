@@ -305,6 +305,7 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         f, layer5, all_layers = self.forward_feature_distilation(x)
+        print(f.size())
 
         feature_dict, pooling = self.attention_module(f)
 

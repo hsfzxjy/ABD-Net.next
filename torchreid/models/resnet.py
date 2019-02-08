@@ -277,6 +277,7 @@ class ResNet(nn.Module):
 
     def _init_params(self):
         for m in self.modules():
+            print('hhhh', m)
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:

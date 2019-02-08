@@ -390,7 +390,7 @@ class ResNet(nn.Module):
         feature_dict['layer5'] = layer5
 
         print(v.size())
-        v = self.reduction(v)
+        v = self.reduction(v.view(*v.size(), 1))
         triplet_features.append(v)
         predict_features.append(v)
         v = self.classifier2(v)

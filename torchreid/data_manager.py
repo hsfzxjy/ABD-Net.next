@@ -97,6 +97,7 @@ class ImageDataManager(BaseDataManager):
             self._num_train_cams += dataset.num_train_cams
 
         if self.train_sampler == 'RandomIdentitySampler':
+            print('!!! Using RandomIdentitySampler !!!')
             self.trainloader = DataLoader(
                 ImageDataset(self.train, transform=transform_train),
                 sampler=RandomIdentitySampler(self.train, self.train_batch_size, self.num_instances),

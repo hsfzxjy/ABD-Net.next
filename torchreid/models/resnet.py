@@ -7,6 +7,7 @@ from torch import nn
 from torch.nn import functional as F
 import torchvision
 import torch.utils.model_zoo as model_zoo
+from copy import deepcopy
 
 
 channels = {
@@ -203,6 +204,36 @@ class ResNet(nn.Module):
             )
             self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
 
+        if self.tricky == 3:
+            delattr(self, 'layer3')
+            delattr(self, 'layer4')
+
+            self.layer3 = backbone.layer3[0]
+            self.layer4 = nn.Sequential(
+                *deepcopy(backbone.layer3[1:]),
+                *backbone.layer4
+            )
+            layer4_normal_branch = nn.Sequential(
+                Bottleneck(
+                    1024,
+                    512,
+                    stride=2,
+                    downsample=nn.Sequential(
+                        nn.Conv2d(
+                            1024, 2048, kernel_size=1, stride=2, bias=False
+                        ),
+                        nn.BatchNorm2d(2048)
+                    )
+                ),
+                Bottleneck(2048, 512),
+                Bottleneck(2048, 512)
+            )
+            layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
+            self.layer4_normal_branch = nn.Sequential(
+                *deepcopy(backbone.layer3[1:]),
+                *layer4_normal_branch,
+            )
+
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
@@ -241,7 +272,7 @@ class ResNet(nn.Module):
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
-        if self.tricky == 1:
+        if self.tricky in [1, 3]:
             self.reduction = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
             )
@@ -249,7 +280,7 @@ class ResNet(nn.Module):
             self._init_params(self.reduction)
             self._init_params(self.classifier2)
 
-        if self.tricky == 2:
+        if self.tricky in [2, 4]:
             self.reduction = nn.Sequential(
                 nn.Conv2d(2048, 1024, kernel_size=1, bias=False),
                 nn.ReLU(inplace=True),
@@ -353,7 +384,7 @@ class ResNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def forward_tricky_1_2(self, x):
+    def forward_tricky_1_2_3_4(self, x):
 
         x = self.conv1(x)
         x = self.bn1(x)
@@ -412,8 +443,8 @@ class ResNet(nn.Module):
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):
-        if self.tricky in [1, 2]:
-            return self.forward_tricky_1_2(x)
+        if self.tricky in [1, 2, 3, 4]:
+            return self.forward_tricky_1_2_3_4(x)
 
         f, layer5 = self.forward_feature_distilation(x)
 
@@ -679,3 +710,14 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_sf_tricky_50(name, config, 3)
+
+
+for fragment in fragments:
+
+    name = 'resnet50_sf_tr4'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_sf_tricky_50(name, config, 4)

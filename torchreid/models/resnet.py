@@ -274,7 +274,7 @@ class ResNet(nn.Module):
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
-        if self.tricky in [1, 3]:
+        if self.tricky in [1, 3, 5, 7]:
             self.reduction = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
             )
@@ -445,7 +445,7 @@ class ResNet(nn.Module):
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):
-        if self.tricky in [1, 2, 3, 4]:
+        if self.tricky in [1, 2, 3, 4, 5, 7]:
             return self.forward_tricky_1_2_3_4(x)
 
         f, layer5 = self.forward_feature_distilation(x)

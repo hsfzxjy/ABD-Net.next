@@ -186,7 +186,9 @@ class ResNet(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        if self.tricky in [1, 2]:
+        normal_branch_stride = 2 if self.tricky <= 4 else 1
+
+        if self.tricky in [1, 2, 5]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
                     1024,
@@ -194,7 +196,7 @@ class ResNet(nn.Module):
                     stride=2,
                     downsample=nn.Sequential(
                         nn.Conv2d(
-                            1024, 2048, kernel_size=1, stride=2, bias=False
+                            1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
                         ),
                         nn.BatchNorm2d(2048)
                     )
@@ -204,7 +206,7 @@ class ResNet(nn.Module):
             )
             self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
 
-        if self.tricky in [3, 4]:
+        if self.tricky in [3, 4, 7]:
             delattr(self, 'layer3')
             delattr(self, 'layer4')
 
@@ -220,7 +222,7 @@ class ResNet(nn.Module):
                     stride=2,
                     downsample=nn.Sequential(
                         nn.Conv2d(
-                            1024, 2048, kernel_size=1, stride=2, bias=False
+                            1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
                         ),
                         nn.BatchNorm2d(2048)
                     )
@@ -307,7 +309,7 @@ class ResNet(nn.Module):
             self.layer4,
         ]
 
-        if self.tricky in [1, 2]:
+        if hasattr(self, 'layer4_normal_branch'):
             convs.append(self.layer4_normal_branch)
 
         return convs

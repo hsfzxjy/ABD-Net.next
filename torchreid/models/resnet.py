@@ -204,7 +204,7 @@ class ResNet(nn.Module):
             )
             self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
 
-        if self.tricky == 3:
+        if self.tricky in [3, 4]:
             delattr(self, 'layer3')
             delattr(self, 'layer4')
 

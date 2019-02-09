@@ -193,7 +193,7 @@ class ResNet(nn.Module):
                 Bottleneck(
                     1024,
                     512,
-                    stride=2,
+                    stride=normal_branch_stride,
                     downsample=nn.Sequential(
                         nn.Conv2d(
                             1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
@@ -219,7 +219,7 @@ class ResNet(nn.Module):
                 Bottleneck(
                     1024,
                     512,
-                    stride=2,
+                    stride=normal_branch_stride,
                     downsample=nn.Sequential(
                         nn.Conv2d(
                             1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False

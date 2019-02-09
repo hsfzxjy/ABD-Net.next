@@ -682,44 +682,13 @@ for fragment in fragments:
     make_function_sf_ls1_50(name, config)
 
 
-for fragment in fragments:
+for tricky in [1, 2, 3, 4, 5, 7]:
+    for fragment in fragments:
 
-    name = 'resnet50_sf_tr1'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
+        name = f'resnet50_sf_tr{tricky}'
+        config = {}
+        for key, (sub_config, name_frag) in zip(keys, fragment):
+            name += name_frag
+            config.update({key: sub_config})
 
-    make_function_sf_tricky_50(name, config, 1)
-
-for fragment in fragments:
-
-    name = 'resnet50_sf_tr2'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
-
-    make_function_sf_tricky_50(name, config, 2)
-
-
-for fragment in fragments:
-
-    name = 'resnet50_sf_tr3'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
-
-    make_function_sf_tricky_50(name, config, 3)
-
-
-for fragment in fragments:
-
-    name = 'resnet50_sf_tr4'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
-
-    make_function_sf_tricky_50(name, config, 4)
+        make_function_sf_tricky_50(name, config, tricky)

@@ -252,7 +252,6 @@ class ResNet(nn.Module):
         if self.tricky == 2:
             self.reduction = nn.Sequential(
                 nn.Conv2d(2048, 1024, kernel_size=1, bias=False),
-                nn.BatchNorm2d(1024),
                 nn.ReLU(inplace=True),
             )
             self.classifier2 = nn.Linear(1024, num_classes)
@@ -354,7 +353,7 @@ class ResNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def forward_tricky1(self, x):
+    def forward_tricky_1_2(self, x):
 
         x = self.conv1(x)
         x = self.bn1(x)
@@ -414,7 +413,7 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         if self.tricky in [1, 2]:
-            return self.forward_tricky1(x)
+            return self.forward_tricky_1_2(x)
 
         f, layer5 = self.forward_feature_distilation(x)
 

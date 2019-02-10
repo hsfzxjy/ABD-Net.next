@@ -186,9 +186,9 @@ class ResNet(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        normal_branch_stride = 2 if self.tricky <= 4 else 1
+        normal_branch_stride = 2 if self.tricky <= 4 or tricky == 11 else 1
 
-        if self.tricky in [1, 2, 5, 9]:
+        if self.tricky in [1, 2, 5, 9, 11]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
                     1024,
@@ -290,6 +290,27 @@ class ResNet(nn.Module):
             self.classifier2 = nn.Linear(1024, num_classes)
             self._init_params(self.reduction)
             self._init_params(self.classifier2)
+
+        if self.tricky == 11:
+            self.reduction_before = nn.Sequential(
+                nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
+            )
+            self.reduction_pam = nn.Sequential(
+                nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
+            )
+            self.reduction_cam = nn.Sequential(
+                nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
+            )
+            self.classifier_before = nn.Linear(fc_dims[0], num_classes)
+            self.classifier_pam = nn.Linear(fc_dims[0], num_classes)
+            self.classifier_cam = nn.Linear(fc_dims[0], num_classes)
+
+            self._init_params(self.reduction_before)
+            self._init_params(self.reduction_pam)
+            self._init_params(self.reduction_cam)
+            self._init_params(self.classifier_before)
+            self._init_params(self.classifier_pam)
+            self._init_params(self.classifier_cam)
 
         self._init_params(self.feature_distilation)
         self._init_params(self.attention_module)
@@ -445,9 +466,72 @@ class ResNet(nn.Module):
 
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
+    def forward_tricky_11(self, x):
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        x = self.layer1(x)
+
+        layer5 = x
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.feature_distilation.cam_modules:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        x = self.layer2(x)
+        x = self.layer3(x)
+
+        triplet_features = []
+        xent_features = []
+        predict_features = []
+
+        # normal branch
+        x1 = x
+        x1 = self.layer4_normal_branch(x1)
+        x1 = self.global_avgpool(x1).squeeze()
+        x1 = self.fc(x1)
+        triplet_features.append(x1)
+        predict_features.append(x1)
+        x1 = self.classifier(x1)
+        xent_features.append(x1)
+
+        # our branch
+        x2 = x
+        f = self.layer4(x2)
+        feature_dict, _ = self.attention_module(f)
+        feature_dict['before'] = f
+        feature_dict['layer5'] = layer5
+
+        for name in ['before', 'pam', 'cam']:
+            feature_ = feature_dict[name]
+            reduction = getattr(self, f'reduction_{name}')
+            classifier = getattr(self, f'classifier_{name}')
+
+            feature_ = self.global_avgpool(feature_)
+            feature_ = reduction(feature_).squeeze()
+            triplet_features.append(feature_)
+            predict_features.append(feature_)
+            feature_ = classifier(feature_)
+            xent_features.append(feature_)
+
+        if not self.training:
+            return torch.cat(predict_features, 1)
+
+        return None, tuple(xent_features), tuple(triplet_features), feature_dict
+
     def forward(self, x):
         if self.tricky in [1, 2, 3, 4, 5, 7, 9]:
             return self.forward_tricky(x)
+
+        if self.tricky == 1:
+            return self.forward_tricky_11(x)
 
         f, layer5 = self.forward_feature_distilation(x)
 
@@ -683,7 +767,7 @@ for fragment in fragments:
     make_function_sf_ls1_50(name, config)
 
 
-for tricky in [1, 2, 3, 4, 5, 7, 9]:
+for tricky in [1, 2, 3, 4, 5, 7, 9, 11]:
     for fragment in fragments:
 
         name = f'resnet50_sf_tr{tricky}'

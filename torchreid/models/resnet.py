@@ -524,7 +524,7 @@ class ResNet(nn.Module):
         if not self.training:
             return torch.cat(predict_features, 1)
 
-        print(torch.cat(predict_features, 1).size())
+        # print(torch.cat(predict_features, 1).size())
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):

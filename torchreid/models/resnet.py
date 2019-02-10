@@ -188,7 +188,7 @@ class ResNet(nn.Module):
 
         normal_branch_stride = 2 if self.tricky <= 4 else 1
 
-        if self.tricky in [1, 2, 5]:
+        if self.tricky in [1, 2, 5, 9]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
                     1024,
@@ -274,7 +274,7 @@ class ResNet(nn.Module):
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
-        if self.tricky in [1, 3, 5, 7]:
+        if self.tricky in [1, 3, 5, 7, 9]:
             self.reduction = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
             )
@@ -386,7 +386,7 @@ class ResNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def forward_tricky_1_2_3_4(self, x):
+    def forward_tricky(self, x):
 
         x = self.conv1(x)
         x = self.bn1(x)
@@ -434,7 +434,8 @@ class ResNet(nn.Module):
         feature_dict['layer5'] = layer5
 
         v = self.reduction(v).squeeze()
-        triplet_features.append(v)
+        if self.tricky != 9:
+            triplet_features.append(v)
         predict_features.append(v)
         v = self.classifier2(v)
         xent_features.append(v)
@@ -445,8 +446,8 @@ class ResNet(nn.Module):
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):
-        if self.tricky in [1, 2, 3, 4, 5, 7]:
-            return self.forward_tricky_1_2_3_4(x)
+        if self.tricky in [1, 2, 3, 4, 5, 7, 9]:
+            return self.forward_tricky(x)
 
         f, layer5 = self.forward_feature_distilation(x)
 
@@ -682,7 +683,7 @@ for fragment in fragments:
     make_function_sf_ls1_50(name, config)
 
 
-for tricky in [1, 2, 3, 4, 5, 7]:
+for tricky in [1, 2, 3, 4, 5, 7, 9]:
     for fragment in fragments:
 
         name = f'resnet50_sf_tr{tricky}'

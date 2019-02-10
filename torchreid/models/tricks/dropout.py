@@ -52,7 +52,7 @@ class DropoutOptimizer(nn.Module):
 
         # print(self.epoch)
         p = .2 + .1 * (self.epoch // 10)
-        p = min(p, .9)
+        p = min(p, .5)
 
         return p
 

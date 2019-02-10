@@ -524,13 +524,14 @@ class ResNet(nn.Module):
         if not self.training:
             return torch.cat(predict_features, 1)
 
+        print(torch.cat(predict_features, 1).size())
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
     def forward(self, x):
         if self.tricky in [1, 2, 3, 4, 5, 7, 9]:
             return self.forward_tricky(x)
 
-        if self.tricky == 1:
+        if self.tricky == 11:
             return self.forward_tricky_11(x)
 
         f, layer5 = self.forward_feature_distilation(x)

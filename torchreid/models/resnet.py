@@ -272,14 +272,14 @@ class ResNet(nn.Module):
             self._init_params(self.classifier2)
 
         if self.tricky in [2]:
-            self.reduction = nn.Sequential(
+            self.reduction_tr = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
                 nn.BatchNorm2d(fc_dims[0]),
                 nn.ReLU(inplace=True)
             )
-            self.classifier2 = nn.Linear(fc_dims[0], num_classes)
-            self._init_params(self.reduction)
-            self._init_params(self.classifier2)
+            self.classifier_tr = nn.Linear(fc_dims[0], num_classes)
+            self._init_params(self.reduction_tr)
+            self._init_params(self.classifier_tr)
 
         if self.tricky in [3]:
             self.reduction_tr = nn.Sequential(

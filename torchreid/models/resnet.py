@@ -186,6 +186,8 @@ class ResNet(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
+        normal_branch_stride = 2
+
         if self.tricky in [1, 2]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(

@@ -163,6 +163,7 @@ class ResNet(nn.Module):
                  tricky: int=0,
                  **kwargs):
 
+        self.sum_fusion = True
         super(ResNet, self).__init__()
         self.feature_dim = 2048
 
@@ -261,7 +262,6 @@ class ResNet(nn.Module):
             self.layer3,
             self.layer4,
             self.layer4_normal_branch,
-            self.layer4_2,
         ]
 
         return convs

@@ -186,9 +186,9 @@ class ResNet(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        normal_branch_stride = 2
+        normal_branch_stride = 2 if self.tricky in [1, 2, 3] else 1
 
-        if self.tricky in [1, 2]:
+        if self.tricky in [1, 2, 4]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
                     1024,
@@ -246,7 +246,7 @@ class ResNet(nn.Module):
 
         self.attention_module = AttentionModule(
             attention_config['parts'],
-            2048 if tricky not in [2, 3] else fc_dims[0],
+            2048 if tricky not in [2, 3, 4] else fc_dims[0],
             use_conv_head=attention_config['use_conv_head'],
             sum_fusion=self.sum_fusion
         )
@@ -271,7 +271,7 @@ class ResNet(nn.Module):
             self._init_params(self.reduction)
             self._init_params(self.classifier2)
 
-        if self.tricky in [2]:
+        if self.tricky in [2, 4]:
             self.reduction_tr = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
                 nn.BatchNorm2d(fc_dims[0]),
@@ -588,7 +588,7 @@ class ResNet(nn.Module):
         if self.tricky in [1]:
             return self.forward_tricky_1(x)
 
-        if self.tricky in [2]:
+        if self.tricky in [2, 4]:
             return self.forward_tricky_2(x)
 
         if self.tricky in [3]:

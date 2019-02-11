@@ -246,7 +246,7 @@ class ResNet(nn.Module):
 
         self.attention_module = AttentionModule(
             attention_config['parts'],
-            num_features,
+            2048 if tricky not in [2, 3] else fc_dims[0],
             use_conv_head=attention_config['use_conv_head'],
             sum_fusion=self.sum_fusion
         )

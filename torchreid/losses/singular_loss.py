@@ -71,7 +71,7 @@ class SingularLoss(nn.Module):
         tmp = self.dominant_eigenvalue(AAT - I)
         return tmp + largest, largest
 
-    def apply_penalty(self, x):
+    def apply_penalty(self, k, x):
 
         if isinstance(x, tuple):
             return sum([self.apply_penalty(xx) for xx in x]) / len(x)
@@ -84,6 +84,9 @@ class SingularLoss(nn.Module):
         else:
             singular_penalty = (torch.log1p(largest) - torch.log1p(smallest)) * self.beta
 
+        if k == 'layer5':
+            singular_penalty *= 0.01
+
         return singular_penalty.sum()
 
     def forward(self, inputs, pids):
@@ -95,7 +98,7 @@ class SingularLoss(nn.Module):
         if missing:
             raise RuntimeError('Cannot apply singular loss, as positions {!r} are missing.'.format(list(missing)))
 
-        singular_penalty = sum([self.apply_penalty(x) for k, x in feature_dict.items() if k in self.penalty_position])
+        singular_penalty = sum([self.apply_penalty(k, x) for k, x in feature_dict.items() if k in self.penalty_position])
 
         xloss = self.xent_loss(y, pids)
         # print(xloss)

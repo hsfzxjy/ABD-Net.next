@@ -1,3 +1,4 @@
+import os
 import argparse
 
 
@@ -178,7 +179,7 @@ def image_dataset_kwargs(parsed_args):
         'train_batch_size': parsed_args.train_batch_size,
         'test_batch_size': parsed_args.test_batch_size,
         'workers': parsed_args.workers,
-        'train_sampler': parsed_args.train_sampler if 'htri' not in parsed_args.criterion else 'RandomIdentitySampler',
+        'train_sampler': parsed_args.train_sampler if 'htri' not in parsed_args.criterion or os.environ.get('ns') else 'RandomIdentitySampler',
         'num_instances': parsed_args.num_instances,
         'cuhk03_labeled': parsed_args.cuhk03_labeled,
         'cuhk03_classic_split': parsed_args.cuhk03_classic_split,

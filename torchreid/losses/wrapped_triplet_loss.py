@@ -2,7 +2,7 @@ from .hard_mine_triplet_loss import TripletLoss
 from .cross_entropy_loss import CrossEntropyLoss
 
 
-def WrappedTripletLoss(num_classes: int, use_gpu: bool, args, htri_only=False) -> 'func':
+def WrappedTripletLoss(num_classes: int, use_gpu: bool, args, param_controller, htri_only=False) -> 'func':
 
     xent_loss = CrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
     htri_loss = TripletLoss(margin=args.margin)
@@ -16,7 +16,7 @@ def WrappedTripletLoss(num_classes: int, use_gpu: bool, args, htri_only=False) -
         else:
             loss = (
                 args.lambda_xent * xent_loss(y, pids) +
-                args.lambda_htri * htri_loss(v, pids)
+                args.lambda_htri * htri_loss(v, pids) * param_controller.get_value()
             )
 
         return loss

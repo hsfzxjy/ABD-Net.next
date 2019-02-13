@@ -38,9 +38,13 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
 
     from torchreid.losses.wrapped_triplet_loss import WrappedTripletLoss
 
+    from torchreid.regularizers.param_controller import HtriParamController
+
+    htri_param_controller = HtriParamController()
+
     if 'htri' in args.criterion:
-        fix_criterion = WrappedTripletLoss(num_classes, use_gpu, args)
-        switch_criterion = WrappedTripletLoss(num_classes, use_gpu, args)
+        fix_criterion = WrappedTripletLoss(num_classes, use_gpu, args, htri_param_controller)
+        switch_criterion = WrappedTripletLoss(num_classes, use_gpu, args, htri_param_controller)
     else:
         fix_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
         switch_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
@@ -54,10 +58,10 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
         from torchreid.losses.singular_loss import SingularLoss
         criterion = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth, penalty_position=args.penalty_position)
     elif args.criterion == 'htri':
-        criterion = WrappedTripletLoss(num_classes=num_classes, use_gpu=use_gpu, args=args)
+        criterion = WrappedTripletLoss(num_classes=num_classes, use_gpu=use_gpu, args=args, param_controller=htri_param_controller)
     elif args.criterion == 'singular_htri':
         from torchreid.losses.singular_triplet_loss import SingularTripletLoss
-        criterion = SingularTripletLoss(num_classes, use_gpu, args)
+        criterion = SingularTripletLoss(num_classes, use_gpu, args, htri_param_controller)
     elif args.criterion == 'incidence':
         from torchreid.losses.incidence_loss import IncidenceLoss
         criterion = IncidenceLoss()
@@ -73,7 +77,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     if args.switch_loss < 0:
         criterion, switch_criterion = switch_criterion, criterion
 
-    return criterion, fix_criterion, switch_criterion
+    return criterion, fix_criterion, switch_criterion, htri_param_controller
 
 
 def main():
@@ -106,7 +110,7 @@ def main():
     print("Model size: {:.3f} M".format(count_num_param(model)))
 
     # criterion = WrappedCrossEntropyLoss(num_classes=dm.num_train_pids, use_gpu=use_gpu, label_smooth=args.label_smooth)
-    criterion, fix_criterion, switch_criterion = get_criterions(dm.num_train_pids, use_gpu, args)
+    criterion, fix_criterion, switch_criterion, htri_param_controller = get_criterions(dm.num_train_pids, use_gpu, args)
     regularizer, reg_param_controller = get_regularizer(args.regularizer)
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
@@ -174,6 +178,7 @@ def main():
     for epoch in range(args.start_epoch, args.max_epoch):
         dropout_optimizer.set_epoch(epoch)
         reg_param_controller.set_epoch(epoch)
+        htri_param_controller.set_epoch(epoch)
         dropout_optimizer.set_training(True)
         start_train_time = time.time()
         print(epoch, args.switch_loss)

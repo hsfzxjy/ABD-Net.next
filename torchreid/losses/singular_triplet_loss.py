@@ -2,10 +2,10 @@ from .wrapped_triplet_loss import WrappedTripletLoss
 from .singular_loss import SingularLoss
 
 
-def SingularTripletLoss(num_classes: int, use_gpu: bool, args) -> 'func':
+def SingularTripletLoss(num_classes: int, use_gpu: bool, args, param_controller) -> 'func':
 
     xent_loss = SingularLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth, penalty_position=args.penalty_position)
-    htri_loss = WrappedTripletLoss(num_classes, use_gpu, args, htri_only=True)
+    htri_loss = WrappedTripletLoss(num_classes, use_gpu, args, param_controller, htri_only=True)
 
     def _loss(x, pids):
 
@@ -13,7 +13,7 @@ def SingularTripletLoss(num_classes: int, use_gpu: bool, args) -> 'func':
 
         loss = (
             args.lambda_xent * xent_loss(x, pids) +
-            args.lambda_htri * htri_loss(x, pids)
+            args.lambda_htri * htri_loss(x, pids) * param_controller.get_value()
         )
 
         return loss

@@ -503,8 +503,7 @@ class ResNet(nn.Module):
         # v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
 
-        if os.environ.get('htri_tricky'):
-            triplet_features.append(v)
+        triplet_features.append(v)
         predict_features.append(v)
         v = self.classifier_tr(v)
         xent_features.append(v)

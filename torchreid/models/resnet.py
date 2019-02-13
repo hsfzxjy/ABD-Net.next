@@ -188,6 +188,38 @@ class ResNet(nn.Module):
 
         normal_branch_stride = 2 if self.tricky in [1, 2, 3] else 1
 
+        if self.tricky in [5]:
+
+            delattr(self, 'layer3')
+            delattr(self, 'layer4')
+
+            self.layer3 = backbone.layer3[0]
+
+            layer4_normal_branch = nn.Sequential(
+                Bottleneck(
+                    1024,
+                    512,
+                    stride=1,
+                    downsample=nn.Sequential(
+                        nn.Conv2d(
+                            1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
+                        ),
+                        nn.BatchNorm2d(2048)
+                    )
+                ),
+                Bottleneck(2048, 512),
+                Bottleneck(2048, 512)
+            )
+            layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
+            self.layer4_normal_branch = nn.Sequential(
+                *deepcopy(backbone.layer3[1:]),
+                *layer4_normal_branch
+            )
+            self.layer4 = nn.Sequential(
+                *deepcopy(backbone.layer3[1:]),
+                *deepcopy(backbone.layer4),
+            )
+
         if self.tricky in [1, 2, 4]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
@@ -271,7 +303,7 @@ class ResNet(nn.Module):
             self._init_params(self.reduction)
             self._init_params(self.classifier2)
 
-        if self.tricky in [2, 4]:
+        if self.tricky in [2, 4, 5]:
             self.reduction_tr = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
                 nn.BatchNorm2d(fc_dims[0]),
@@ -503,7 +535,8 @@ class ResNet(nn.Module):
         # v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
 
-        triplet_features.append(v)
+        if os.environ.get('nht') is not None:
+            triplet_features.append(v)
         predict_features.append(v)
         v = self.classifier_tr(v)
         xent_features.append(v)
@@ -588,7 +621,7 @@ class ResNet(nn.Module):
         if self.tricky in [1]:
             return self.forward_tricky_1(x)
 
-        if self.tricky in [2, 4]:
+        if self.tricky in [2, 4, 5]:
             return self.forward_tricky_2(x)
 
         if self.tricky in [3]:

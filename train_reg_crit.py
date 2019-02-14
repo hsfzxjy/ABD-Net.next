@@ -43,7 +43,7 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     htri_param_controller = HtriParamController()
 
     if 'htri' in args.criterion:
-        fix_criterion = WrappedTripletLoss(num_classes, use_gpu, args, htri_param_controller)
+        fix_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
         switch_criterion = WrappedTripletLoss(num_classes, use_gpu, args, htri_param_controller)
     else:
         fix_criterion = WrappedCrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)

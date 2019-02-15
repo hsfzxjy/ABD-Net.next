@@ -714,6 +714,9 @@ class ResNet(nn.Module):
         if self.tricky in [3]:
             return self.forward_tricky_3(x)
 
+        if self.tricky in [6]:
+            return self.forward_tricky_6(x)
+
         f, layer5 = self.forward_feature_distilation(x)
 
         feature_dict, pooling = self.attention_module(f)

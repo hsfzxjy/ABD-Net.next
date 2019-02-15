@@ -269,6 +269,7 @@ class ResNet(nn.Module):
         # End Feature Distilation
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
+        self.global_maxpool = nn.AdaptiveMaxPool2d(1)
 
         num_features = 2048
         # Begin Attention Module
@@ -531,7 +532,11 @@ class ResNet(nn.Module):
         feature_dict['before'] = f
         f = sum(feature_dict.values())
         feature_dict['after'] = f
-        v = self.global_avgpool(f).squeeze()
+
+        if os.environ.get('max_pool') is not None:
+            v = self.global_maxpool(f).squeeze()
+        else:
+            v = self.global_avgpool(f).squeeze()
         # v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
 

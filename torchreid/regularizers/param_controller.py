@@ -43,7 +43,7 @@ class HtriParamController:
         except (TypeError, ValueError):
             return self._value
 
-        if self._epoch > 50:
+        if self._epoch > 100:
             return decay_to
         else:
-            return self._value + (decay_to - self._value) * (self._epoch / 50)
+            return self._value + (decay_to - self._value) * (self._epoch / 100)

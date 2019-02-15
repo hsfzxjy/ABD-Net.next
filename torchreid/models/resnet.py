@@ -952,7 +952,7 @@ for fragment in fragments:
     make_function_sf_ls1_50(name, config)
 
 
-for tricky in [1, 2, 3, 4, 5, 7, 9, 11]:
+for tricky in [1, 2, 3, 4, 5, 6, 7, 9, 11]:
     for fragment in fragments:
 
         name = f'resnet50_sf_tr{tricky}'

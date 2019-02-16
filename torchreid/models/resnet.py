@@ -309,10 +309,17 @@ class ResNet(nn.Module):
             self._init_params(self.classifier2)
 
         if self.tricky in [2, 4, 5, 6]:
+
+            if os.environ.get('dropout_reduction'):
+                dropout = [dropout_optimizer]
+            else:
+                dropout = []
+
             self.reduction_tr = nn.Sequential(
                 nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
                 nn.BatchNorm2d(fc_dims[0]),
-                nn.ReLU(inplace=True)
+                nn.ReLU(inplace=True),
+                *dropout
             )
             self.classifier_tr = nn.Linear(fc_dims[0], num_classes)
             self._init_params(self.reduction_tr)

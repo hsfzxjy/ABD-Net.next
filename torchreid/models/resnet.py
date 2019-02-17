@@ -558,7 +558,7 @@ class ResNet(nn.Module):
         f = sum(feature_dict.values())
         feature_dict['after'] = f
 
-        v = global_avgpool(f)
+        v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
 

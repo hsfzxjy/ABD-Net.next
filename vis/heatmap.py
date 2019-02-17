@@ -119,10 +119,9 @@ if __name__ == '__main__':
     options = parser.parse_args()
 
     for i, (imgs, pids, camids, img_paths) in enumerate(testloader):
-        if i >= options.num - 1:
+        if i > options.num - 1:
             break
         input_img = imgs[:2]
-        target = pids[0]
 
         from gradcam import GradCam
         from misc_functions import save_class_activation_on_image
@@ -133,6 +132,7 @@ if __name__ == '__main__':
         for attrname, basename in [
             ('dummy_sum', 'deep'),
             ('dummy_fd', 'shallow'),
+            ('conv1', 'front'),
         ]:
             prefix = f'{options.prefix}/{i}/{basename}/output'
             print('Making', prefix)

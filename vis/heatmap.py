@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     imgs, pids, camids, _ = next(iter(testloader))
     input_img = imgs[:2]
-    input_img = input_img.view(1, *input_img.size())
+    # input_img = input_img.view(1, *input_img.size())
     target = pids[0]
 
     from gradcam import GradCam

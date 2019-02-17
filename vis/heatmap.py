@@ -136,7 +136,8 @@ if __name__ == '__main__':
 
     model = get_model()
 
-    gradcam = GradCam(model, model.reduction_tr[1], 'before')
+    print(input_img.size())
+    gradcam = GradCam(model, model.reduction_tr, 'before')
     cam = gradcam.generate_cam(input_img)
 
     save_class_activation_on_image(input_img, cam, 'heatmap.jpg')

@@ -515,6 +515,7 @@ class ResNet(nn.Module):
     def forward_tricky_2(self, x):
 
         x = self.conv1(x)
+        f_dict = {'conv1': x}
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
@@ -554,6 +555,7 @@ class ResNet(nn.Module):
         f = self.layer4(x2)
         f = self.reduction_tr(f)
         feature_dict, _ = self.attention_module(f)
+        feature_dict.update(f_dict)
         feature_dict['before'] = f
         f = sum(feature_dict.values())
         feature_dict['after'] = f

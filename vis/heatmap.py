@@ -138,7 +138,7 @@ if __name__ == '__main__':
     model = get_model()
 
     print(input_img.size())
-    gradcam = GradCam(model, model.layer1, 'layer5')
+    gradcam = GradCam(model, model.conv1, 'conv1')
     cam = gradcam.generate_cam(input_img, pids[:2])
 
     save_class_activation_on_image(cv2.imread(img_paths[0]), cam, 'test')

@@ -133,6 +133,7 @@ if __name__ == '__main__':
 
     from gradcam import GradCam
     from misc_functions import save_class_activation_on_image
+    import cv2
 
     model = get_model()
 
@@ -140,4 +141,4 @@ if __name__ == '__main__':
     gradcam = GradCam(model, model.reduction_tr, 'before')
     cam = gradcam.generate_cam(input_img, pids[:2])
 
-    save_class_activation_on_image(read_image(img_paths[0]), cam, 'test')
+    save_class_activation_on_image(cv2.imread(img_paths[0]), cam, 'test')

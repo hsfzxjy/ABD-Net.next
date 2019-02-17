@@ -39,7 +39,7 @@ class CamExtractor():
         #         conv_output = x  # Save the convolution output on that layer
         # return conv_output, x
         self.target_layer.register_backward_hook(self.save_gradient)
-        self.target_layer.registser_forward_hook(self.save_feature)
+        self.target_layer.register_forward_hook(self.save_feature)
         _, xent_features, _, feature_dict = self.model.forward(x)
         return self.conv_output, xent_features[-1]
 

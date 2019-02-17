@@ -68,14 +68,14 @@ class GradCam():
         if target_class is None:
             target_class = np.argmax(model_output.data.numpy())
         # Target for backprop
-        one_hot_output = torch.FloatTensor(1, model_output.size()[-1]).zero_()
-        one_hot_output[0][target_class] = 1
+        one_hot_output = torch.FloatTensor(2, model_output.size()[-1]).zero_()
+        one_hot_output[0][target_class[0]] = 1
+        one_hot_output[1][target_class[1]] = 1
         # Zero grads
         self.model.zero_grad()
         # self.model.features.zero_grad()
         # self.model.classifier.zero_grad()
         # Backward pass with specified target
-        print(one_hot_output.size())
         model_output.backward(gradient=one_hot_output, retain_graph=True)
         # Get hooked gradients
         guided_gradients = self.extractor.gradients.data.numpy()[0]

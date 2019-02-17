@@ -121,7 +121,6 @@ if __name__ == '__main__':
     for i, (imgs, pids, camids, img_paths) in enumerate(testloader):
         if i >= options.num - 1:
             break
-        del model
         input_img = imgs[:2]
         target = pids[0]
 

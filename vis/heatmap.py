@@ -47,7 +47,7 @@ dataset = data_manager.init_imgreid_dataset(
     cuhk03_labeled=args.cuhk03_labeled, cuhk03_classic_split=args.cuhk03_classic_split,
 )
 testloader = DataLoader(
-    ImageDataset(dataset.gallery, transform=transform_test),
+    ImageDataset(dataset.train, transform=transform_test),
     batch_size=100, shuffle=False, num_workers=4,
     pin_memory=True, drop_last=False
 )

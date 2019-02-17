@@ -382,12 +382,16 @@ class ResNet(nn.Module):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
 
-        self.before_module = DANetHead(1024, 1024, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module = DANetHead(1024, 1024, nn.BatchNorm2d, PAM_Module)
-        self.cam_module = DANetHead(1024, 1024, nn.BatchNorm2d, CAM_Module)
+        if os.environ.get('no_reduction') is None:
+            in_channels = 1024
+        else:
+            in_channels = 2048
+        self.before_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, lambda _: lambda x: x)
+        self.pam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, PAM_Module)
+        self.cam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, CAM_Module)
         self.sum_conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(1024, 1024, 1))
 
-        self._init_params(self.before_module)
+        # self._init_params(self.before_module)
         self._init_params(self.cam_module)
         self._init_params(self.pam_module)
         self._init_params(self.sum_conv)
@@ -635,12 +639,17 @@ class ResNet(nn.Module):
         # our branch
         x2 = x
         f = self.layer4(x2)
-        f = self.reduction_tr(f)
+        if ps.environ.get('no_reduction') is None:
+            f = self.reduction_tr(f)
 
         f_before = self.before_module(f)
         f_cam = self.cam_module(f)
         f_pam = self.pam_module(f)
-        f_after = self.sum_conv(f_before + f_cam + f_pam)
+
+        f_sum = f_cam + f_pam
+        if os.environ.get('no_before') is None:
+            f_sum = f_sum + f_before
+        f_after = self.sum_conv(f_sum)
         feature_dict = {
             'cam': f_cam,
             'before': f_before,

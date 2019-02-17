@@ -32,6 +32,13 @@ def conv3x3(in_planes, out_planes, stride=1):
                      padding=1, bias=False)
 
 
+class DummySum(nn.Module):
+
+    def forward(self, x, y, z):
+
+        return x + y + z
+
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -187,6 +194,7 @@ class ResNet(nn.Module):
         self.layer4 = backbone.layer4
 
         normal_branch_stride = 2 if self.tricky in [1, 2, 3] else 1
+        self.dummy_sum = DummySum()
 
         if self.tricky in [5]:
 
@@ -556,7 +564,7 @@ class ResNet(nn.Module):
         f = self.reduction_tr(f)
         feature_dict, _ = self.attention_module(f)
         feature_dict['before'] = f
-        f = feature_dict['before'] + feature_dict['pam'] + feature_dict['cam']
+        f = self.dummy_sum(feature_dict['before'], feature_dict['pam'], feature_dict['cam'])
         feature_dict['after'] = f
 
         v = self.global_avgpool(f)

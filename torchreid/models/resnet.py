@@ -541,8 +541,8 @@ class ResNet(nn.Module):
         # normal branch
         x1 = x
         x1 = self.layer4_normal_branch(x1)
-        x1 = self.global_avgpool(x1).squeeze()
-        print(x1.size())
+        x1 = self.global_avgpool(x1)
+        x1 = x1.view(x1.size(0), -1)
         x1 = self.fc(x1)
         triplet_features.append(x1)
         predict_features.append(x1)
@@ -558,11 +558,8 @@ class ResNet(nn.Module):
         f = sum(feature_dict.values())
         feature_dict['after'] = f
 
-        if os.environ.get('max_pool') is not None:
-            v = self.global_maxpool(f).squeeze()
-        else:
-            v = self.global_avgpool(f).squeeze()
-        # v = v.view(v.size(0), -1)
+        v = global_avgpool(f)
+        v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
 
         if os.environ.get('nht') is not None:

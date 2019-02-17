@@ -542,6 +542,7 @@ class ResNet(nn.Module):
         x1 = x
         x1 = self.layer4_normal_branch(x1)
         x1 = self.global_avgpool(x1).squeeze()
+        print(x1.size())
         x1 = self.fc(x1)
         triplet_features.append(x1)
         predict_features.append(x1)

@@ -39,6 +39,27 @@ class DummySum(nn.Module):
         return x + y + z
 
 
+class DummyFD(nn.Module):
+
+    def __init__(self, fd):
+
+        super().__init__()
+        self.fd = fd
+
+    def forward(self, x):
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.feature_distilation.cam_modules:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        return x
+
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -274,6 +295,7 @@ class ResNet(nn.Module):
             channels=channels,
             use_conv_head=fd_config['use_conv_head']
         )
+        self.dummy_fd = DummyFD(self.feature_distilation)
         # End Feature Distilation
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
@@ -523,7 +545,6 @@ class ResNet(nn.Module):
     def forward_tricky_2(self, x):
 
         x = self.conv1(x)
-        f_dict = {'conv1': x}
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
@@ -531,14 +552,7 @@ class ResNet(nn.Module):
 
         layer5 = x
 
-        B, C, H, W = x.shape
-
-        for cs, cam in self.feature_distilation.cam_modules:
-            c_tensor = torch.tensor(cs).cuda()
-
-            new_x = x[:, c_tensor]
-            new_x = cam(new_x)
-            x[:, c_tensor] = new_x
+        x = self.dummy_fd(x)
 
         x = self.layer2(x)
         x = self.layer3(x)
@@ -570,7 +584,6 @@ class ResNet(nn.Module):
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
-        feature_dict.update(f_dict)
 
         if os.environ.get('nht') is not None:
             triplet_features.append(v)

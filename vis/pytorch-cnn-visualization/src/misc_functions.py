@@ -50,7 +50,7 @@ def save_gradient_images(gradient, file_name):
     cv2.imwrite(path_to_file, gradient)
 
 
-def save_class_activation_on_image(org_img, activation_map, file_name):
+def save_class_activation_on_image(org_img, activation_map, prefix):
     """
         Saves cam activation map and activation map on the original image
 
@@ -59,21 +59,22 @@ def save_class_activation_on_image(org_img, activation_map, file_name):
         activation_map (numpy arr): activation map (grayscale) 0-255
         file_name (str): File name of the exported image
     """
-    if not os.path.exists('vis/results'):
-        os.makedirs('vis/results')
+    dirname = os.path.dirname(prefix)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
     # Grayscale activation map
-    path_to_file = os.path.join('vis/results', file_name+'_Cam_Grayscale.jpg')
+    path_to_file = os.path.join(prefix + '_Cam_Grayscale.jpg')
     cv2.imwrite(path_to_file, activation_map)
     # Heatmap of activation map
     activation_heatmap = cv2.applyColorMap(activation_map, cv2.COLORMAP_HSV)
-    path_to_file = os.path.join('vis/results', file_name+'_Cam_Heatmap.jpg')
+    path_to_file = os.path.join(prefix + '_Cam_Heatmap.jpg')
     cv2.imwrite(path_to_file, activation_heatmap)
     # Heatmap on picture
     print(org_img.shape)
     org_img = cv2.resize(org_img, (64, 128))
     img_with_heatmap = .4 * np.float32(activation_heatmap) + .6 * np.float32(org_img)
     img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
-    path_to_file = os.path.join('vis/results', file_name+'_Cam_On_Image.jpg')
+    path_to_file = os.path.join(prefix + '_Cam_On_Image.jpg')
     cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))
 
 
@@ -121,7 +122,7 @@ def recreate_image(im_as_var):
         recreated_im (numpy arr): Recreated image in array
     """
     reverse_mean = [-0.485, -0.456, -0.406]
-    reverse_std = [1/0.229, 1/0.224, 1/0.225]
+    reverse_std = [1 / 0.229, 1 / 0.224, 1 / 0.225]
     recreated_im = copy.copy(im_as_var.data.cpu().numpy()[0])
     for c in range(3):
         recreated_im[c] /= reverse_std[c]
@@ -171,7 +172,7 @@ def get_params(example_index):
     selected_example = example_index
     img_path = example_list[selected_example][0]
     target_class = example_list[selected_example][1]
-    file_name_to_export = img_path[img_path.rfind('/')+1:img_path.rfind('.')]
+    file_name_to_export = img_path[img_path.rfind('/') + 1:img_path.rfind('.')]
     # Read image
     original_image = cv2.imread(img_path, 1)
     # Process image

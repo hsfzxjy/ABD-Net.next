@@ -14,14 +14,18 @@ class CamExtractor():
     """
         Extracts cam features from the model
     """
-    def __init__(self, model, target_layer, target_name):
+
+    def __init__(self, model, target_layer):
         self.model = model
         self.target_layer = target_layer
         self.gradients = None
-        self.target_name = target_name
 
     def save_gradient(self, module, grad_in, grad):
         self.gradients = grad[0]
+
+    def save_feature(self, module, inputs, outputs):
+
+        self.conv_output = outputs[0]
 
     def forward_pass_on_convolutions(self, x):
         # """
@@ -35,8 +39,9 @@ class CamExtractor():
         #         conv_output = x  # Save the convolution output on that layer
         # return conv_output, x
         self.target_layer.register_backward_hook(self.save_gradient)
+        self.target_layer.registser_forward_hook(self.save_feature)
         _, xent_features, _, feature_dict = self.model.forward(x)
-        return feature_dict[self.target_name], xent_features[-1]
+        return self.conv_output, xent_features[-1]
 
     def forward_pass(self, x):
         """
@@ -50,15 +55,17 @@ class CamExtractor():
         # return conv_output, x
         return self.forward_pass_on_convolutions(x)
 
+
 class GradCam():
     """
         Produces class activation map
     """
-    def __init__(self, model, target_layer, target_name):
+
+    def __init__(self, model, target_layer):
         self.model = model
         # self.model.eval()
         # Define extractor
-        self.extractor = CamExtractor(self.model, target_layer, target_name)
+        self.extractor = CamExtractor(self.model, target_layer)
 
     def generate_cam(self, input_image, target_class=None):
         # Full forward pass

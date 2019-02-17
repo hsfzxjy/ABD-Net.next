@@ -114,31 +114,32 @@ if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-l', dest='layer', type=int)
-    parser.add_argument('-p', dest='path', default=None)
-    parser.add_argument('-i', dest='input', default='')
-    parser.add_argument('-w', dest='weights')
-    parser.add_argument('-a', dest='arch')
-    parser.add_argument('--iter', type=int, default=50)
-    # options = parser.parse_args()
-    # args.load_weights = options.weights
-    # if options.arch:
-    #     args.arch = options.arch
-    # print(options)
+    parser.add_argument('prefix')
+    parser.add_argument('num', default=5, type=int)
+    options = parser.parse_args()
 
-    imgs, pids, camids, img_paths = next(iter(testloader))
-    input_img = imgs[:2]
-    # input_img = input_img.view(1, *input_img.size())
-    target = pids[0]
+    for i, (imgs, pids, camids, img_paths) in enumerate(testloader):
+        if i >= options.num - 1:
+            break
+        del model
+        input_img = imgs[:2]
+        target = pids[0]
 
-    from gradcam import GradCam
-    from misc_functions import save_class_activation_on_image
-    import cv2
+        from gradcam import GradCam
+        from misc_functions import save_class_activation_on_image
+        import cv2
 
-    model = get_model()
+        model = None
 
-    print(input_img.size())
-    gradcam = GradCam(model, model.dummy_sum, 'after')
-    cam = gradcam.generate_cam(input_img, pids[:2])
+        for attrname, basename in [
+            ('dummy_sum', 'deep'),
+            ('dummy_fd', 'shallow'),
+        ]:
+            prefix = f'vis/heatmap_result/{i}/{basename}/output'
+            print('Making', prefix)
+            del model
+            model = get_model()
+            gradcam = GradCam(model, getattr(model, attrname))
+            cam = gradcam.generate_cam(input_img, pids[:2])
 
-    save_class_activation_on_image(cv2.imread(img_paths[0]), cam, 'test')
+            save_class_activation_on_image(cv2.imread(img_paths[0]), cam, prefix)

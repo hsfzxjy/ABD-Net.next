@@ -14,7 +14,7 @@ class CamExtractor():
     """
         Extracts cam features from the model
     """
-    def __init__(self, model, target_layer):
+    def __init__(self, model, target_layer, target_name):
         self.model = model
         self.target_layer = target_layer
         self.gradients = None
@@ -23,38 +23,41 @@ class CamExtractor():
         self.gradients = grad
 
     def forward_pass_on_convolutions(self, x):
-        """
-            Does a forward pass on convolutions, hooks the function at given layer
-        """
-        conv_output = None
-        for module_pos, module in self.model.features._modules.items():
-            x = module(x)  # Forward
-            if int(module_pos) == self.target_layer:
-                x.register_hook(self.save_gradient)
-                conv_output = x  # Save the convolution output on that layer
-        return conv_output, x
+        # """
+        #     Does a forward pass on convolutions, hooks the function at given layer
+        # """
+        # conv_output = None
+        # for module_pos, module in self.model.features._modules.items():
+        #     x = module(x)  # Forward
+        #     if int(module_pos) == self.target_layer:
+        #         x.register_hook(self.save_gradient)
+        #         conv_output = x  # Save the convolution output on that layer
+        # return conv_output, x
+        self.target_layer.register_hook(self.save_gradient)
+        _, xent_features, _, feature_dict = self.model.forward(x)
+        return feature_dict[name], xent_features[-1]
 
     def forward_pass(self, x):
         """
             Does a full forward pass on the model
         """
         # Forward pass on the convolutions
-        conv_output, x = self.forward_pass_on_convolutions(x)
-        x = x.view(x.size(0), -1)  # Flatten
-        # Forward pass on the classifier
-        x = self.model.classifier(x)
-        return conv_output, x
-
+        # conv_output, x = self.forward_pass_on_convolutions(x)
+        # x = x.view(x.size(0), -1)  # Flatten
+        # # Forward pass on the classifier
+        # x = self.model.classifier(x)
+        # return conv_output, x
+        return self.forward_pass_on_convolutions(x)
 
 class GradCam():
     """
         Produces class activation map
     """
-    def __init__(self, model, target_layer):
+    def __init__(self, model, target_layer, target_name):
         self.model = model
-        self.model.eval()
+        # self.model.eval()
         # Define extractor
-        self.extractor = CamExtractor(self.model, target_layer)
+        self.extractor = CamExtractor(self.model, target_layer, target_name)
 
     def generate_cam(self, input_image, target_class=None):
         # Full forward pass

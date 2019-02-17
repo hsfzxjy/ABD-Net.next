@@ -555,14 +555,14 @@ class ResNet(nn.Module):
         f = self.layer4(x2)
         f = self.reduction_tr(f)
         feature_dict, _ = self.attention_module(f)
-        feature_dict.update(f_dict)
         feature_dict['before'] = f
-        f = sum(feature_dict.values())
+        f = feature_dict['before'] + feature_dict['pam'] + feature_dict['cam']
         feature_dict['after'] = f
 
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
         feature_dict['layer5'] = layer5
+        feature_dict.update(f_dict)
 
         if os.environ.get('nht') is not None:
             triplet_features.append(v)

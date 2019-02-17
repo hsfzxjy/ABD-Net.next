@@ -18,6 +18,7 @@ class CamExtractor():
         self.model = model
         self.target_layer = target_layer
         self.gradients = None
+        self.target_name = target_name
 
     def save_gradient(self, grad):
         self.gradients = grad
@@ -35,7 +36,7 @@ class CamExtractor():
         # return conv_output, x
         self.target_layer.register_backward_hook(self.save_gradient)
         _, xent_features, _, feature_dict = self.model.forward(x)
-        return feature_dict[name], xent_features[-1]
+        return feature_dict[self.target_name], xent_features[-1]
 
     def forward_pass(self, x):
         """

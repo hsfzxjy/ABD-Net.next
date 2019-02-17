@@ -639,7 +639,7 @@ class ResNet(nn.Module):
         # our branch
         x2 = x
         f = self.layer4(x2)
-        if ps.environ.get('no_reduction') is None:
+        if os.environ.get('no_reduction') is None:
             f = self.reduction_tr(f)
 
         f_before = self.before_module(f)

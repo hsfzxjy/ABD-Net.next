@@ -126,7 +126,7 @@ if __name__ == '__main__':
     #     args.arch = options.arch
     # print(options)
 
-    imgs, pids, camids, _ = next(iter(testloader))
+    imgs, pids, camids, img_paths = next(iter(testloader))
     input_img = imgs[:2]
     # input_img = input_img.view(1, *input_img.size())
     target = pids[0]
@@ -140,4 +140,4 @@ if __name__ == '__main__':
     gradcam = GradCam(model, model.reduction_tr, 'before')
     cam = gradcam.generate_cam(input_img, pids[:2])
 
-    save_class_activation_on_image(input_img.data.numpy()[0].transpose(2, 1, 0), cam, 'test')
+    save_class_activation_on_image(read_image(img_paths[0]), cam, 'test')

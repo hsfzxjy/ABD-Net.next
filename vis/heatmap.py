@@ -132,7 +132,8 @@ if __name__ == '__main__':
         for attrname, basename in [
             ('dummy_sum', 'deep'),
             ('dummy_fd', 'shallow'),
-            ('conv1', 'front'),
+            ('conv1', 'conv1'),
+            ('relu', 'relu'),
         ]:
             prefix = f'{options.prefix}/{i}/{basename}/output'
             print('Making', prefix)

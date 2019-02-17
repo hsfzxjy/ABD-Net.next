@@ -20,7 +20,8 @@ class CamExtractor():
         self.gradients = None
         self.target_name = target_name
 
-    def save_gradient(self, grad):
+    def save_gradient(self, *args):
+        print(*args)
         self.gradients = grad
 
     def forward_pass_on_convolutions(self, x):

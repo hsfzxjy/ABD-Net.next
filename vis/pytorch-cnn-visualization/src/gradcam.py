@@ -75,6 +75,7 @@ class GradCam():
         # self.model.features.zero_grad()
         # self.model.classifier.zero_grad()
         # Backward pass with specified target
+        print(one_hot_output.size())
         model_output.backward(gradient=one_hot_output, retain_graph=True)
         # Get hooked gradients
         guided_gradients = self.extractor.gradients.data.numpy()[0]

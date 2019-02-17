@@ -127,7 +127,7 @@ if __name__ == '__main__':
     # print(options)
 
     imgs, pids, camids, _ = next(iter(testloader))
-    input_img = imgs[0]
+    input_img = imgs[:2]
     input_img = input_img.view(1, *input_img.size())
     target = pids[0]
 

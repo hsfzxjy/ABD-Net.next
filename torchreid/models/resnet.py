@@ -50,7 +50,7 @@ class DummyFD(nn.Module):
 
         B, C, H, W = x.shape
 
-        for cs, cam in self.feature_distilation.cam_modules:
+        for cs, cam in self.fd.cam_modules:
             c_tensor = torch.tensor(cs).cuda()
 
             new_x = x[:, c_tensor]

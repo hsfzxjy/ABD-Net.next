@@ -71,7 +71,7 @@ def save_class_activation_on_image(org_img, activation_map, file_name):
     # Heatmap on picture
     print(org_img.shape)
     org_img = cv2.resize(org_img, (64, 128))
-    img_with_heatmap = .2 * np.float32(activation_heatmap) + .8 * np.float32(org_img)
+    img_with_heatmap = .4 * np.float32(activation_heatmap) + .6 * np.float32(org_img)
     img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
     path_to_file = os.path.join('vis/results', file_name+'_Cam_On_Image.jpg')
     cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))

@@ -135,7 +135,7 @@ if __name__ == '__main__':
             ('dummy_sum', 'deep'),
             ('dummy_fd', 'shallow'),
         ]:
-            prefix = f'vis/heatmap_result/{i}/{basename}/output'
+            prefix = f'{options.prefix}/{i}/{basename}/output'
             print('Making', prefix)
             del model
             model = get_model()

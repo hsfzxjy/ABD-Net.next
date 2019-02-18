@@ -524,7 +524,6 @@ class ResNet(nn.Module):
             new_x = cam(new_x)
             x[:, c_tensor] = new_x
 
-        return x
         x = self.layer2(x)
         x = self.layer3(x)
 
@@ -571,7 +570,6 @@ class ResNet(nn.Module):
         predict_features.append(v)
         v = self.classifier_tr(v)
         xent_features.append(v)
-        print(self.training)
         if not self.training:
             return torch.cat(predict_features, 1)
 

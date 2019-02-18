@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 from __future__ import division
 
+import logging
+
 import torch
 import torch.nn as nn
 
@@ -8,6 +10,7 @@ import os
 
 from .cross_entropy_loss import CrossEntropyLoss
 
+logger = logging.getLogger(__name__)
 
 USE_LOG = os.environ.get('use_log') is not None
 CONSTRAINT_WEIGHTS = os.environ.get('constraint_weights') is not None
@@ -87,7 +90,7 @@ class SingularLoss(nn.Module):
         if k == 'layer5':
             singular_penalty *= 0.01
 
-        return singular_penalty.sum()
+        return singular_penalty.sum() / (x.size[0] / 32.)  # Quirk: normalize to 32-batch case
 
     def forward(self, inputs, pids):
 

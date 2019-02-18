@@ -90,7 +90,7 @@ class SingularLoss(nn.Module):
         if k == 'layer5':
             singular_penalty *= 0.01
 
-        return singular_penalty.sum() / (x.size[0] / 32.)  # Quirk: normalize to 32-batch case
+        return singular_penalty.sum() / (x.size()[0] / 32.)  # Quirk: normalize to 32-batch case
 
     def forward(self, inputs, pids):
 

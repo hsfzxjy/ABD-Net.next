@@ -7,6 +7,11 @@
 import torch
 from torch.nn import Module, Conv2d, Parameter, Softmax
 import torch.nn as nn
+
+import logging
+
+logger = logging.getLogger(__name__)
+
 torch_ver = torch.__version__[:3]
 
 __all__ = ['PAM_Module', 'CAM_Module', 'get_attention_module_instance', 'AttentionModule']
@@ -166,8 +171,7 @@ class CAM_Module(Module):
         super(CAM_Module, self).__init__()
         self.channel_in = in_dim
 
-        self.register_buffer('gamma', Parameter(torch.zeros(1)))
-        print(self.gamma.device)
+        self.gamma = Parameter(torch.zeros(1))
         self.softmax = Softmax(dim=-1)
 
     def forward(self, x):
@@ -190,6 +194,7 @@ class CAM_Module(Module):
         out = torch.bmm(attention, proj_value)
         out = out.view(m_batchsize, C, height, width)
 
+        logging.debug(f'cam device: {out.device}, {gamma.device}')
         gamma = self.gamma.to(out.device)
         out = gamma * out + x
         return out

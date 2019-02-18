@@ -166,8 +166,7 @@ class CAM_Module(Module):
         super(CAM_Module, self).__init__()
         self.channel_in = in_dim
 
-        self.gamma = Parameter(torch.zeros(1))
-        self.register_parameter('gamma', self.gamma)
+        self.register_parameter('gamma', Parameter(torch.zeros(1)))
         self.softmax = Softmax(dim=-1)
 
     def forward(self, x):

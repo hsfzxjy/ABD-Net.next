@@ -323,6 +323,9 @@ class ResNet(nn.Module):
             cam_module = CAM_Module(len(cs))
             setattr(self, f'_fd_cam_module_{part}', cam_module)  # force gpu
 
+            cs = torch.tensor(cs)
+            setattr(self, f'_fd_cs_{part}', cs)  # force gpu
+
             self.cam_modules.append((cs, cam_module))
 
     def get_tricky_6_attention_module(self):
@@ -515,8 +518,7 @@ class ResNet(nn.Module):
 
         B, C, H, W = x.shape
 
-        for cs, cam in self.cam_modules:
-            c_tensor = torch.tensor(cs).cuda()
+        for c_tensor, cam in self.cam_modules:
 
             new_x = x[:, c_tensor]
             new_x = cam(new_x)

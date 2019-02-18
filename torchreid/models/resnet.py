@@ -285,7 +285,7 @@ class ResNet(nn.Module):
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
-        if self.tricky in [4, 6]:
+        if self.tricky in [4, 5, 6]:
 
             if os.environ.get('dropout_reduction'):
                 dropout = [dropout_optimizer]

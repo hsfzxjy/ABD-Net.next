@@ -309,6 +309,8 @@ class ResNet(nn.Module):
 
         from .tricks.attention import CAM_Module
 
+        self.cam_modules = []
+
         for part in fd_config['parts']:
 
             part: 'subset of "abc"'

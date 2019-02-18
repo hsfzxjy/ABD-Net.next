@@ -217,7 +217,7 @@ class ResNet(nn.Module):
         normal_branch_stride = 2
         self.dummy_sum = DummySum()
 
-        if self.tricky in [4, 6]:
+        if self.tricky in [4, 5, 6]:
             self.layer4_normal_branch = nn.Sequential(
                 Bottleneck(
                     1024,
@@ -239,19 +239,23 @@ class ResNet(nn.Module):
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
         from .tricks.feature_distilation import FeatureDistilationTrick
-        self.feature_distilation = FeatureDistilationTrick(
-            fd_config['parts'],
-            channels=channels,
-            use_conv_head=fd_config['use_conv_head']
-        )
-        self.dummy_fd = DummyFD(self.feature_distilation)
+        if self.tricky == 5:
+            self.init_fd_tricky_5(fd_config)
+            self.dummy_fd = DummyFD(self)
+        else:
+            self.feature_distilation = FeatureDistilationTrick(
+                fd_config['parts'],
+                channels=channels,
+                use_conv_head=fd_config['use_conv_head']
+            )
+            self.dummy_fd = DummyFD(self.feature_distilation)
         # End Feature Distilation
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
 
         num_features = 2048
         # Begin Attention Module
-        if self.tricky != 6:
+        if self.tricky not in [5, 6]:
             if attention_config is None:
                 attention_config = {'parts': (), 'use_conv_head': False}
             from .tricks.attention import AttentionModule
@@ -265,7 +269,9 @@ class ResNet(nn.Module):
             if not sum_fusion:
                 self.feature_dim = num_features = num_features + self.attention_module.output_dim
             self._init_params(self.attention_module)
-        else:
+        elif self.tricky == 5:
+            self.get_tricky_5_attention_module()
+        elif self.tricky == 6:
             self.get_tricky_6_attention_module()
         # End Attention Module
 
@@ -299,6 +305,22 @@ class ResNet(nn.Module):
         self._init_params(self.fc)
         self._init_params(self.classifier)
 
+    def init_fd_tricky_5(self, fd_config):
+
+        for part in fd_config['parts']:
+
+            part: 'subset of "abc"'
+
+            cs = []
+            for key in part:
+                cs.extend(channels[key])
+            cs.sort()
+
+            cam_module = CAM_Module(len(cs))
+            setattr(self, f'_fd_cam_module_{part}', cam_module)  # force gpu
+
+            self.cam_modules.append((cs, cam_module))
+
     def get_tricky_6_attention_module(self):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
@@ -312,7 +334,19 @@ class ResNet(nn.Module):
         self.cam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, CAM_Module)
         self.sum_conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(1024, 1024, 1))
 
-        # self._init_params(self.before_module)
+        self._init_params(self.before_module)
+        self._init_params(self.cam_module)
+        self._init_params(self.pam_module)
+        self._init_params(self.sum_conv)
+
+    def get_tricky_5_attention_module(self):
+
+        from .tricks.attention import DANetHead, CAM_Module, PAM_Module
+
+        in_channels = 1024
+        self.pam_module = CAM_Module(in_channels)
+        self.cam_module = PAM_Module(in_channels)
+
         self._init_params(self.cam_module)
         self._init_params(self.pam_module)
         self._init_params(self.sum_conv)
@@ -466,6 +500,70 @@ class ResNet(nn.Module):
 
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
+    def forward_tricky_4(self, x):
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        x = self.layer1(x)
+
+        layer5 = x
+
+        x = self.dummy_fd(x)
+
+        x = self.layer2(x)
+        x = self.layer3(x)
+
+        triplet_features = []
+        xent_features = []
+        predict_features = []
+
+        # normal branch
+        x1 = x
+        x1 = self.layer4_normal_branch(x1)
+        x1 = self.global_avgpool(x1)
+        x1 = x1.view(x1.size(0), -1)
+        x1 = self.fc(x1)
+        triplet_features.append(x1)
+        predict_features.append(x1)
+        x1 = self.classifier(x1)
+        xent_features.append(x1)
+
+        # our branch
+        x2 = x
+        f = self.layer4(x2)
+        f = self.reduction_tr(f)
+
+        f_before = f
+        f_cam = self.cam_module(f)
+        f_pam = self.pam_module(f)
+
+        f_sum = f_sum + f_before
+        f_after = self.sum_conv(f_sum)
+        feature_dict = {
+            'cam': f_cam,
+            'before': f_before,
+            'pam': f_pam,
+            'after': f_after,
+            'layer5': layer5,
+        }
+
+        v = self.global_avgpool(f_after)
+        v = v.view(v.size(0), -1)
+        feature_dict['layer5'] = layer5
+
+        if os.environ.get('nht') is not None:
+            triplet_features.append(v)
+        predict_features.append(v)
+        v = self.classifier_tr(v)
+        xent_features.append(v)
+
+        if not self.training:
+            return torch.cat(predict_features, 1)
+
+        return None, tuple(xent_features), tuple(triplet_features), feature_dict
+
     def forward_tricky_6(self, x):
 
         x = self.conv1(x)
@@ -542,6 +640,9 @@ class ResNet(nn.Module):
 
         if self.tricky in [4]:
             return self.forward_tricky_4(x)
+
+        if self.tricky in [5]:
+            return self.forward_tricky_5(x)
 
         if self.tricky in [6]:
             return self.forward_tricky_6(x)

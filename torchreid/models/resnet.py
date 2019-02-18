@@ -248,6 +248,7 @@ class ResNet(nn.Module):
                 channels=channels,
                 use_conv_head=fd_config['use_conv_head']
             )
+            self._init_params(self.feature_distilation)
             self.dummy_fd = DummyFD(self.feature_distilation)
         # End Feature Distilation
 
@@ -301,7 +302,6 @@ class ResNet(nn.Module):
             self._init_params(self.reduction_tr)
             self._init_params(self.classifier_tr)
 
-        self._init_params(self.feature_distilation)
         self._init_params(self.fc)
         self._init_params(self.classifier)
 

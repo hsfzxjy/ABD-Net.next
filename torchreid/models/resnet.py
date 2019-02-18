@@ -503,7 +503,7 @@ class ResNet(nn.Module):
 
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
-    def forward_tricky_4(self, x):
+    def forward_tricky_5(self, x):
 
         x = self.conv1(x)
         x = self.bn1(x)

@@ -495,7 +495,8 @@ class ResNet(nn.Module):
         # normal branch
         x1 = x
         x1 = self.layer4_normal_branch(x1)
-        x1 = self.global_avgpool(x1).squeeze()
+        x1 = self.global_avgpool(x1)
+        x1 = x1.view(x1.size(0), -1)
         x1 = self.fc(x1)
         triplet_features.append(x1)
         predict_features.append(x1)
@@ -524,7 +525,8 @@ class ResNet(nn.Module):
             'layer5': layer5,
         }
 
-        v = self.global_avgpool(f_after).squeeze()
+        v = self.global_avgpool(f_after)
+        v = v.view(v.size(0), -1)
 
         triplet_features.append(v)
         predict_features.append(v)

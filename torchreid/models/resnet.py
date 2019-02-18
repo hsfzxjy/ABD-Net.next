@@ -571,7 +571,7 @@ class ResNet(nn.Module):
         predict_features.append(v)
         v = self.classifier_tr(v)
         xent_features.append(v)
-
+        print(self.training)
         if not self.training:
             return torch.cat(predict_features, 1)
 

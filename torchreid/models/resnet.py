@@ -513,8 +513,16 @@ class ResNet(nn.Module):
 
         layer5 = x
 
-        x = self.dummy_fd(x)
+        B, C, H, W = x.shape
 
+        for cs, cam in self.cam_modules:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        return x
         x = self.layer2(x)
         x = self.layer3(x)
 

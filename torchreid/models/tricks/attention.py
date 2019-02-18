@@ -166,7 +166,7 @@ class CAM_Module(Module):
         super(CAM_Module, self).__init__()
         self.channel_in = in_dim
 
-        self.register_buffer('gamma', Parameter(torch.zeros(1)))
+        self.register_buffer('gamma', Parameter(torch.zeros(1).cuda()))
         print(self.gamma.device)
         self.softmax = Softmax(dim=-1)
 

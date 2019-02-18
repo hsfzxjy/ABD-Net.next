@@ -353,7 +353,6 @@ class ResNet(nn.Module):
 
         self._init_params(self.cam_module)
         self._init_params(self.pam_module)
-        self._init_params(self.sum_conv)
 
     def backbone_convs(self):
 

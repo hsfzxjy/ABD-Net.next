@@ -26,6 +26,10 @@ class AttentionModule(nn.Module):
         super().__init__()
         print(module_names)
         self.modules_list = []
+
+        if sum_fusion:
+            use_avg_pool = False
+
         for name in module_names:
             module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head, sum_fusion=sum_fusion)
             setattr(self, f'_{name}_module', module)  # force gpu
@@ -177,7 +181,7 @@ class CAM_Module(Module):
         proj_query = x.view(m_batchsize, C, -1)
         proj_key = x.view(m_batchsize, C, -1).permute(0, 2, 1)
         energy = torch.bmm(proj_query, proj_key)
-        max_energy_0 = torch.tensor(torch.max(energy, -1, keepdim=True)[0], device='cuda').expand_as(energy)
+        max_energy_0 = torch.max(energy, -1, keepdim=True)[0].expand_as(energy)
         energy_new = max_energy_0 - energy
         attention = self.softmax(energy_new)
         proj_value = x.view(m_batchsize, C, -1)

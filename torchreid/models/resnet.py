@@ -472,6 +472,9 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def _init_params(self, x):
+        if x is None:
+            return
+
         for m in x.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')

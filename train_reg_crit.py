@@ -139,7 +139,7 @@ def main():
         print("- start_epoch: {}\n- rank1: {}".format(args.start_epoch, checkpoint['rank1']))
 
     if use_gpu:
-        model = nn.DataParallel(model, device_ids=args.gpu_devices.split(',')).cuda()
+        model = nn.DataParallel(model, device_ids=[int(x) for x in args.gpu_devices.split(',')]).cuda()
 
     if args.evaluate:
         print("Evaluate only")

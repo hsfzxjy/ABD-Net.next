@@ -167,6 +167,7 @@ class CAM_Module(Module):
         self.channel_in = in_dim
 
         self.register_buffer('gamma', Parameter(torch.zeros(1)))
+        print(self.gamma.device)
         self.softmax = Softmax(dim=-1)
 
     def forward(self, x):
@@ -189,5 +190,6 @@ class CAM_Module(Module):
         out = torch.bmm(attention, proj_value)
         out = out.view(m_batchsize, C, height, width)
 
+        print(self.gamma.device, out.device)
         out = self.gamma * out + x
         return out

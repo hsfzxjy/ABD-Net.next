@@ -324,7 +324,7 @@ class ResNet(nn.Module):
             setattr(self, f'_fd_cam_module_{part}', cam_module)  # force gpu
 
             cs = torch.tensor(cs)
-            setattr(self, f'_fd_cs_{part}', cs)  # force gpu
+            self.register_buffer(f'_fd_cs_{part}', cs)  # force gpu
 
             self.cam_modules.append((cs, cam_module))
 

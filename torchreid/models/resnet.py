@@ -41,16 +41,16 @@ class DummySum(nn.Module):
 
 class DummyFD(nn.Module):
 
-    def __init__(self, fd):
+    def __init__(self, fd_getter):
 
         super().__init__()
-        self.fd = fd
+        self.fd_getter = fd_getter
 
     def forward(self, x):
 
         B, C, H, W = x.shape
 
-        for cs, cam in self.fd.cam_modules:
+        for cs, cam in self.fd_getter().cam_modules:
             c_tensor = torch.tensor(cs).cuda()
 
             new_x = x[:, c_tensor]
@@ -241,7 +241,7 @@ class ResNet(nn.Module):
         from .tricks.feature_distilation import FeatureDistilationTrick
         if self.tricky == 5:
             self.init_fd_tricky_5(fd_config)
-            self.dummy_fd = DummyFD(self)
+            self.dummy_fd = DummyFD(lambda: self)
         else:
             self.feature_distilation = FeatureDistilationTrick(
                 fd_config['parts'],
@@ -249,7 +249,7 @@ class ResNet(nn.Module):
                 use_conv_head=fd_config['use_conv_head']
             )
             self._init_params(self.feature_distilation)
-            self.dummy_fd = DummyFD(self.feature_distilation)
+            self.dummy_fd = DummyFD(lambda: self.feature_distilation)
         # End Feature Distilation
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)

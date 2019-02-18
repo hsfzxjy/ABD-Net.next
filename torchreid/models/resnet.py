@@ -543,7 +543,7 @@ class ResNet(nn.Module):
         f_pam = self.pam_module(f)
 
         f_sum = f_cam + f_pam + f_before
-        f_after = self.sum_conv(f_sum)
+        f_after = f_sum
         feature_dict = {
             'cam': f_cam,
             'before': f_before,

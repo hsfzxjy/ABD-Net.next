@@ -194,7 +194,7 @@ class CAM_Module(Module):
         out = torch.bmm(attention, proj_value)
         out = out.view(m_batchsize, C, height, width)
 
-        logging.debug(f'cam device: {out.device}, {gamma.device}')
+        logging.debug(f'cam device: {out.device}, {self.gamma.device}')
         gamma = self.gamma.to(out.device)
         out = gamma * out + x
         return out

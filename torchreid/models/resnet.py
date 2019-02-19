@@ -780,10 +780,7 @@ class ResNet(nn.Module):
         xent_features.append(v)
 
         # SI Branch
-        x3 = x
-        f = self.layer4_si(x3)
-        f = self.reduction_si(f)
-        feature_dict['before'] = (feature_dict['before'], f)
+        f = feature_dict['before']
         v3 = self.global_avgpool(f)
         triplet_features.append(v3)
         predict_features.append(v3)

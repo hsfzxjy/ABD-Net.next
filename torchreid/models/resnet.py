@@ -235,6 +235,41 @@ class ResNet(nn.Module):
             )
             self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
 
+        if self.tricky in [7]:
+            self.layer4_normal_branch = nn.Sequential(
+                Bottleneck(
+                    1024,
+                    512,
+                    stride=normal_branch_stride,
+                    downsample=nn.Sequential(
+                        nn.Conv2d(
+                            1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
+                        ),
+                        nn.BatchNorm2d(2048)
+                    )
+                ),
+                Bottleneck(2048, 512),
+                Bottleneck(2048, 512)
+            )
+            self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
+
+            self.layer4_si = nn.Sequential(
+                Bottleneck(
+                    1024,
+                    512,
+                    stride=normal_branch_stride,
+                    downsample=nn.Sequential(
+                        nn.Conv2d(
+                            1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
+                        ),
+                        nn.BatchNorm2d(2048)
+                    )
+                ),
+                Bottleneck(2048, 512),
+                Bottleneck(2048, 512)
+            )
+            self.layer4_si.load_state_dict(backbone.layer4.state_dict())
+
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
@@ -328,7 +363,6 @@ class ResNet(nn.Module):
             self._init_params(self.reduction_si)
             self._init_params(self.classifier_si)
 
-
         self._init_params(self.fc)
         self._init_params(self.classifier)
 
@@ -399,8 +433,8 @@ class ResNet(nn.Module):
 
         if hasattr(self, 'layer4_normal_branch'):
             convs.append(self.layer4_normal_branch)
-        if hasattr(self, 'layer4_2'):
-            convs.append(self.layer4_2)
+        if hasattr(self, 'layer4_si'):
+            convs.append(self.layer4_si)
 
         return convs
 
@@ -672,6 +706,88 @@ class ResNet(nn.Module):
 
         return None, tuple(xent_features), tuple(triplet_features), feature_dict
 
+    def forward_tricky_7(self, x):
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        x = self.layer1(x)
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.feature_distilation.cam_modules:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        layer5 = x
+        x = self.layer2(x)
+        x = self.layer3(x)
+
+        triplet_features = []
+        xent_features = []
+        predict_features = []
+
+        # normal branch
+        x1 = x
+        x1 = self.layer4_normal_branch(x1)
+        x1 = self.global_avgpool(x1)
+        x1 = x1.view(x1.size(0), -1)
+        x1 = self.fc(x1)
+        triplet_features.append(x1)
+        predict_features.append(x1)
+        x1 = self.classifier(x1)
+        xent_features.append(x1)
+
+        # our branch
+        x2 = x
+        f = self.layer4(x2)
+        if os.environ.get('no_reduction') is None:
+            f = self.reduction_tr(f)
+
+        f_before = self.before_module(f)
+        f_cam = self.cam_module(f)
+        f_pam = self.pam_module(f)
+
+        f_sum = f_cam + f_pam
+        if os.environ.get('no_before') is None:
+            f_sum = f_sum + f_before
+        f_after = self.sum_conv(f_sum)
+        feature_dict = {
+            'cam': f_cam,
+            'before': f_before,
+            'pam': f_pam,
+            'after': f_after,
+            'layer5': layer5,
+        }
+
+        v = self.global_avgpool(f_after)
+        v = v.view(v.size(0), -1)
+
+        triplet_features.append(v)
+        predict_features.append(v)
+        v = self.classifier_tr(v)
+        xent_features.append(v)
+
+        # SI Branch
+        x3 = x
+        f = self.layer4_si(x3)
+        f = self.reduction_si(f)
+        feature_dict['before'] = (feature_dict['before'], f)
+        v3 = self.global_avgpool(f)
+        triplet_features.append(v3)
+        predict_features.append(v3)
+        v3 = self.classifier_si(v3)
+        xent_features.append(v3)
+
+        if not self.training:
+            return torch.cat(predict_features, 1)
+
+        return None, tuple(xent_features), tuple(triplet_features), feature_dict
+
     def forward(self, x):
 
         if self.tricky in [4]:
@@ -681,6 +797,9 @@ class ResNet(nn.Module):
             return self.forward_tricky_5(x)
 
         if self.tricky in [6]:
+            return self.forward_tricky_6(x)
+
+        if self.tricky in [7]:
             return self.forward_tricky_6(x)
 
         f, layer5 = self.forward_feature_distilation(x)

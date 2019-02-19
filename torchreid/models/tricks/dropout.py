@@ -1,3 +1,4 @@
+import os
 from torch.nn import functional as F
 from torch import nn
 
@@ -47,12 +48,17 @@ class DropoutOptimizer(nn.Module):
         if dropout_settings == 'none':
             return 0
 
+        try:
+            max_dropout = float(os.environ.get('max_dropout'))
+        except (ValueError, TypeError):
+            max_dropout = 0.5
+
         if dropout_settings == 'fix':
-            return .5
+            return max_dropout
 
         # print(self.epoch)
         p = .2 + .1 * (self.epoch // 10)
-        p = min(p, .5)
+        p = min(p, max_dropout)
 
         return p
 

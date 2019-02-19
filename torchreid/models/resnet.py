@@ -397,6 +397,10 @@ class ResNet(nn.Module):
             in_channels = 1024
         else:
             in_channels = 2048
+
+        if self.tricky == 7:
+            in_channels = 512
+
         self.before_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, lambda _: lambda x: x)
         self.pam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, PAM_Module)
         self.cam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, CAM_Module)

@@ -886,7 +886,7 @@ class ResNetTr8(nn.Module):
         assert self.sum_fusion and fc_dims
 
         # self.inplanes = 64
-        super(ResNet, self).__init__()
+        super(ResNetTr8, self).__init__()
         self.feature_dim = 2048  # 512 * block.expansion
 
         # backbone network

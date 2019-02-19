@@ -214,7 +214,7 @@ class ResNet(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        normal_branch_stride = 2
+        normal_branch_stride = 1
         self.dummy_sum = DummySum()
 
         if self.tricky in [4, 5, 6]:
@@ -256,7 +256,7 @@ class ResNet(nn.Module):
 
         num_features = 2048
         # Begin Attention Module
-        if self.tricky not in [5, 6]:
+        if self.tricky not in [5, 6, 7]:
             if attention_config is None:
                 attention_config = {'parts': (), 'use_conv_head': False}
             from .tricks.attention import AttentionModule
@@ -272,7 +272,7 @@ class ResNet(nn.Module):
             self._init_params(self.attention_module)
         elif self.tricky == 5:
             self.get_tricky_5_attention_module()
-        elif self.tricky == 6:
+        elif self.tricky in [6, 7]:
             self.get_tricky_6_attention_module()
         # End Attention Module
 
@@ -301,6 +301,33 @@ class ResNet(nn.Module):
             self.classifier_tr = nn.Linear(fc_dims[0], num_classes)
             self._init_params(self.reduction_tr)
             self._init_params(self.classifier_tr)
+
+        if self.tricky in [7]:
+            if os.environ.get('dropout_reduction'):
+                dropout = [dropout_optimizer]
+            else:
+                dropout = []
+
+            self.reduction_tr = nn.Sequential(
+                nn.Conv2d(2048, 512, kernel_size=1, bias=False),
+                nn.BatchNorm2d(512),
+                nn.ReLU(inplace=True),
+                *dropout
+            )
+            self.classifier_tr = nn.Linear(512, num_classes)
+            self._init_params(self.reduction_tr)
+            self._init_params(self.classifier_tr)
+
+            self.reduction_si = nn.Sequential(
+                nn.Conv2d(2048, 512, kernel_size=1, bias=False),
+                nn.BatchNorm2d(512),
+                nn.ReLU(inplace=True),
+                *dropout
+            )
+            self.classifier_si = nn.Linear(512, num_classes)
+            self._init_params(self.reduction_si)
+            self._init_params(self.classifier_si)
+
 
         self._init_params(self.fc)
         self._init_params(self.classifier)
@@ -514,8 +541,6 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
         x = self.layer1(x)
 
-        layer5 = x
-
         B, C, H, W = x.shape
 
         for c_tensor, cam in self.cam_modules:
@@ -524,6 +549,7 @@ class ResNet(nn.Module):
             new_x = cam(new_x)
             x[:, c_tensor] = new_x
 
+        layer5 = x
         x = self.layer2(x)
         x = self.layer3(x)
 
@@ -583,8 +609,6 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
         x = self.layer1(x)
 
-        layer5 = x
-
         B, C, H, W = x.shape
 
         for cs, cam in self.feature_distilation.cam_modules:
@@ -594,6 +618,7 @@ class ResNet(nn.Module):
             new_x = cam(new_x)
             x[:, c_tensor] = new_x
 
+        layer5 = x
         x = self.layer2(x)
         x = self.layer3(x)
 

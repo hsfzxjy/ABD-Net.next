@@ -882,6 +882,7 @@ class ResNetTr8(nn.Module):
 
         self.sum_fusion = True
         self.tricky = 8
+        last_stride = 1
 
         assert self.sum_fusion and fc_dims
 
@@ -946,6 +947,11 @@ class ResNetTr8(nn.Module):
             from .tricks.dropout import SimpleDropoutOptimizer
             dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
         # End Dropout Module
+
+        if os.environ.get('dropout_reduction'):
+            dropout = [dropout_optimizer]
+        else:
+            dropout = []
 
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes, bias=False)

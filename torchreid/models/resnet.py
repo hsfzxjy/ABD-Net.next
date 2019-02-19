@@ -398,13 +398,16 @@ class ResNet(nn.Module):
         else:
             in_channels = 2048
 
+        out_channels = 1024
+
         if self.tricky == 7:
             in_channels = 512
+            out_channels = 512
 
-        self.before_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, PAM_Module)
-        self.cam_module = DANetHead(in_channels, 1024, nn.BatchNorm2d, CAM_Module)
-        self.sum_conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(1024, 1024, 1))
+        self.before_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
+        self.pam_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
+        self.cam_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
+        self.sum_conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
 
         self._init_params(self.before_module)
         self._init_params(self.cam_module)

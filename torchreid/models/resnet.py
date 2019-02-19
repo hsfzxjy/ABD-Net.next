@@ -1681,7 +1681,7 @@ for fragment in fragments:
 
 for fragment in fragments:
 
-    name = f'resnet50_sf_tr8'
+    name = f'resnet50_sf_tr9'
     config = {}
     for key, (sub_config, name_frag) in zip(keys, fragment):
         name += name_frag

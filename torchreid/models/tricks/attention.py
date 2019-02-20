@@ -85,7 +85,14 @@ def get_attention_module_instance(
 class DANetHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, module_class):
         super(DANetHead, self).__init__()
-        inter_channels = in_channels // 4
+
+        import os
+        try:
+            collapsion = int(os.environ.get('head_col'))
+        except (TypeError, ValueError):
+            collapsion = 4
+
+        inter_channels = in_channels // collapsion
 
         self.conv5c = nn.Sequential(
             nn.Conv2d(

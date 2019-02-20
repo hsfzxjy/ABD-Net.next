@@ -1595,8 +1595,8 @@ class ResNetTr10(nn.Module):
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self.reduction_tr = nn.Sequential(
-            nn.Conv2d(2048, 1024, kernel_size=1, bias=False),
-            nn.BatchNorm2d(1024),
+            nn.Conv2d(2048, 512, kernel_size=1, bias=False),
+            nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
             *dropout
         )
@@ -1614,7 +1614,7 @@ class ResNetTr10(nn.Module):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
 
-        in_channels = 1024
+        in_channels = 512
         out_channels = 512
 
         self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)

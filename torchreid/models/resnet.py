@@ -327,13 +327,16 @@ class ResNet(nn.Module):
             else:
                 dropout = []
 
+            if self.tricky == 6:
+                dim = 1024
+
             self.reduction_tr = nn.Sequential(
-                nn.Conv2d(2048, fc_dims[0], kernel_size=1, bias=False),
-                nn.BatchNorm2d(fc_dims[0]),
+                nn.Conv2d(2048, dim, kernel_size=1, bias=False),
+                nn.BatchNorm2d(dim),
                 nn.ReLU(inplace=True),
                 *dropout
             )
-            self.classifier_tr = nn.Linear(fc_dims[0], num_classes)
+            self.classifier_tr = nn.Linear(dim, num_classes, bias=False)
             self._init_params(self.reduction_tr)
             self._init_params(self.classifier_tr)
 

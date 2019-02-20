@@ -1465,21 +1465,14 @@ class ResNetTr9(nn.Module):
         f = self.reduction_tr(x2)
         f = x2[:, :, 0:12, :]
 
-        f_before = self.before_module1(f)
-        f_cam = self.cam_module1(f)
-        f_pam = self.pam_module1(f)
+        f_before1 = self.before_module1(f)
+        f_cam1 = self.cam_module1(f)
+        f_pam1 = self.pam_module1(f)
 
-        f_sum = f_cam + f_pam + f_before
-        f_after = self.sum_conv1(f_sum)
-        feature_dict = {
-            'cam': f_cam,
-            'before': f_before,
-            'pam': f_pam,
-            'after': f_after,
-            'layer5': layer5,
-        }
+        f_sum1 = f_cam1 + f_pam1 + f_before1
+        f_after1 = self.sum_conv1(f_sum1)
 
-        v = self.global_avgpool(f_after)
+        v = self.global_avgpool(f_after1)
         v = v.view(v.size(0), -1)
         triplet_features.append(v)
         predict_features.append(v)
@@ -1488,27 +1481,26 @@ class ResNetTr9(nn.Module):
 
         f = x2[:, :, 12:24, :]
 
-        f_before = self.before_module2(f)
-        f_cam = self.cam_module2(f)
-        f_pam = self.pam_module2(f)
+        f_before2 = self.before_module2(f)
+        f_cam2 = self.cam_module2(f)
+        f_pam2 = self.pam_module2(f)
 
-        f_sum = f_cam + f_pam + f_before
-        f_after = self.sum_conv2(f_sum)
+        f_sum2 = f_cam2 + f_pam2 + f_before2
+        f_after2 = self.sum_conv2(f_sum2)
         feature_dict = {
-            'cam': f_cam,
-            'before': f_before,
-            'pam': f_pam,
-            'after': f_after,
+            'cam': (f_cam1, f_cam2),
+            'before': (f_before1, f_before2),
+            'pam': (f_pam1, f_pam2),
+            'after': (f_after1, f_after2),
             'layer5': layer5,
         }
 
-        v = self.global_avgpool(f_after)
+        v = self.global_avgpool(f_after2)
         v = v.view(v.size(0), -1)
         triplet_features.append(v)
         predict_features.append(v)
         v = self.classifier_p2(v)
         xent_features.append(v)
-
 
         if not self.training:
             return torch.cat(predict_features, 1)

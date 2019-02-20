@@ -1462,7 +1462,7 @@ class ResNetTr9(nn.Module):
         # our branch
         x2 = x
         x2 = self.layer4(x2)
-        f = self.reduction_tr(x2)
+        x2 = self.reduction_tr(x2)
         f = x2[:, :, 0:12, :]
 
         f_before1 = self.before_module1(f)

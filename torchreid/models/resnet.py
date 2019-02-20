@@ -1275,7 +1275,7 @@ class ResNetTr9(nn.Module):
             dropout = []
 
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
-        self.classifier = nn.Linear(self.feature_dim, num_classes, bias=False)
+        self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self.reduction_tr = nn.Sequential(
             nn.Conv2d(2048, 1024, kernel_size=1, bias=False),
@@ -1284,15 +1284,11 @@ class ResNetTr9(nn.Module):
             *dropout
         )
 
-        self.classifier_before = nn.Linear(512, num_classes, bias=False)
-        self.classifier_after = nn.Linear(512, num_classes, bias=False)
-        self.classifier_pam = nn.Linear(512, num_classes, bias=False)
-        self.classifier_cam = nn.Linear(512, num_classes, bias=False)
+        self.classifier_p1 = nn.Linear(1024, num_classes)
+        self.classifier_p2 = nn.Linear(1024, num_classes)
 
-        self._init_params(self.classifier_after)
-        self._init_params(self.classifier_before)
-        self._init_params(self.classifier_cam)
-        self._init_params(self.classifier_pam)
+        self._init_params(self.classifier_p1)
+        self._init_params(self.classifier_p2)
 
         self._init_params(self.fc)
         self._init_params(self.classifier)
@@ -1302,17 +1298,27 @@ class ResNetTr9(nn.Module):
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
 
         in_channels = 1024
-        out_channels = 512
+        out_channels = 1024
 
-        self.before_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
-        self.cam_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
-        self.sum_conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
+        self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
+        self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
+        self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
+        self.sum_conv1 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
 
-        self._init_params(self.before_module)
-        self._init_params(self.cam_module)
-        self._init_params(self.pam_module)
-        self._init_params(self.sum_conv)
+        self._init_params(self.before_module1)
+        self._init_params(self.cam_module1)
+        self._init_params(self.pam_module1)
+        self._init_params(self.sum_conv1)
+
+        self.before_module2 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
+        self.pam_module2 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
+        self.cam_module2 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
+        self.sum_conv2 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
+
+        self._init_params(self.before_module2)
+        self._init_params(self.cam_module2)
+        self._init_params(self.pam_module2)
+        self._init_params(self.sum_conv2)
 
     def backbone_convs(self):
 
@@ -1455,15 +1461,16 @@ class ResNetTr9(nn.Module):
 
         # our branch
         x2 = x
-        f = self.layer4(x2)
-        f = self.reduction_tr(f)
+        x2 = self.layer4(x2)
+        f = self.reduction_tr(x2)
+        f = x2[:, :, 0:12, :]
 
-        f_before = self.before_module(f)
-        f_cam = self.cam_module(f)
-        f_pam = self.pam_module(f)
+        f_before = self.before_module1(f)
+        f_cam = self.cam_module1(f)
+        f_pam = self.pam_module1(f)
 
         f_sum = f_cam + f_pam + f_before
-        f_after = self.sum_conv(f_sum)
+        f_after = self.sum_conv1(f_sum)
         feature_dict = {
             'cam': f_cam,
             'before': f_before,
@@ -1472,19 +1479,36 @@ class ResNetTr9(nn.Module):
             'layer5': layer5,
         }
 
-        v = self.global_avgpool(f_before)
+        v = self.global_avgpool(f_after)
         v = v.view(v.size(0), -1)
         triplet_features.append(v)
         predict_features.append(v)
-        v = self.classifier_before(v)
+        v = self.classifier_p1(v)
         xent_features.append(v)
+
+        f = x2[:, :, 12:24, :]
+
+        f_before = self.before_module2(f)
+        f_cam = self.cam_module2(f)
+        f_pam = self.pam_module2(f)
+
+        f_sum = f_cam + f_pam + f_before
+        f_after = self.sum_conv2(f_sum)
+        feature_dict = {
+            'cam': f_cam,
+            'before': f_before,
+            'pam': f_pam,
+            'after': f_after,
+            'layer5': layer5,
+        }
 
         v = self.global_avgpool(f_after)
         v = v.view(v.size(0), -1)
         triplet_features.append(v)
         predict_features.append(v)
-        v = self.classifier_after(v)
+        v = self.classifier_p2(v)
         xent_features.append(v)
+
 
         if not self.training:
             return torch.cat(predict_features, 1)

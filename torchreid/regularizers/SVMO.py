@@ -67,6 +67,9 @@ class SVMORegularizer(nn.Module):
         # old_W = W
         old_size = W.size()
 
+        if old_size[0] == 1:
+            return 0
+
         W = W.view(old_size[0], -1).permute(1, 0)  # (C x H x W) x S
 
         smallest, largest = self.get_singular_values(W)

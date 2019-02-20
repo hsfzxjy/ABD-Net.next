@@ -1327,6 +1327,14 @@ class ResNetTr9(nn.Module):
         if hasattr(self, 'layer4_si'):
             convs.append(self.layer4_si)
 
+        if os.environ.get('reg_deep') is not None:
+            convs.extend([
+                getattr(self, 'reduction_tr', None),
+                getattr(self, 'before_module', None),
+                getattr(self, 'cam_module', None),
+                getattr(self, 'pam_module', None),
+            ])
+
         return convs
 
     def forward_feature_distilation(self, x):

@@ -1481,12 +1481,12 @@ class ResNetTr9(nn.Module):
 
         f = x2[:, :, 12:24, :]
 
-        f_before2 = self.before_module2(f)
-        f_cam2 = self.cam_module2(f)
-        f_pam2 = self.pam_module2(f)
+        f_before2 = self.before_module1(f)
+        f_cam2 = self.cam_module1(f)
+        f_pam2 = self.pam_module1(f)
 
         f_sum2 = f_cam2 + f_pam2 + f_before2
-        f_after2 = self.sum_conv2(f_sum2)
+        f_after2 = self.sum_conv1(f_sum2)
         feature_dict = {
             'cam': (f_cam1, f_cam2),
             'before': (f_before1, f_before2),

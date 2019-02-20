@@ -1310,16 +1310,6 @@ class ResNetTr9(nn.Module):
         self._init_params(self.pam_module1)
         self._init_params(self.sum_conv1)
 
-        self.before_module2 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module2 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
-        self.cam_module2 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
-        self.sum_conv2 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
-
-        self._init_params(self.before_module2)
-        self._init_params(self.cam_module2)
-        self._init_params(self.pam_module2)
-        self._init_params(self.sum_conv2)
-
     def backbone_convs(self):
 
         convs = [

@@ -329,6 +329,8 @@ class ResNet(nn.Module):
 
             if self.tricky == 6:
                 dim = 1024
+            else:
+                dim = fc_dims[0]
 
             self.reduction_tr = nn.Sequential(
                 nn.Conv2d(2048, dim, kernel_size=1, bias=False),

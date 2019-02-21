@@ -1610,7 +1610,7 @@ class ResNetTr10(nn.Module):
         self.part_num = part_num
 
         for i in range(1, part_num + 1):
-            c = nn.Linear(1024, num_classes)
+            c = nn.Linear(512, num_classes)
             setattr(self, f'classifier_p{i}', c)
             self._init_params(c)
 

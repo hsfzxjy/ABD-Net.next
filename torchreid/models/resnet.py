@@ -1788,7 +1788,7 @@ class ResNetTr10(nn.Module):
 
         margin = 24 // self.part_num
 
-        for p in range(1, self.part_num):
+        for p in range(1, self.part_num + 1):
 
             f = x2[:, :, margin * (p - 1):margin * p, :]
 

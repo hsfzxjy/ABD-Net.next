@@ -1284,11 +1284,17 @@ class ResNetTr9(nn.Module):
             *dropout
         )
 
-        self.classifier_p1 = nn.Linear(1024, num_classes)
-        self.classifier_p2 = nn.Linear(1024, num_classes)
+        try:
+            part_num = int(os.environ.get('part_num'))
+        except (TypeError, ValueError):
+            part_num = 2
 
-        self._init_params(self.classifier_p1)
-        self._init_params(self.classifier_p2)
+        self.part_num = part_num
+
+        for i in range(1, part_num + 1):
+            c = nn.Linear(1024, num_classes)
+            setattr(self, f'classifier_p{i}', c)
+            self._init_params(c)
 
         self._init_params(self.fc)
         self._init_params(self.classifier)
@@ -1453,44 +1459,39 @@ class ResNetTr9(nn.Module):
         x2 = x
         x2 = self.layer4(x2)
         x2 = self.reduction_tr(x2)
-        f = x2[:, :, 0:12, :]
 
-        f_before1 = self.before_module1(f)
-        f_cam1 = self.cam_module1(f)
-        f_pam1 = self.pam_module1(f)
-
-        f_sum1 = f_cam1 + f_pam1 + f_before1
-        f_after1 = self.sum_conv1(f_sum1)
-
-        v = self.global_avgpool(f_after1)
-        v = v.view(v.size(0), -1)
-        triplet_features.append(v)
-        predict_features.append(v)
-        v = self.classifier_p1(v)
-        xent_features.append(v)
-
-        f = x2[:, :, 12:24, :]
-
-        f_before2 = self.before_module1(f)
-        f_cam2 = self.cam_module1(f)
-        f_pam2 = self.pam_module1(f)
-
-        f_sum2 = f_cam2 + f_pam2 + f_before2
-        f_after2 = self.sum_conv1(f_sum2)
         feature_dict = {
-            'cam': (f_cam1, f_cam2),
-            'before': (f_before1, f_before2),
-            'pam': (f_pam1, f_pam2),
-            'after': (f_after1, f_after2),
-            'layer5': layer5,
+            'cam': [],
+            'pam': [],
+            'before': [],
+            'after': [],
+            'layer5': layer5
         }
 
-        v = self.global_avgpool(f_after2)
-        v = v.view(v.size(0), -1)
-        triplet_features.append(v)
-        predict_features.append(v)
-        v = self.classifier_p2(v)
-        xent_features.append(v)
+        margin = 24 // self.part_num
+
+        for p in range(1, self.part_num + 1):
+
+            f = x2[:, :, margin * (p - 1):margin * p, :]
+
+            f_before1 = self.before_module1(f)
+            f_cam1 = self.cam_module1(f)
+            f_pam1 = self.pam_module1(f)
+
+            f_sum1 = f_cam1 + f_pam1 + f_before1
+            f_after1 = self.sum_conv1(f_sum1)
+
+            feature_dict['cam'] = (*feature_dict['cam'], f_cam1)
+            feature_dict['pam'] = (*feature_dict['pam'], f_pam1)
+            feature_dict['before'] = (*feature_dict['before'], f_before1)
+            feature_dict['after'] = (*feature_dict['after'], f_after1)
+
+            v = self.global_avgpool(f_after1)
+            v = v.view(v.size(0), -1)
+            triplet_features.append(v)
+            predict_features.append(v)
+            v = getattr(self, f'classifier_p{p}')(v)
+            xent_features.append(v)
 
         if not self.training:
             return torch.cat(predict_features, 1)
@@ -1601,11 +1602,17 @@ class ResNetTr10(nn.Module):
             *dropout
         )
 
-        self.classifier_p1 = nn.Linear(512, num_classes)
-        self.classifier_p2 = nn.Linear(512, num_classes)
+        try:
+            part_num = int(os.environ.get('part_num'))
+        except (TypeError, ValueError):
+            part_num = 2
 
-        self._init_params(self.classifier_p1)
-        self._init_params(self.classifier_p2)
+        self.part_num = part_num
+
+        for i in range(1, part_num + 1):
+            c = nn.Linear(1024, num_classes)
+            setattr(self, f'classifier_p{i}', c)
+            self._init_params(c)
 
         self._init_params(self.fc)
         self._init_params(self.classifier)
@@ -1770,44 +1777,39 @@ class ResNetTr10(nn.Module):
         x2 = x
         x2 = self.layer4(x2)
         x2 = self.reduction_tr(x2)
-        f = x2[:, :, 0:12, :]
 
-        f_before1 = self.before_module1(f)
-        f_cam1 = self.cam_module1(f)
-        f_pam1 = self.pam_module1(f)
-
-        f_sum1 = f_cam1 + f_pam1 + f_before1
-        f_after1 = self.sum_conv1(f_sum1)
-
-        v = self.global_avgpool(f_after1)
-        v = v.view(v.size(0), -1)
-        triplet_features.append(v)
-        predict_features.append(v)
-        v = self.classifier_p1(v)
-        xent_features.append(v)
-
-        f = x2[:, :, 12:24, :]
-
-        f_before2 = self.before_module1(f)
-        f_cam2 = self.cam_module1(f)
-        f_pam2 = self.pam_module1(f)
-
-        f_sum2 = f_cam2 + f_pam2 + f_before2
-        f_after2 = self.sum_conv1(f_sum2)
         feature_dict = {
-            'cam': (f_cam1, f_cam2),
-            'before': (f_before1, f_before2),
-            'pam': (f_pam1, f_pam2),
-            'after': (f_after1, f_after2),
-            'layer5': layer5,
+            'cam': [],
+            'pam': [],
+            'before': [],
+            'after': [],
+            'layer5': layer5
         }
 
-        v = self.global_avgpool(f_after2)
-        v = v.view(v.size(0), -1)
-        triplet_features.append(v)
-        predict_features.append(v)
-        v = self.classifier_p2(v)
-        xent_features.append(v)
+        margin = 24 // self.part_num
+
+        for p in range(1, self.part_num):
+
+            f = x2[:, :, margin * (p - 1):margin * p, :]
+
+            f_before1 = self.before_module1(f)
+            f_cam1 = self.cam_module1(f)
+            f_pam1 = self.pam_module1(f)
+
+            f_sum1 = f_cam1 + f_pam1 + f_before1
+            f_after1 = self.sum_conv1(f_sum1)
+
+            feature_dict['cam'] = (*feature_dict['cam'], f_cam1)
+            feature_dict['pam'] = (*feature_dict['pam'], f_pam1)
+            feature_dict['before'] = (*feature_dict['before'], f_before1)
+            feature_dict['after'] = (*feature_dict['after'], f_after1)
+
+            v = self.global_avgpool(f_after1)
+            v = v.view(v.size(0), -1)
+            triplet_features.append(v)
+            predict_features.append(v)
+            v = getattr(self, f'classifier_p{p}')(v)
+            xent_features.append(v)
 
         if not self.training:
             return torch.cat(predict_features, 1)

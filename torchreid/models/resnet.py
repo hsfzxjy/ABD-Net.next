@@ -1841,6 +1841,13 @@ class ResNetTr11(nn.Module):
         self.tricky = 11
         last_stride = 1
 
+        try:
+            part_num = int(os.environ.get('part_num'))
+        except (TypeError, ValueError):
+            part_num = 2
+
+        self.part_num = part_num
+
         assert self.sum_fusion and fc_dims
 
         # self.inplanes = 64
@@ -1919,13 +1926,6 @@ class ResNetTr11(nn.Module):
             nn.ReLU(inplace=True),
             *dropout
         )
-
-        try:
-            part_num = int(os.environ.get('part_num'))
-        except (TypeError, ValueError):
-            part_num = 2
-
-        self.part_num = part_num
 
         for i in range(1, part_num + 1):
             c = nn.Linear(1024, num_classes)
@@ -2165,6 +2165,13 @@ class ResNetTr12(nn.Module):
         self.tricky = 12
         last_stride = 1
 
+        try:
+            part_num = int(os.environ.get('part_num'))
+        except (TypeError, ValueError):
+            part_num = 2
+
+        self.part_num = part_num
+
         assert self.sum_fusion and fc_dims
 
         # self.inplanes = 64
@@ -2243,13 +2250,6 @@ class ResNetTr12(nn.Module):
             nn.ReLU(inplace=True),
             *dropout
         )
-
-        try:
-            part_num = int(os.environ.get('part_num'))
-        except (TypeError, ValueError):
-            part_num = 2
-
-        self.part_num = part_num
 
         for i in range(1, part_num + 1):
             c = nn.Linear(512, num_classes)

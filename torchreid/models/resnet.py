@@ -2576,7 +2576,8 @@ configurations = OrderedDict([
                 [('ab', 'c'), 'ab_c'],
                 [('ab',), 'ab'],
                 [('a',), 'a'],
-                [(), 'none']
+                [(), 'none'],
+                [('abc',), 'abc']
             ]
             for use_conv_head in (True, False)
         ],

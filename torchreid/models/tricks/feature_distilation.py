@@ -20,6 +20,7 @@ class FeatureDistilationTrick(nn.Module):
 
         self.cam_modules = []
         self.channels = channels
+
         for part in parts:
 
             part: 'subset of "abc"'

@@ -165,6 +165,7 @@ def main():
 
     if args.fixbase_epoch > 0:
         oldenv = os.environ.get('sa', '')
+        os.environ['sa'] = ''
         print("Train {} for {} epochs while keeping other layers frozen".format(args.open_layers, args.fixbase_epoch))
         initial_optim_state = optimizer.state_dict()
 

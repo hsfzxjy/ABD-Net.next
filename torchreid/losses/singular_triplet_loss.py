@@ -22,6 +22,7 @@ def SingularTripletLoss(num_classes: int, use_gpu: bool, args, param_controller)
             layer4_2 = torch.norm(layer4_2, dim=1, p=2) ** 2 / 2048
 
             as_loss = ((layer3 - layer4_1) ** 2).sum() + ((layer3 - layer4_2) ** 2).sum()
+            print(as_loss)
         else:
             as_loss = 0.
 

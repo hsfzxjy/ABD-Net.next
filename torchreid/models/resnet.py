@@ -1458,6 +1458,7 @@ class ResNetTr9(nn.Module):
             layer5 = x
             x = self.cam2(self.layer2(x))
             x = self.cam3(self.layer3(x))
+            layer3 = x
 
         else:
             x = self.layer1(x)
@@ -1475,6 +1476,7 @@ class ResNetTr9(nn.Module):
 
             x = self.layer2(x)
             x = self.layer3(x)
+            layer3 = x
 
         triplet_features = []
         xent_features = []
@@ -1483,6 +1485,7 @@ class ResNetTr9(nn.Module):
         # normal branch
         x1 = x
         x1 = self.layer4_normal_branch(x1)
+        layer4_1 = x1
         if os.environ.get('non_local') is not None:
 
             x1 = self.non_local(x1)
@@ -1497,6 +1500,7 @@ class ResNetTr9(nn.Module):
         # our branch
         x2 = x
         x2 = self.layer4(x2)
+        layer4_2 = x2
         x2 = self.reduction_tr(x2)
 
         feature_dict = {
@@ -1504,7 +1508,8 @@ class ResNetTr9(nn.Module):
             'pam': [],
             'before': [],
             'after': [],
-            'layer5': layer5
+            'layer5': layer5,
+            'layers': (layer3, layer4_1, layer4_2)
         }
 
         margin = 24 // self.part_num

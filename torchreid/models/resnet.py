@@ -1320,6 +1320,12 @@ class ResNetTr9(nn.Module):
             self.cam2 = CAM_Module(512)
             self.cam3 = CAM_Module(1024)
 
+        if os.environ.get('non_local') is not None:
+            from .tricks.non_local import NONLocalBlock2D
+
+            self.non_local = NONLocalBlock2D(1024)
+            self._init_params(self.non_local)
+
     def get_tricky_8_attention_module(self):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
@@ -1468,6 +1474,10 @@ class ResNetTr9(nn.Module):
             layer5 = x
             x = self.layer2(x)
             x = self.layer3(x)
+
+        if os.environ.get('non_local') is not None:
+
+            x = self.non_local(x)
 
         triplet_features = []
         xent_features = []

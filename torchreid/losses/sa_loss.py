@@ -4,7 +4,7 @@ import os
 
 def sa_loss(features_dict):
 
-    if os.environ.get('sa') is not None:
+    if os.environ.get('sa'):
         layer3, layer4_1, layer4_2 = features_dict['layers']
 
         layer3 = torch.norm(layer3, dim=1, p=2) ** 2 / 1024

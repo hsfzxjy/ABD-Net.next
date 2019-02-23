@@ -14,15 +14,15 @@ def SingularTripletLoss(num_classes: int, use_gpu: bool, args, param_controller)
 
         _, y, v, features_dict = x
 
-        from .as_loss import as_loss
+        from .sa_loss import sa_loss
 
-        as_loss_value = as_loss(features_dict)
+        sa_loss_value = sa_loss(features_dict)
 
         loss = (
             args.lambda_xent * xent_loss(x, pids) +
             args.lambda_htri * htri_loss(x, pids) * param_controller.get_value()
         )
 
-        return loss + as_loss_value
+        return loss + sa_loss_value
 
     return _loss

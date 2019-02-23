@@ -1323,7 +1323,7 @@ class ResNetTr9(nn.Module):
         if os.environ.get('non_local') is not None:
             from .tricks.non_local import NONLocalBlock2D
 
-            self.non_local = NONLocalBlock2D(256)
+            self.non_local = NONLocalBlock2D(2048)
             self._init_params(self.non_local)
 
     def get_tricky_8_attention_module(self):
@@ -1472,9 +1472,6 @@ class ResNetTr9(nn.Module):
                 x[:, c_tensor] = new_x
 
             layer5 = x
-            if os.environ.get('non_local') is not None:
-
-                x = self.non_local(x)
 
             x = self.layer2(x)
             x = self.layer3(x)
@@ -1486,6 +1483,9 @@ class ResNetTr9(nn.Module):
         # normal branch
         x1 = x
         x1 = self.layer4_normal_branch(x1)
+        if os.environ.get('non_local') is not None:
+
+            x1 = self.non_local(x1)
         x1 = self.global_avgpool(x1)
         x1 = x1.view(x1.size(0), -1)
         triplet_features.append(x1)

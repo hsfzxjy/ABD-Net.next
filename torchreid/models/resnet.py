@@ -1537,6 +1537,9 @@ class ResNetTr9(nn.Module):
             v = getattr(self, f'classifier_p{p}')(v)
             xent_features.append(v)
 
+        if os.environ.get('with_normal'):
+            feature_dict['after'] = (*feature_dict['after'], layer4_1)
+
         if not self.training:
             return torch.cat(predict_features, 1)
 

@@ -1314,6 +1314,12 @@ class ResNetTr9(nn.Module):
         self._init_params(self.fc)
         self._init_params(self.classifier)
 
+        if os.environ.get('all_cam') is not None:
+            from .tricks.attention import CAM_Module
+            self.cam1 = CAM_Module(256)
+            self.cam2 = CAM_Module(512)
+            self.cam3 = CAM_Module(1024)
+
     def get_tricky_8_attention_module(self):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
@@ -1440,20 +1446,28 @@ class ResNetTr9(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-        x = self.layer1(x)
+        if os.environ.get('all_cam') is not None:
 
-        B, C, H, W = x.shape
+            x = self.cam1(self.layer1(x))
+            layer5 = x
+            x = self.cam2(self.layer2(x))
+            x = self.cam3(self.layer3(x))
 
-        for cs, cam in self.feature_distilation.cam_modules:
-            c_tensor = torch.tensor(cs).cuda()
+        else:
+            x = self.layer1(x)
 
-            new_x = x[:, c_tensor]
-            new_x = cam(new_x)
-            x[:, c_tensor] = new_x
+            B, C, H, W = x.shape
 
-        layer5 = x
-        x = self.layer2(x)
-        x = self.layer3(x)
+            for cs, cam in self.feature_distilation.cam_modules:
+                c_tensor = torch.tensor(cs).cuda()
+
+                new_x = x[:, c_tensor]
+                new_x = cam(new_x)
+                x[:, c_tensor] = new_x
+
+            layer5 = x
+            x = self.layer2(x)
+            x = self.layer3(x)
 
         triplet_features = []
         xent_features = []

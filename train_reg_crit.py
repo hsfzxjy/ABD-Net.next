@@ -164,6 +164,7 @@ def main():
     print("==> Start training")
 
     if args.fixbase_epoch > 0:
+        oldenv = os.environ.get('sa', '')
         print("Train {} for {} epochs while keeping other layers frozen".format(args.open_layers, args.fixbase_epoch))
         initial_optim_state = optimizer.state_dict()
 
@@ -174,6 +175,7 @@ def main():
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))
         optimizer.load_state_dict(initial_optim_state)
+        os.environ['sa'] = oldenv
 
     for epoch in range(args.start_epoch, args.max_epoch):
         dropout_optimizer.set_epoch(epoch)

@@ -101,7 +101,7 @@ def argument_parser():
     parser.add_argument('--fix-custom-loss', action='store_true', default=False)
     parser.add_argument('--regularizer', type=str, default='none')
     parser.add_argument('--dropout', type=str, default='none', choices=['none', 'incr', 'fix'])
-    parser.add_argument('--penalty-position', type=str, default='before', choices=['before', 'after', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5', 'all_layers', 'before,layer5', 'after,layer5', 'after,cam', 'before,after,cam,pam', 'after,pam', 'before,before2,after,cam,pam', 'before,after,cam,pam,layer5'])
+    parser.add_argument('--penalty-position', type=str, default='before', choices=['before', 'after', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5', 'all_layers', 'before,layer5', 'after,layer5', 'after,cam', 'before,after,cam,pam', 'after,pam', 'before,before2,after,cam,pam', 'before,after,cam,pam,layer5', 'before,after'])
 
     # ************************************************************
     # Cross entropy loss-specific setting

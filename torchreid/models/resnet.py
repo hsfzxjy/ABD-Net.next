@@ -2599,6 +2599,7 @@ class ResNetABD(nn.Module):
         else:
             dropout = []
 
+        fc_dims = [1024]
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 

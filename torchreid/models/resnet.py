@@ -2531,8 +2531,6 @@ class ResNetABD(nn.Module):
         self.sum_fusion = True
         last_stride = 1
 
-        assert self.sum_fusion and fc_dims
-
         super(ResNetABD, self).__init__()
         self.feature_dim = 2048  # 512 * block.expansion
 

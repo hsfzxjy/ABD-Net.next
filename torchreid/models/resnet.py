@@ -2546,24 +2546,24 @@ class ResNetABD(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        # self.layer4_normal_branch = nn.Sequential(
-        #     Bottleneck(
-        #         1024,
-        #         512,
-        #         stride=normal_branch_stride,
-        #         downsample=nn.Sequential(
-        #             nn.Conv2d(
-        #                 1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
-        #             ),
-        #             nn.BatchNorm2d(2048)
-        #         )
-        #     ),
-        #     Bottleneck(2048, 512),
-        #     Bottleneck(2048, 512)
-        # )
-        # self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
-        #
-        self.layer4_normal_branch = deepcopy(self.layer4)
+        self.layer4_normal_branch = nn.Sequential(
+            Bottleneck(
+                1024,
+                512,
+                stride=normal_branch_stride,
+                downsample=nn.Sequential(
+                    nn.Conv2d(
+                        1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
+                    ),
+                    nn.BatchNorm2d(2048)
+                )
+            ),
+            Bottleneck(2048, 512),
+            Bottleneck(2048, 512)
+        )
+        self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
+        # #
+        # self.layer4_normal_branch = deepcopy(self.layer4)
 
         # Begin Feature Distilation
         if fd_config is None:
@@ -3037,7 +3037,7 @@ for fragment in fragments:
 
 for fragment in fragments:
 
-    name = f'resnet50_abd'
+    name = f'resnet50_sf_abd'
     config = {}
     for key, (sub_config, name_frag) in zip(keys, fragment):
         name += name_frag

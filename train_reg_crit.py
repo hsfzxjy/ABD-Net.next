@@ -221,7 +221,7 @@ def main():
                 os.environ['NOFC'] = ''
                 rank1 = test(model, queryloader, galleryloader, use_gpu)
                 ranklogger.write(name, epoch + 1, rank1)
-                if 'nofc' not in args.arch and 'tr' not in args.arch:
+                if 'nofc' not in args.arch and 'tr' not in args.arch and 'abd' not in args.arch:
                     print('!!!!!!!!NOFC!!!!!!')
                     os.environ['NOFC'] = '1'
                     test(model, queryloader, galleryloader, use_gpu)

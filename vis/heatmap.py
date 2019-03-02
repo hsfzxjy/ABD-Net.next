@@ -137,6 +137,7 @@ if __name__ == '__main__':
         for attrname, basename in [
             ('sum_conv1', 'deep'),
             ('dummy_fd', 'shallow'),
+            ('reduction_tr', 'deep'),
             # ('conv1', 'conv1'),
             # ('relu', 'relu'),
         ]:

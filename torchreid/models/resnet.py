@@ -2716,17 +2716,18 @@ class ResNetABD(nn.Module):
         x = self.maxpool(x)
         x = self.layer1(x)
 
-        B, C, H, W = x.shape
+        # B, C, H, W = x.shape
 
-        for cs, cam in self.feature_distilation.cam_modules:
-            c_tensor = torch.tensor(cs).cuda()
+        # for cs, cam in self.feature_distilation.cam_modules:
+        #     c_tensor = torch.tensor(cs).cuda()
 
-            new_x = x[:, c_tensor]
-            new_x = cam(new_x)
-            x[:, c_tensor] = new_x
+        #     new_x = x[:, c_tensor]
+        #     new_x = cam(new_x)
+        #     x[:, c_tensor] = new_x
 
-        layer5 = x
+        # layer5 = x
 
+        x = self.dummy_fd(x)
         x = self.layer2(x)
         x = self.layer3(x)
 

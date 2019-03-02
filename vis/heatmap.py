@@ -135,11 +135,13 @@ if __name__ == '__main__':
         model = None
 
         for attrname, basename in [
-            ('dummy_sum', 'deep'),
+            ('sum_conv1', 'deep'),
             ('dummy_fd', 'shallow'),
-            ('conv1', 'conv1'),
-            ('relu', 'relu'),
+            # ('conv1', 'conv1'),
+            # ('relu', 'relu'),
         ]:
+            if attrname not in options.layer.split(','):
+                continue
             prefix = f'{options.prefix}/{i}/{basename}/output'
             print('Making', prefix)
             del model

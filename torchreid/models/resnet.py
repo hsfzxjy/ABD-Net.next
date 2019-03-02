@@ -2728,6 +2728,7 @@ class ResNetABD(nn.Module):
         # layer5 = x
 
         x = self.dummy_fd(x)
+        layer5 = x
         x = self.layer2(x)
         x = self.layer3(x)
 

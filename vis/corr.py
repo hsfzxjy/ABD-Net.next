@@ -144,6 +144,6 @@ if __name__ == '__main__':
         output = extractor.forward_pass(input_img)[0][0]
         output = output.view(output.size(0), -1).data.numpy()
         print(output.shape)
-        dct[i] = output
+        dct[str(i)] = output
 
     scipy.io.savemat(f'vis/corr/{options.name}.mat', dct)

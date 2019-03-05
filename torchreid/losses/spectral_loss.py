@@ -11,8 +11,8 @@ def btr(A: 'N x C x C'):
     ATA = torch.bmm(A.permute(0, 2, 1), A)
     eye = torch.eye(C, device='cuda').expand(N, C, C)
     masked = torch.sqrt(ATA * eye)
-    # print(masked)
-    return masked.sum(dim=1)
+    print(masked)
+    return masked.sum(dim=(1, 2))
 
 
 class SpectralLoss(nn.Module):
@@ -44,7 +44,7 @@ class SpectralLoss(nn.Module):
     def get_trace(self, A: 'N x C x S'):
 
         N, C, _ = A.size()
-        print(A)
+        # print(A)
         AAT = torch.bmm(A, A.permute(0, 2, 1))
         ones = torch.ones((N, C, 1), device='cuda')
         D = torch.bmm(AAT, ones).view(N, C)

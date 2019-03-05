@@ -132,8 +132,6 @@ if __name__ == '__main__':
         if i not in ids:
             continue
 
-        if i > options.num - 1:
-            break
         input_img = imgs[:2]
 
         model = None

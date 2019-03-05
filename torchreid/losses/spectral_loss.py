@@ -74,7 +74,7 @@ class SpectralLoss(nn.Module):
         if k == 'layer5':
             penalty *= 0.01
 
-        return penalty  # Quirk: normalize to 32-batch case
+        return penalty * self.beta  # Quirk: normalize to 32-batch case
 
     def forward(self, inputs, pids):
 

@@ -114,11 +114,11 @@ if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('prefix')
+    # parser.add_argument('prefix')
     parser.add_argument('arch')
     parser.add_argument('ckpt')
     parser.add_argument('layer')
-    parser.add_argument('num', default=5, type=int)
+    parser.add_argument('num', default=40, type=int)
     options = parser.parse_args()
     args.load_weights = options.ckpt
     args.arch = options.arch

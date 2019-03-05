@@ -118,7 +118,6 @@ if __name__ == '__main__':
     parser.add_argument('arch')
     parser.add_argument('ckpt')
     parser.add_argument('layer')
-    parser.add_argument('num', default=40, type=int)
     options = parser.parse_args()
     args.load_weights = options.ckpt
     args.arch = options.arch
@@ -126,6 +125,9 @@ if __name__ == '__main__':
     from gradcam import CamExtractor
     ids = [1, 3, 4, 5, 8, 13]
     for i, (imgs, pids, camids, img_paths) in enumerate(testloader):
+
+        if i > 40:
+            break
 
         if i not in ids:
             continue

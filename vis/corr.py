@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
         model = None
 
-        extractor = CamExtractor(model, options.layer)
+        extractor = CamExtractor(model, getattr(model, options.layer))
         output = extractor.forward_pass(input_img)[0][0]
         output = output.view(output.size(0), -1).data.numpy()
         print(output.shape)

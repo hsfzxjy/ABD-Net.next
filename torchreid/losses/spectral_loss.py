@@ -5,6 +5,9 @@ import torch.nn as nn
 from .cross_entropy_loss import CrossEntropyLoss
 
 
+epsilon = 1e-12
+
+
 def btr(A: 'N x C x C'):
 
     # N, _, _ = A.size()
@@ -16,9 +19,9 @@ def btr(A: 'N x C x C'):
     N, C, _ = A.size()
     ATA = torch.bmm(A.permute(0, 2, 1), A)
     eye = torch.eye(C, device='cuda').expand(N, C, C)
-    masked = torch.sqrt(abs(ATA * eye) + 1e-10)
+    masked = torch.sqrt(abs(ATA * eye) + epsilon)  # for numerical stability
     # print(masked)
-    return masked.sum(dim=(1, 2)) - 1e-5 * N * C * C
+    return masked.sum()
 
 
 class SpectralLoss(nn.Module):

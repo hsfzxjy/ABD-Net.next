@@ -48,6 +48,7 @@ class SpectralLoss(nn.Module):
         ones = torch.ones((N, C, 1), device='cuda')
         D = torch.bmm(AAT, ones).view(N, C)
         D = torch.diag_embed(D)
+        print(D)
 
         return btr(D - AAT)
 

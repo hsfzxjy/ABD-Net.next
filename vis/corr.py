@@ -146,4 +146,4 @@ if __name__ == '__main__':
         print(output.shape)
         dct[i] = output
 
-    scipy.savemat(f'vis/corr/{options.name}.mat', dct)
+    scipy.io.savemat(f'vis/corr/{options.name}.mat', dct)

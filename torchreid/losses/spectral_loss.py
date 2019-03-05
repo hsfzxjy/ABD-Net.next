@@ -10,8 +10,7 @@ def btr(A: 'N x C x C'):
     N, C, _ = A.size()
     ATA = torch.bmm(A.permute(0, 2, 1), A)
     eye = torch.eye(C, device='cuda').expand(N, C, C)
-    masked = ATA * eye
-    # print(masked)
+    masked = torch.sqrt(abs(ATA * eye))
     return masked.sum(dim=(1, 2))
 
 

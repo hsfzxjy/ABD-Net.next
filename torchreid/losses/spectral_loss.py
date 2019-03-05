@@ -18,7 +18,7 @@ def btr(A: 'N x C x C'):
     eye = torch.eye(C, device='cuda').expand(N, C, C)
     masked = torch.sqrt(abs(ATA * eye) + 1e-10)
     print(masked)
-    return masked.sum(dim=(1, 2))
+    return masked.sum(dim=(1, 2)) - 1e-10 * N * C * C
 
 
 class SpectralLoss(nn.Module):

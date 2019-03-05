@@ -20,7 +20,7 @@ class SpectralLoss(nn.Module):
 
         os_beta = None
 
-        sing_beta = os.environ.get('sing_beta')
+        sing_beta = os.environ.get('spec_beta')
         if sing_beta is not None:
             try:
                 os_beta = float(sing_beta)
@@ -44,7 +44,8 @@ class SpectralLoss(nn.Module):
         N, C, _ = A.size()
         AAT = torch.bmm(A, A.permute(0, 2, 1))
         ones = torch.ones((N, C, 1), device='cuda')
-        D = torch.bmm(AAT, ones).view(N, C).diag_embed()
+        D = torch.bmm(AAT, ones).view(N, C)
+        D = torch.diag_embed(D)
 
         return btr(D - AAT)
 

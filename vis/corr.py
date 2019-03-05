@@ -118,12 +118,16 @@ if __name__ == '__main__':
     parser.add_argument('arch')
     parser.add_argument('ckpt')
     parser.add_argument('layer')
+    parser.add_argument('name')
     options = parser.parse_args()
     args.load_weights = options.ckpt
     args.arch = options.arch
 
     from gradcam import CamExtractor
+    import scipy.io
     ids = [1, 3, 4, 5, 8, 13]
+    dct = {}
+    os.makedirs('vis/corr', exist_ok=True)
     for i, (imgs, pids, camids, img_paths) in enumerate(testloader):
 
         if i > 40:
@@ -140,3 +144,6 @@ if __name__ == '__main__':
         output = extractor.forward_pass(input_img)[0][0]
         output = output.view(output.size(0), -1).data.numpy()
         print(output.shape)
+        dct[i] = output
+
+    scipy.savemat(f'vis/corr/{options.name}.mat', dct)

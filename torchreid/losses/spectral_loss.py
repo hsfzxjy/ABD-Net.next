@@ -17,8 +17,8 @@ def btr(A: 'N x C x C'):
     ATA = torch.bmm(A.permute(0, 2, 1), A)
     eye = torch.eye(C, device='cuda').expand(N, C, C)
     masked = torch.sqrt(abs(ATA * eye) + 1e-10)
-    print(masked)
-    return masked.sum(dim=(1, 2)) - 1e-10 * N * C * C
+    # print(masked)
+    return masked.sum(dim=(1, 2)) - 1e-5 * N * C * C
 
 
 class SpectralLoss(nn.Module):
@@ -71,7 +71,7 @@ class SpectralLoss(nn.Module):
         if k == 'layer5':
             penalty *= 0.01
 
-        return penalty.sum() / (x.size()[0] / 32.)  # Quirk: normalize to 32-batch case
+        return penalty  # Quirk: normalize to 32-batch case
 
     def forward(self, inputs, pids):
 

@@ -8,8 +8,8 @@ from .cross_entropy_loss import CrossEntropyLoss
 def btr(A: 'N x C x C'):
 
     N, C, _ = A.size()
+    A = torch.sqrt(torch.bmm(A.permute(0, 2, 1), A))
     print(A)
-    A = torch.sqrt(torch.bmm(A, A.permute(0, 2, 1)))
     eye = torch.eye(C, device='cuda').expand(N, C, C).view(N, C * C, 1)
     return torch.bmm(A.view(N, 1, C * C), eye).view(N)
 

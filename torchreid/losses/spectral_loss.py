@@ -7,11 +7,13 @@ from .cross_entropy_loss import CrossEntropyLoss
 
 def btr(A: 'N x C x C'):
 
-    N, C, _ = A.size()
-    ATA = torch.bmm(A.permute(0, 2, 1), A)
-    eye = torch.eye(C, device='cuda').expand(N, C, C)
-    masked = torch.sqrt(abs(ATA * eye))
-    return masked.sum(dim=(1, 2))
+    return torch.norm(A, p='nuc', dim=(1, 2))
+
+    # N, C, _ = A.size()
+    # ATA = torch.bmm(A.permute(0, 2, 1), A)
+    # eye = torch.eye(C, device='cuda').expand(N, C, C)
+    # masked = torch.sqrt(abs(ATA * eye))
+    # return masked.sum(dim=(1, 2))
 
 
 class SpectralLoss(nn.Module):

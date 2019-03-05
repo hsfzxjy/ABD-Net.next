@@ -7,7 +7,11 @@ from .cross_entropy_loss import CrossEntropyLoss
 
 def btr(A: 'N x C x C'):
 
-    return torch.norm(A, p='nuc', dim=(1, 2))
+    N, _, _ = A.size()
+
+    return sum([torch.norm(A[i, :, :], p='nuc') for i in range(N)]) / N
+
+    # return torch.norm(A, p='nuc', dim=(1, 2))
 
     # N, C, _ = A.size()
     # ATA = torch.bmm(A.permute(0, 2, 1), A)

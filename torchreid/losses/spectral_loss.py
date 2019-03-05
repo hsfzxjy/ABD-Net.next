@@ -7,17 +7,17 @@ from .cross_entropy_loss import CrossEntropyLoss
 
 def btr(A: 'N x C x C'):
 
-    N, _, _ = A.size()
+    # N, _, _ = A.size()
 
-    return sum([torch.norm(A[i, :, :], p='nuc') for i in range(N)]) / N
+    # return sum([torch.norm(A[i, :, :], p='nuc') for i in range(N)]) / N
 
     # return torch.norm(A, p='nuc', dim=(1, 2))
 
-    # N, C, _ = A.size()
-    # ATA = torch.bmm(A.permute(0, 2, 1), A)
-    # eye = torch.eye(C, device='cuda').expand(N, C, C)
-    # masked = torch.sqrt(abs(ATA * eye))
-    # return masked.sum(dim=(1, 2))
+    N, C, _ = A.size()
+    ATA = torch.bmm(A.permute(0, 2, 1), A)
+    eye = torch.eye(C, device='cuda').expand(N, C, C)
+    masked = torch.sqrt(abs(ATA * eye) + 1e-10)
+    return masked.sum(dim=(1, 2))
 
 
 class SpectralLoss(nn.Module):
@@ -70,7 +70,6 @@ class SpectralLoss(nn.Module):
         if k == 'layer5':
             penalty *= 0.01
 
-        print(penalty)
         return penalty.sum() / (x.size()[0] / 32.)  # Quirk: normalize to 32-batch case
 
     def forward(self, inputs, pids):

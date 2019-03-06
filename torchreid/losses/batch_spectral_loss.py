@@ -43,7 +43,7 @@ class BatchSpectralLoss(nn.Module):
 
         penalty = self.get_trace(x)
 
-        return penalty.sum()
+        return penalty.sum() * self.beta
 
     def forward(self, inputs, pids):
 

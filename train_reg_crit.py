@@ -54,6 +54,9 @@ def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_
     elif args.criterion == 'spectral':
         from torchreid.losses.spectral_loss import SpectralLoss
         criterion = SpectralLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth, penalty_position=args.penalty_position)
+    elif args.criterion == 'batch_spectral':
+        from torchreid.losses.batch_spectral_loss import BatchSpectralLoss
+        criterion = BatchSpectralLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
     elif args.criterion == 'lowrank':
         from torchreid.losses.lowrank_loss import LowRankLoss
         criterion = LowRankLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)

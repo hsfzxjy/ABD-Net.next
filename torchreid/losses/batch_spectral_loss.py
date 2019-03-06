@@ -5,13 +5,6 @@ import torch.nn as nn
 from .cross_entropy_loss import CrossEntropyLoss
 
 
-def btr(A: 'N x C x C'):
-
-    N, C = A.size()
-    eye = torch.eye(C, device='cuda').expand(N, C, C).view(N, C * C, 1)
-    return torch.bmm(A.view(N, 1, C * C), eye).view(N)
-
-
 class BatchSpectralLoss(nn.Module):
 
     def __init__(self, num_classes, *, use_gpu=True, label_smooth=True, beta=None):
@@ -43,7 +36,8 @@ class BatchSpectralLoss(nn.Module):
 
         N, _ = A.size()
         D = (AAT @ torch.ones((N, 1), device='cuda')).view(N).diag()
-        return torch.trace(D - AAT)
+        X = D - AAT
+        return torch.trace(torch.sqrt(X.permute(1, 0) @ X + 1e-12))
 
     def apply_penalty(self, x):
 

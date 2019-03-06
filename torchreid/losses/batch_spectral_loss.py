@@ -37,6 +37,7 @@ class BatchSpectralLoss(nn.Module):
         N, _ = A.size()
         D = (AAT @ torch.ones((N, 1), device='cuda')).view(N).diag()
         X = D - AAT
+        print(X)
         return torch.trace(torch.sqrt(X.permute(1, 0) @ X + 1e-12))
 
     def apply_penalty(self, x):

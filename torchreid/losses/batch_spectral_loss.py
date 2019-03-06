@@ -61,6 +61,5 @@ class BatchSpectralLoss(nn.Module):
 
         xloss = self.xent_loss(y, pids)
         # logger.debug(str(singular_penalty))
-        return xloss
         print(penalty)
         return penalty + xloss

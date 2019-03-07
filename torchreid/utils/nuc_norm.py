@@ -102,6 +102,7 @@ if __name__ == '__main__':
     A_ = A.clone()
     A_ = torch.bmm(A_.permute(0, 2, 1), A_)
     sA_ = msqrt(A_)
+    print(sA_)
     print(compute_error(A_, torch.bmm(sA_, sA_)))
     print('Applying torch.norm...')
     A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A.clone())

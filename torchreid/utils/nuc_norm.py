@@ -25,8 +25,8 @@ def msqrt(A, numIters=10):
     dim = A.shape[1]
     normA = A.mul(A).sum(dim=1).sum(dim=1).sqrt()
     Y = A.div(normA.view(batchSize, 1, 1).expand_as(A))
-    I = torch.eye(dim, dim).view(1, dim, dim).repeat(batchSize, 1, 1)  # noqa
-    Z = torch.eye(dim, dim).view(1, dim, dim).repeat(batchSize, 1, 1)
+    I = torch.eye(dim, dim, device='cuda').view(1, dim, dim).repeat(batchSize, 1, 1)  # noqa
+    Z = torch.eye(dim, dim, device='cuda').view(1, dim, dim).repeat(batchSize, 1, 1)
     for i in range(numIters):
         T = 0.5 * (3.0 * I - Z.bmm(Y))
         Y = Y.bmm(T)

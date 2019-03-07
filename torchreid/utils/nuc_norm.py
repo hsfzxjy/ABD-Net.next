@@ -51,6 +51,15 @@ def binv(M: 'N x C x C'):
 EPSILON = 1e-12  # for numeric stability
 
 
+def _functional_batch_nuc_norm(A):
+
+    N, C, _ = A.size()
+    ATA = torch.bmm(A.permute(0, 2, 1), A)
+    eye = torch.eye(C, device='cuda').expand(N, C, C)
+    masked = msqrt(ATA * eye + EPSILON)
+    return torch.sum(masked, dim=(1, 2))
+
+
 class NucNorm(torch.autograd.Function):
 
     @staticmethod
@@ -92,7 +101,7 @@ if __name__ == '__main__':
     A = Variable(generate_symm_matrix(options.batch, options.size))
     dt = Variable(torch.rand(options.batch, device='cuda'), requires_grad=False)
     print('Applying torch.norm...')
-    A_norm_1 = torch.norm(A, p='nuc', dim=(1, 2))
+    A_norm_1 = _functional_batch_nuc_norm(A)
     print('Applying custom norm...')
     A_norm_2 = my_nuc_norm(A.clone())
 

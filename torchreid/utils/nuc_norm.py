@@ -10,7 +10,7 @@ def compute_error(A, B):
 
 def generate_symm_matrix(batch_size, C):
 
-    A = torch.random(batch_size, C, C, device='cuda', requires_grad=True)
+    A = torch.rand(batch_size, C, C, device='cuda', requires_grad=True)
 
     return torch.bmm(A.permute(0, 2, 1), A)
 

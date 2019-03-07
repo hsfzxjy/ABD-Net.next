@@ -108,6 +108,24 @@ class NucNorm(torch.autograd.Function):
         return grad_output * grad_norm
 
 
+class SymNucNorm(torch.autograd.Function):
+
+    @staticmethod
+    def forward(ctx, A):
+
+        N, C, _ = A.size()
+        eye = torch.eye(C, device='cuda').expand(N, C, C)
+        ctx.save_for_backward(eye)
+        return torch.sum(A * eye, dim=(1, 2))
+
+    @staticmethod
+    def backward(ctx, grad_output):
+
+        eye, = ctx.saved_tensors
+        N, C, _ = eye.size()
+        return grad_output.view(N, 1, 1).repeat(1, C, C)
+
+
 import os
 
 if os.environ.get('use_autograd') is None:
@@ -119,10 +137,13 @@ else:
     __func = _functional_nuc_norm
 
 
-def nuclear_norm(A):
+def nuclear_norm(A, sym=False):
 
     if len(A.size()) == 2:
         A = A.view(1, *A.size())
+
+    if sym:
+        return SymNucNorm.apply(A)
 
     result = __func(A)
 

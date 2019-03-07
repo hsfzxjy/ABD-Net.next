@@ -116,6 +116,7 @@ if __name__ == '__main__':
     print(compute_error(A_, torch.bmm(sA_, sA_)))
     print('Applying torch.norm...')
     A_ = A.clone()
+    print(A_.requires_grad)
     A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A_)
     A_norm_1.backward(dt)
     A_grad_1 = A_.grad.data

@@ -65,6 +65,15 @@ def binv(M: 'N x C x C'):
 EPSILON = 1e-12  # for numeric stability
 
 
+def _functional_nuc_norm(A):
+
+    N, C, _ = A.size()
+    ATA = torch.bmm(A.permute(0, 2, 1), A)
+    eye = torch.eye(C, device='cuda').expand(N, C, C)
+    masked = msqrt(ATA + EPSILON * eye)
+    return torch.sum(masked * eye, dim=(1, 2))
+
+
 class NucNorm(torch.autograd.Function):
 
     @staticmethod
@@ -110,10 +119,12 @@ if __name__ == '__main__':
     print('Generating matrix for testing...')
     A = Variable(generate_symm_matrix(options.batch, options.size))
     dt = Variable(torch.rand(options.batch, device='cuda'), requires_grad=False)
+
     print('Testing msqrt...')
     A_ = A.clone()
     sA_ = msqrt(A_)
     print(compute_error(A_, torch.bmm(sA_, sA_)))
+
     print('Applying torch.norm...')
     A_ = Variable(A.clone(), requires_grad=True)
     A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A_)
@@ -121,6 +132,7 @@ if __name__ == '__main__':
     A_grad_1 = A_.grad.data
     print('--- norm 1 ---')
     print(A_norm_1)
+
     print('Applying custom norm...')
     A_ = Variable(A.clone(), requires_grad=True)
     A_norm_2 = my_nuc_norm(A_)
@@ -129,7 +141,14 @@ if __name__ == '__main__':
     print('--- norm 2 ---')
     print(A_norm_2)
 
+    print('Applying functional custom norm...')
+    A_ = Variable(A.clone(), requires_grad=True)
+    A_norm_3 = _functional_nuc_norm(A_)
+    A_norm_3.backward(dt)
+    A_grad_3 = A_.grad.data
+
     print('--- norm error ---')
     print(compute_error(A_norm_1, A_norm_2).data)
     print('--- grad error ---')
-    print(compute_error(A_grad_1, A_grad_2).data)
+    print('1 vs 2', compute_error(A_grad_1, A_grad_2).data)
+    print('2 vs 3', compute_error(A_grad_2, A_grad_3).data)

@@ -6,7 +6,19 @@ iter_times = 10
 
 def compute_error(A, B):
 
+    def _sum(X):
+
+        while len(X.size()) > 1:
+            X = X.sum(dim=1)
+
+        return X
+
+    normA = torch.sqrt(_sum(A * A))
     error = A - B
+    error = torch.sqrt(_sum(error * error)) / normA
+
+    return torch.mean(error)
+
     return torch.sqrt(error * error).sum()
 
 

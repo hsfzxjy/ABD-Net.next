@@ -62,7 +62,6 @@ class NucNorm(torch.autograd.Function):
         ATA = torch.bmm(A.permute(0, 2, 1), A)
         eye = torch.eye(C, device='cuda').expand(N, C, C)
         masked = msqrt(ATA + EPSILON * eye)
-        print(masked)
         ctx.save_for_backward(A, masked)
         return torch.sum(masked * eye, dim=(1, 2))
 
@@ -101,7 +100,8 @@ if __name__ == '__main__':
     dt = Variable(torch.rand(options.batch, device='cuda'), requires_grad=False)
     print('Testing msqrt...')
     A_ = A.clone()
-    sA_ = msqrt(A)
+    A_ = torch.bmm(A_.permute(0, 2, 1), A_)
+    sA_ = msqrt(A_)
     print(compute_error(A_, torch.bmm(sA_, sA_)))
     print('Applying torch.norm...')
     A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A.clone())

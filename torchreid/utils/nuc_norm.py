@@ -135,13 +135,13 @@ if __name__ == '__main__':
     sA_ = msqrt(A_)
     print(compute_error(A_, torch.bmm(sA_, sA_)))
 
-    print('Applying torch.norm...')
-    A_ = Variable(A.clone(), requires_grad=True)
-    A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A_)
-    A_norm_1.backward(dt)
-    A_grad_1 = A_.grad.data
-    print('--- norm 1 ---')
-    print(A_norm_1)
+    # print('Applying torch.norm...')
+    # A_ = Variable(A.clone(), requires_grad=True)
+    # A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A_)
+    # A_norm_1.backward(dt)
+    # A_grad_1 = A_.grad.data
+    # print('--- norm 1 ---')
+    # print(A_norm_1)
 
     print('Applying custom norm...')
     A_ = Variable(A.clone(), requires_grad=True)
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     A_grad_3 = A_.grad.data
 
     print('--- norm error ---')
-    print(compute_error(A_norm_1, A_norm_2).data)
+    # print(compute_error(A_norm_1, A_norm_2).data)
     print('--- grad error ---')
-    print('1 vs 2', compute_error(A_grad_1, A_grad_2).data)
+    # print('1 vs 2', compute_error(A_grad_1, A_grad_2).data)
     print('2 vs 3', compute_error(A_grad_2, A_grad_3).data)

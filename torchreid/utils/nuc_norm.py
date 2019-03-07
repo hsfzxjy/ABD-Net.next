@@ -93,7 +93,7 @@ class NucNorm(torch.autograd.Function):
         A, masked = ctx.saved_tensors
         C = A.size(1)
 
-        grad_output = grad_output.clone().view(N, 1, 1).repeat(1, C, C)
+        grad_output = grad_output.view(N, 1, 1).repeat(1, C, C)
         grad_norm = torch.bmm(
             A,
             binv(masked)

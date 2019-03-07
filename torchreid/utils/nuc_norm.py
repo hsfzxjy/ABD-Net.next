@@ -74,6 +74,9 @@ def _functional_nuc_norm(A):
     return torch.sum(masked * eye, dim=(1, 2))
 
 
+from time import time
+
+
 class NucNorm(torch.autograd.Function):
 
     @staticmethod
@@ -94,10 +97,13 @@ class NucNorm(torch.autograd.Function):
         C = A.size(1)
 
         grad_output = grad_output.view(N, 1, 1).repeat(1, C, C)
+        start = time()
         grad_norm = torch.bmm(
             A,
             binv(masked)
         )
+        end = time()
+        print(end - start)
 
         return grad_output * grad_norm
 

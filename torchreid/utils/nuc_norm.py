@@ -1,6 +1,8 @@
 import torch
 from torch.autograd import Variable
 
+iter_times = 10
+
 
 def compute_error(A, B):
 
@@ -15,7 +17,7 @@ def generate_symm_matrix(batch_size, C):
     return torch.bmm(A.permute(0, 2, 1), A)
 
 
-def msqrt(A, numIters=10):
+def msqrt(A):
     """
     Newton-Schulz Iteration Version.
     Copy from: https://github.com/msubhransu/matrix-sqrt/blob/master/matrix_sqrt.py.
@@ -27,7 +29,7 @@ def msqrt(A, numIters=10):
     Y = A.div(normA.view(batchSize, 1, 1).expand_as(A))
     I = torch.eye(dim, dim, device='cuda').view(1, dim, dim).repeat(batchSize, 1, 1)  # noqa
     Z = torch.eye(dim, dim, device='cuda').view(1, dim, dim).repeat(batchSize, 1, 1)
-    for i in range(numIters):
+    for i in range(iter_times):
         T = 0.5 * (3.0 * I - Z.bmm(Y))
         Y = Y.bmm(T)
         Z = T.bmm(Z)
@@ -85,7 +87,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch', default=32, type=int)
     parser.add_argument('--size', default=32, type=int)
+    parser.add_argument('--iters', default=10, type=int)
     options = parser.parse_args()
+
+    iter_times = options.iters
 
     my_nuc_norm = NucNorm.apply
     print('Generating matrix for testing...')

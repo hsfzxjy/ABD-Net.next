@@ -102,6 +102,16 @@ class NucNorm(torch.autograd.Function):
         return grad_output * grad_norm
 
 
+def nuclear_norm(A):
+
+    if len(A.size()) == 2:
+        A = A.view(1, *A.size())
+
+    result = NucNorm.apply(A)
+
+    return result
+
+
 if __name__ == '__main__':
 
     import argparse
@@ -151,5 +161,4 @@ if __name__ == '__main__':
     print(compute_error(A_norm_1, A_norm_2).data)
     print('--- grad error ---')
     print('1 vs 2', compute_error(A_grad_1, A_grad_2).data)
-    print(A_grad_2, A_grad_3)
     print('2 vs 3', compute_error(A_grad_2, A_grad_3).data)

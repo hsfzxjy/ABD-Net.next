@@ -4,6 +4,8 @@ import torch.nn as nn
 
 from .cross_entropy_loss import CrossEntropyLoss
 
+from torchreid.utils.nuc_norm import nuclear_norm
+
 
 class BatchSpectralLoss(nn.Module):
 
@@ -30,23 +32,18 @@ class BatchSpectralLoss(nn.Module):
         print('beta', self.beta)
         self.xent_loss = CrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=label_smooth)
 
-    def get_trace(self, A: 'N x D'):
+    def get_laplacian_nuc_norm(self, A: 'N x D'):
 
         AAT = A @ A.permute(1, 0)
 
         N, _ = A.size()
         D = (AAT @ torch.ones((N, 1), device='cuda')).view(N).diag()
         X = D - AAT
-        return torch.trace(
-            torch.sqrt(
-                (X.permute(1, 0) @ X) * torch.eye(N, device='cuda') +
-                1e-12
-            )
-        )
+        return nuclear_norm(X).sum()
 
     def apply_penalty(self, x):
 
-        penalty = self.get_trace(x)
+        penalty = self.get_laplacian_nuc_norm(x)
 
         return penalty.sum() * self.beta
 

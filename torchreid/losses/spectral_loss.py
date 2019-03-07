@@ -5,23 +5,7 @@ import torch.nn as nn
 from .cross_entropy_loss import CrossEntropyLoss
 
 
-epsilon = 1e-12
-
-
-def btr(A: 'N x C x C'):
-
-    # N, _, _ = A.size()
-
-    # return sum([torch.norm(A[i, :, :], p='nuc') for i in range(N)]) / N
-
-    # return torch.norm(A, p='nuc', dim=(1, 2))
-
-    N, C, _ = A.size()
-    ATA = torch.bmm(A.permute(0, 2, 1), A)
-    eye = torch.eye(C, device='cuda').expand(N, C, C)
-    masked = torch.sqrt(abs(ATA * eye) + epsilon)  # for numerical stability
-    # print(masked)
-    return masked.sum()
+from torchreid.utils.nuc_norm import nuclear_norm
 
 
 class SpectralLoss(nn.Module):
@@ -50,7 +34,7 @@ class SpectralLoss(nn.Module):
         self.xent_loss = CrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=label_smooth)
         self.penalty_position = frozenset(penalty_position.split(','))
 
-    def get_trace(self, A: 'N x C x S'):
+    def get_laplacian_nuc_norm(self, A: 'N x C x S'):
 
         N, C, _ = A.size()
         # print(A)
@@ -59,7 +43,7 @@ class SpectralLoss(nn.Module):
         D = torch.bmm(AAT, ones).view(N, C)
         D = torch.diag_embed(D)
 
-        return btr(D - AAT)
+        return nuclear_norm(D - AAT).sum() / N
 
     def apply_penalty(self, k, x):
 
@@ -69,7 +53,7 @@ class SpectralLoss(nn.Module):
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)
 
-        penalty = self.get_trace(W)
+        penalty = self.get_laplacian_nuc_norm(W)
 
         if k == 'layer5':
             penalty *= 0.01

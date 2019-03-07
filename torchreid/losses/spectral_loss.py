@@ -43,7 +43,7 @@ class SpectralLoss(nn.Module):
         D = torch.bmm(AAT, ones).view(N, C)
         D = torch.diag_embed(D)
 
-        return nuclear_norm(D - AAT).sum() / N
+        return nuclear_norm(D - AAT, sym=True).sum() / N
 
     def apply_penalty(self, k, x):
 

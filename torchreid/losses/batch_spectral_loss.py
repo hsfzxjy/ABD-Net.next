@@ -39,7 +39,7 @@ class BatchSpectralLoss(nn.Module):
         N, _ = A.size()
         D = (AAT @ torch.ones((N, 1), device='cuda')).view(N).diag()
         X = D - AAT
-        return nuclear_norm(X).sum()
+        return nuclear_norm(X, sym=True).sum()
 
     def apply_penalty(self, x):
 

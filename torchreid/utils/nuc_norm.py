@@ -100,7 +100,6 @@ if __name__ == '__main__':
     dt = Variable(torch.rand(options.batch, device='cuda'), requires_grad=False)
     print('Testing msqrt...')
     A_ = A.clone()
-    A_ = torch.bmm(A_.permute(0, 2, 1), A_)
     sA_ = msqrt(A_)
     print(compute_error(A_, torch.bmm(sA_, sA_)))
     print('Applying torch.norm...')

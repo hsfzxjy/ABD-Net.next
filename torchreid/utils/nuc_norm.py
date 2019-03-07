@@ -1,4 +1,5 @@
 import torch
+from torch.autograd import Variable
 
 
 def compute_error(A, B):
@@ -88,8 +89,8 @@ if __name__ == '__main__':
 
     my_nuc_norm = NucNorm.apply
     print('Generating matrix for testing...')
-    A = torch.Variable(generate_symm_matrix(options.batch, options.size))
-    dt = torch.Variable(torch.rand(options.N, device='cuda'), requires_grad=False)
+    A = Variable(generate_symm_matrix(options.batch, options.size))
+    dt = Variable(torch.rand(options.N, device='cuda'), requires_grad=False)
     print('Applying torch.norm...')
     A_norm_1 = torch.norm(A, p='nuc', dim=(1, 2))
     print('Applying custom norm...')

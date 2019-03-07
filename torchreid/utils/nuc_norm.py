@@ -88,9 +88,11 @@ if __name__ == '__main__':
     parser.add_argument('--batch', default=32, type=int)
     parser.add_argument('--size', default=32, type=int)
     parser.add_argument('--iters', default=10, type=int)
+    parser.add_argument('--epsilon', default=1e-12, type=float)
     options = parser.parse_args()
 
     iter_times = options.iters
+    EPSILON = options.epsilon
 
     my_nuc_norm = NucNorm.apply
     print('Generating matrix for testing...')

@@ -115,10 +115,15 @@ if __name__ == '__main__':
     sA_ = msqrt(A_)
     print(compute_error(A_, torch.bmm(sA_, sA_)))
     print('Applying torch.norm...')
-    A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A.clone())
+    A_ = A.clone()
+    A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A_)
+    A_norm_1.backward(dt)
+    A_grad_1 = A_.grad.data
+    print('--- norm 1 ---')
     print(A_norm_1)
     print('Applying custom norm...')
     A_norm_2 = my_nuc_norm(A.clone())
+    print('--- norm 2 ---')
     print(A_norm_2)
 
     print(compute_error(A_norm_1, A_norm_2))

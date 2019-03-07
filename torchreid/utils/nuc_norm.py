@@ -104,7 +104,7 @@ class NucNorm(torch.autograd.Function):
 
 import os
 
-if os.environ.get('use_custom_backward') is not None:
+if os.environ.get('use_autograd') is None:
 
     __func = NucNorm.apply
 

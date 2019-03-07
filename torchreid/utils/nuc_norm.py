@@ -59,6 +59,7 @@ class NucNorm(torch.autograd.Function):
         N, C, _ = A.size()
         ATA = torch.bmm(A.permute(0, 2, 1), A)
         eye = torch.eye(C, device='cuda').expand(N, C, C)
+        print(eye)
         masked = msqrt(ATA * eye + EPSILON)
         ctx.save_for_backward(A, masked)
         return torch.sum(masked, dim=(1, 2))

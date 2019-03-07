@@ -93,7 +93,9 @@ if __name__ == '__main__':
     dt = Variable(torch.rand(options.batch, device='cuda'), requires_grad=False)
     print('Applying torch.norm...')
     A_norm_1 = _apply_func(lambda A: torch.norm(A, p='nuc'), A)
+    print(A_norm_1)
     print('Applying custom norm...')
     A_norm_2 = my_nuc_norm(A.clone())
+    print(A_norm_2)
 
     print(compute_error(A_norm_1, A_norm_2))

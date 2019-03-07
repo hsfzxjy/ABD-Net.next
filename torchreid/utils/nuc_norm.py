@@ -102,12 +102,23 @@ class NucNorm(torch.autograd.Function):
         return grad_output * grad_norm
 
 
+import os
+
+if os.environ.get('use_custom_backward') is not None:
+
+    __func = NucNorm.apply
+
+else:
+
+    __func = _functional_nuc_norm
+
+
 def nuclear_norm(A):
 
     if len(A.size()) == 2:
         A = A.view(1, *A.size())
 
-    result = NucNorm.apply(A)
+    result = __func(A)
 
     return result
 

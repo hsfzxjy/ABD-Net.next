@@ -130,6 +130,6 @@ if __name__ == '__main__':
     print(A_norm_2)
 
     print('--- norm error ---')
-    print(compute_error(A_norm_1, A_norm_2))
+    print(compute_error(A_norm_1, A_norm_2).data)
     print('--- grad error ---')
-    print(compute_error(A_grad_1, A_grad_2))
+    print(compute_error(A_grad_1, A_grad_2).data)

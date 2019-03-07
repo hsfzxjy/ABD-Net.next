@@ -122,8 +122,14 @@ if __name__ == '__main__':
     print('--- norm 1 ---')
     print(A_norm_1)
     print('Applying custom norm...')
-    A_norm_2 = my_nuc_norm(A.clone())
+    A_ = A.clone()
+    A_norm_2 = my_nuc_norm(A_)
+    A_norm_2.backward(dt)
+    A_grad_2 = A_.grad.data
     print('--- norm 2 ---')
     print(A_norm_2)
 
+    print('--- norm error ---')
     print(compute_error(A_norm_1, A_norm_2))
+    print('--- grad error ---')
+    print(compute_error(A_grad_1, A_grad_2))

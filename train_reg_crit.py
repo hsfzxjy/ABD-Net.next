@@ -236,7 +236,7 @@ def main():
                 state_dict = model.state_dict()
 
             if max_r1 < rank1:
-                print('Save!', max_r1, r1)
+                print('Save!', max_r1, rank1)
                 save_checkpoint({
                     'state_dict': state_dict,
                     'rank1': rank1,

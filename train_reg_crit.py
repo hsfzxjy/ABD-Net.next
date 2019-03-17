@@ -184,6 +184,8 @@ def main():
         optimizer.load_state_dict(initial_optim_state)
         os.environ['sa'] = oldenv
 
+    max_r1 = 0
+
     for epoch in range(args.start_epoch, args.max_epoch):
         dropout_optimizer.set_epoch(epoch)
         reg_param_controller.set_epoch(epoch)
@@ -215,8 +217,6 @@ def main():
 
         scheduler.step()
 
-        max_r1 = 0
-
         if (epoch + 1) > args.start_eval and args.eval_freq > 0 and (epoch + 1) % args.eval_freq == 0 or (epoch + 1) == args.max_epoch:
             print("==> Test")
             dropout_optimizer.set_training(False)  # IMPORTANT!
@@ -244,7 +244,7 @@ def main():
                     'dropout_p': dropout_optimizer.p,
                 }, False, osp.join(args.save_dir, 'checkpoint_best.pth.tar'))
 
-                rank1 = max_r1
+                max_r1 = rank1
 
     elapsed = round(time.time() - start_time)
     elapsed = str(datetime.timedelta(seconds=elapsed))

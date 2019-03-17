@@ -215,6 +215,8 @@ def main():
 
         scheduler.step()
 
+        max_r1 = 0
+
         if (epoch + 1) > args.start_eval and args.eval_freq > 0 and (epoch + 1) % args.eval_freq == 0 or (epoch + 1) == args.max_epoch:
             print("==> Test")
             dropout_optimizer.set_training(False)  # IMPORTANT!
@@ -233,12 +235,16 @@ def main():
             else:
                 state_dict = model.state_dict()
 
-            save_checkpoint({
-                'state_dict': state_dict,
-                'rank1': rank1,
-                'epoch': epoch,
-                'dropout_p': dropout_optimizer.p,
-            }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
+            if max_r1 < rank1:
+                print('Save!', max_r1, r1)
+                save_checkpoint({
+                    'state_dict': state_dict,
+                    'rank1': rank1,
+                    'epoch': epoch,
+                    'dropout_p': dropout_optimizer.p,
+                }, False, osp.join(args.save_dir, 'checkpoint_best.pth.tar'))
+
+                rank1 = max_r1
 
     elapsed = round(time.time() - start_time)
     elapsed = str(datetime.timedelta(seconds=elapsed))

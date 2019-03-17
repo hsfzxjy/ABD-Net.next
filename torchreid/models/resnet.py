@@ -2917,13 +2917,13 @@ class ResNetCAM(nn.Module):
         out_channels = 1024
 
         self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
+        # self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
         self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
         self.sum_conv1 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
 
         self._init_params(self.before_module1)
         self._init_params(self.cam_module1)
-        self._init_params(self.pam_module1)
+        # self._init_params(self.pam_module1)
         self._init_params(self.sum_conv1)
 
     def backbone_convs(self):
@@ -3202,11 +3202,11 @@ class ResNetPAM(nn.Module):
 
         self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
         self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
-        self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
+        # self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
         self.sum_conv1 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
 
         self._init_params(self.before_module1)
-        self._init_params(self.cam_module1)
+        # self._init_params(self.cam_module1)
         self._init_params(self.pam_module1)
         self._init_params(self.sum_conv1)
 

@@ -5,7 +5,7 @@ import argparse
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fd', default='none_nohead', choices=['%s_%s' % (i, j) for i in ['ab_c', 'ab', 'a', 'none'] for j in ['head', 'nohead']])
+    parser.add_argument('--fd', default='none_nohead', choices=['%s_%s' % (i, j) for i in ['ab_c', 'abc', 'ab', 'a', 'none'] for j in ['head', 'nohead']])
     parser.add_argument('--dan', default='none_nohead', choices=['%s_%s' % (i, j) for i in ['cam_pam', 'cam', 'pam', 'none'] for j in ['head', 'nohead']])
     parser.add_argument('--arch', default='densenet121_fc512')
     parser.add_argument('--size', default='256', choices=['256', '384'])

@@ -2816,7 +2816,7 @@ class ResNetCAM(nn.Module):
         self.sum_fusion = True
         last_stride = 1
 
-        super(ResNetABD, self).__init__()
+        super().__init__()
         self.feature_dim = 2048  # 512 * block.expansion
 
         # backbone network
@@ -3100,7 +3100,7 @@ class ResNetPAM(nn.Module):
         self.sum_fusion = True
         last_stride = 1
 
-        super(ResNetABD, self).__init__()
+        super().__init__()
         self.feature_dim = 2048  # 512 * block.expansion
 
         # backbone network

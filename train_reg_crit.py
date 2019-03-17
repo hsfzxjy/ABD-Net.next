@@ -206,12 +206,12 @@ def main():
         else:
             state_dict = model.state_dict()
 
-        save_checkpoint({
-            'state_dict': state_dict,
-            'rank1': 0,
-            'epoch': epoch,
-            'dropout_p': dropout_optimizer.p,
-        }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
+        # save_checkpoint({
+        #     'state_dict': state_dict,
+        #     'rank1': 0,
+        #     'epoch': epoch,
+        #     'dropout_p': dropout_optimizer.p,
+        # }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
 
         scheduler.step()
 
@@ -227,10 +227,6 @@ def main():
                 os.environ['NOFC'] = ''
                 rank1 = test(model, queryloader, galleryloader, use_gpu)
                 ranklogger.write(name, epoch + 1, rank1)
-                if 'nofc' not in args.arch and 'tr' not in args.arch and 'abd' not in args.arch:
-                    print('!!!!!!!!NOFC!!!!!!')
-                    os.environ['NOFC'] = '1'
-                    test(model, queryloader, galleryloader, use_gpu)
 
             if use_gpu:
                 state_dict = model.module.state_dict()

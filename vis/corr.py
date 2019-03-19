@@ -25,13 +25,13 @@ from torchreid.dataset_loader import ImageDataset
 class args:
     height = 384
     width = 128
-    arch = 'resnet50_sf_tr4_fc1024_fd_ab_nohead_dan_cam_pam_nohead'
+    arch = 'resnet_abd_fd_none_nohead_dan_none_nohead'
     root = 'data'
     dataset = 'market1501'
     split_id = 0
     cuhk03_labeled = False
     cuhk03_classic_split = False
-    load_weights = '0215_trick_log/resnet50_sf_tr4_fc1024_fd_ab_nohead_dan_cam_pam_nohead__crit_singular__htri_sb_1e-6__b_1e-3__sl_-179__fcl_False__reg_const_svmo__dropout_incr__dau_crop,random-erase__pp_before,after,cam,pam,layer5__size_384__ep_200__nht__lh_.1__dr__0/checkpoint_ep118.pth.tar'
+    load_weights = '0225_abd_log/ow/resnet50_abd_fd_none_nohead_dan_none_nohead__crit__xent_sb_1e-6__b_1e-3__sl_0__fcl_False__reg_const_svmo__dropout_none__dau_crop__pp_before,after,cam,pam,layer5__size_384__ep_200__lh_.1__dr__b32__m1.2__hc_2_p2/checkpoint_ep45.pth.tar'
 
 
 use_gpu = True
@@ -57,7 +57,7 @@ def get_model():
 
     model = models.init_model(name=args.arch, num_classes=dataset.num_train_pids, loss={'xent'}, use_gpu=use_gpu)
     if check_isfile(args.load_weights):
-        checkpoint = torch.load(args.load_weights)
+        checkpoint = torch.load(args.load_weights, map_location={'cuda:0': 'cpu', 'cuda:1': 'cpu'})
         pretrain_dict = checkpoint['state_dict']
         model_dict = model.state_dict()
         pretrain_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
@@ -116,7 +116,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('prefix')
     parser.add_argument('arch')
-    parser.add_argument('ckpt')
     parser.add_argument('layer')
     parser.add_argument('name')
     options = parser.parse_args()

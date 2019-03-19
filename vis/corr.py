@@ -25,7 +25,7 @@ from torchreid.dataset_loader import ImageDataset
 class args:
     height = 384
     width = 128
-    arch = 'resnet_abd_fc1024_fd_none_nohead_dan_none_nohead'
+    arch = 'resnet50_sf_abd_fc1024_fd_none_nohead_dan_none_nohead'
     root = 'data'
     dataset = 'market1501'
     split_id = 0

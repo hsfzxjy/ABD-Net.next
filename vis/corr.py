@@ -115,12 +115,9 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     # parser.add_argument('prefix')
-    parser.add_argument('arch')
     parser.add_argument('layer')
     parser.add_argument('name')
     options = parser.parse_args()
-    args.load_weights = options.ckpt
-    args.arch = options.arch
 
     from gradcam import CamExtractor
     import scipy.io

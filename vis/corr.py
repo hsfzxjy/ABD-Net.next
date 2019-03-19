@@ -31,7 +31,7 @@ class args:
     split_id = 0
     cuhk03_labeled = False
     cuhk03_classic_split = False
-    load_weights = '0225_abd_log/of/resnet50_abd_fd_none_nohead_dan_none_nohead__crit_singular__sb_1e-6__b_1e-3__sl_-177__fcl_False__reg_const_svmo__dropout_none__dau_crop__pp_after,layer5__size_384__ep_200__lh_.1__dr__b32__m1.2__hc_2_p2/checkpoint_ep45.pth.tar'
+    load_weights = '0225_abd_log/of/resnet50_abd_fd_none_nohead_dan_none_nohead__crit_singular__sb_1e-6__b_1e-3__sl_-177__fcl_False__reg_const_svmo__dropout_none__dau_crop__pp_after,layer5__size_384__ep_200__lh_.1__dr__b32__m1.2__hc_2_p2/checkpoint_ep40.pth.tar'
 
 
 use_gpu = True

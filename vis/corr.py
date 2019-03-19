@@ -122,7 +122,6 @@ if __name__ == '__main__':
     options = parser.parse_args()
     if options.load_weights is not None:
         args.load_weights = options.load_weights
-    args.load_weights = options.load_weights
     if options.arch is not None:
         args.arch = options.arch
 

@@ -117,9 +117,11 @@ if __name__ == '__main__':
     # parser.add_argument('prefix')
     parser.add_argument('layer')
     parser.add_argument('name')
-    parser.add_argument('load_weights')
+    parser.add_argument('--load-weights', required=False)
     parser.add_argument('--arch', required=False)
     options = parser.parse_args()
+    if options.load_weights is not None:
+        args.load_weights = options.load_weights
     args.load_weights = options.load_weights
     if options.arch is not None:
         args.arch = options.arch

@@ -117,7 +117,12 @@ if __name__ == '__main__':
     # parser.add_argument('prefix')
     parser.add_argument('layer')
     parser.add_argument('name')
+    parser.add_argument('load_weights')
+    parser.add_argument('--arch', required=False)
     options = parser.parse_args()
+    args.load_weights = options.load_weights
+    if options.arch is not None:
+        args.arch = options.arch
 
     from gradcam import CamExtractor
     import scipy.io
@@ -136,6 +141,7 @@ if __name__ == '__main__':
 
         model = None
         model = get_model()
+        model.eval()
         extractor = CamExtractor(model, getattr(model, options.layer))
         output = extractor.forward_pass(input_img)[0][0]
         output = output.view(output.size(0), -1).data.numpy()

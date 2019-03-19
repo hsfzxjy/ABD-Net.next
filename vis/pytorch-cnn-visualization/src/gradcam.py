@@ -45,7 +45,7 @@ class CamExtractor():
         try:
             _, xent_features, _, feature_dict = output
         except ValueError:
-            pass
+            xent_features = [0]
         return self.conv_output, xent_features[-1]
 
     def forward_pass(self, x):

@@ -3,13 +3,21 @@ import scipy.io as io
 import numpy as np
 from numpy.linalg import norm
 
-mat = io.loadmat('fuck.mat')
-t = mat['gt']
-tsne = TSNE(n_jobs=32)
+dct = {}
 
-features = mat['g']
-features = features / (norm(features, axis=1, keepdims=True))
+for name, fn in [['base', 'base_feat.mat'], ['final', 'final_feat.mat']]:
 
-a = tsne.fit_transform(mat['g'])
+    mat = io.loadmat(fn)
+    t = mat['gt']
+    tsne = TSNE(n_jobs=32)
 
-io.savemat('aa.mat', {'a': a, 't': t})
+    features = mat['g']
+    # features = features / (norm(features, axis=1, keepdims=True))
+
+    a = tsne.fit_transform(mat['g'])
+    dct.update({
+        name + '_a': a,
+        name + '_t': t,
+    })
+
+io.savemat('tsne.mat', dct)

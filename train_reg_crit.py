@@ -332,7 +332,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
     model.eval()
 
     with torch.no_grad():
-        qf, q_pids, q_camids = [], [], []
+        qf, q_pids, q_camids, q_paths = [], [], [], []
 
         if flip_eval:
             enumerator = enumerate(zip(queryloader[0], queryloader[1]))
@@ -343,8 +343,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             end = time.time()
 
             if flip_eval:
-                (imgs0, pids, camids, _), (imgs1, _, _, _) = package
-                print(_)
+                (imgs0, pids, camids, paths), (imgs1, _, _, _) = package
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
                 features = (model(imgs0) + model(imgs1)) / 2.0
@@ -362,13 +361,14 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             qf.append(features)
             q_pids.extend(pids)
             q_camids.extend(camids)
+            q_paths.extend(paths)
         qf = torch.cat(qf, 0)
         q_pids = np.asarray(q_pids)
         q_camids = np.asarray(q_camids)
 
         print("Extracted features for query set, obtained {}-by-{} matrix".format(qf.size(0), qf.size(1)))
 
-        gf, g_pids, g_camids = [], [], []
+        gf, g_pids, g_camids, g_paths = [], [], [], []
         if flip_eval:
             enumerator = enumerate(zip(galleryloader[0], galleryloader[1]))
         else:
@@ -379,7 +379,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             end = time.time()
 
             if flip_eval:
-                (imgs0, pids, camids, _), (imgs1, _, _, _) = package
+                (imgs0, pids, camids, paths), (imgs1, _, _, _) = package
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
                 features = (model(imgs0) + model(imgs1)) / 2.0
@@ -397,6 +397,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             gf.append(features)
             g_pids.extend(pids)
             g_camids.extend(camids)
+            g_paths.extend(paths)
         gf = torch.cat(gf, 0)
         g_pids = np.asarray(g_pids)
         g_camids = np.asarray(g_camids)
@@ -418,7 +419,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
     if os.environ.get('distmat'):
         import scipy.io as io
-        io.savemat(os.environ.get('distmat'), {'distmat': distmat})
+        io.savemat(os.environ.get('distmat'), {'distmat': distmat, 'qp': q_paths, 'gp': g_paths})
 
     print("Computing CMC and mAP")
     cmc, mAP = evaluate(distmat, q_pids, g_pids, q_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)

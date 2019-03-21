@@ -43,7 +43,7 @@ f_error = process('final_distmat.mat')
 
 import os
 import shutil
-shutil.rmtree('pics')
+shutil.rmtree('pics', True)
 os.makedirs('pics')
 
 for be, fe in zip(b_error, f_error):
@@ -52,12 +52,12 @@ for be, fe in zip(b_error, f_error):
     qf = be[2]
 
     if be[0] > fe[0] + 2:
-        directory = 'pics/' + str(qidx)+'/'
+        directory = 'pics/' + str(qidx) + '/'
         os.makedirs(directory)
-        shutil.copy(qf, directory+'query.jpg')
+        shutil.copy(qf, directory + 'query.jpg')
 
         for base, paths in [['baseline', be[3]], ['final', fe[3]]]:
             d = directory + base + '/'
             os.makedirs(d)
             for x in paths:
-                shutil.copy(x, d+os.path.basename(x))
+                shutil.copy(x, d + os.path.basename(x))

@@ -344,6 +344,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
             if flip_eval:
                 (imgs0, pids, camids, _), (imgs1, _, _, _) = package
+                print(_)
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
                 features = (model(imgs0) + model(imgs1)) / 2.0
@@ -414,6 +415,10 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
         torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
     distmat.addmm_(1, -2, qf, gf.t())
     distmat = distmat.numpy()
+
+    if os.environ.get('distmat'):
+        import scipy.io as io
+        io.savemat(os.environ.get('distmat'), {'distmat': distmat})
 
     print("Computing CMC and mAP")
     cmc, mAP = evaluate(distmat, q_pids, g_pids, q_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)

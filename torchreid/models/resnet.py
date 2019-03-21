@@ -55,7 +55,8 @@ class DummyFD(nn.Module):
             #     c_tensor = torch.tensor(cs).cuda()
             # except RuntimeError:
             c_tensor = torch.tensor(cs)
-            print('fuck!!!')
+            if not os.environ.get('save_feat'):
+                c_tensor = c_tensor.cuda()
 
             new_x = x[:, c_tensor]
             new_x = cam(new_x)

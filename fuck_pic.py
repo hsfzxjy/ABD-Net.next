@@ -5,7 +5,7 @@ import numpy as np
 def pid(s):
 
     import re
-    return re.findall(r'(\d{4})_')[0]
+    return re.findall(r'(\d{4})_', s)[0]
 
 
 def process(fn):

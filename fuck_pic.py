@@ -10,6 +10,7 @@ def process(fn):
     gp = dct['gp']
 
     indices = np.argsort(distmat, axis=1)
+    print(indices)
     matches = (gp[indices] == qp[:, np.newaxis]).astype(np.int32)
     print(matches)
     print(matches.sum())

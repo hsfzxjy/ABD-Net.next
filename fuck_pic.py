@@ -54,10 +54,10 @@ for be, fe in zip(b_error, f_error):
     if be[0] > fe[0] + 2:
         directory = 'pics/' + str(qidx) + '/'
         os.makedirs(directory)
-        shutil.copy(qf, directory + 'query.jpg')
+        shutil.copy(qf.strip(), directory + 'query.jpg')
 
         for base, paths in [['baseline', be[3]], ['final', fe[3]]]:
             d = directory + base + '/'
             os.makedirs(d)
             for x in paths:
-                shutil.copy(x, d + os.path.basename(x))
+                shutil.copy(x.strip(), d + os.path.basename(x.strip()))

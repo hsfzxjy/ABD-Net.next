@@ -18,7 +18,7 @@ def process(fn):
     indices = np.argsort(distmat, axis=1)
     print(indices)
 
-    for qidx in len(qp):
+    for qidx in range(len(qp)):
         print('index =', qidx)
         print(qp[qidx])
         qpid = pid(qp[qidx])

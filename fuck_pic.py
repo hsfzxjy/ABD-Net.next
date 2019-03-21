@@ -11,9 +11,11 @@ def process(fn):
 
     indices = np.argsort(distmat, axis=1)
     print(indices)
-    matches = (gp[indices] == qp[:, np.newaxis]).astype(np.int32)
-    print(matches)
-    print(matches.sum())
-    print(matches.shape)
+
+    for qidx in range(10):
+        print('index =', qidx)
+        print(qp[qidx])
+        for i in range(5):
+            print(gp[indices[qidx][i]])
 
 process('base_distmat.mat')

@@ -8,7 +8,7 @@ t = mat['gt']
 tsne = TSNE(n_jobs=32)
 
 features = mat['g']
-features = features / (norm(features, p=2, dim=1, keepdim=True))
+features = features / (norm(features, axis=1, keepdim=True))
 
 a = tsne.fit_transform(mat['g'])
 

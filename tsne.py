@@ -125,12 +125,7 @@ def main():
 
     if args.load_weights and check_isfile(args.load_weights):
         # load pretrained weights but ignore layers that don't match in size
-        try:
-
-            checkpoint = torch.load(args.load_weights)
-        except Exception as e:
-            print(e)
-            checkpoint = torch.load(args.load_weights, map_location={'cuda:0': 'cpu'})
+        checkpoint = torch.load(args.load_weights)
 
         dropout_optimizer.set_p(checkpoint.get('dropout_p', 0))
         print(list(checkpoint.keys()), checkpoint['dropout_p'])
@@ -398,11 +393,6 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
         g_camids = np.asarray(g_camids)
 
         print("Extracted features for gallery set, obtained {}-by-{} matrix".format(gf.size(0), gf.size(1)))
-
-        if os.environ.get('save_feat'):
-            import scipy.io as io
-            io.savemat('fuck.mat', {'q': qf.data.numpy(), 'g': gf.data.numpy()})
-            return
 
     print("==> BatchTime(s)/BatchSize(img): {:.3f}/{}".format(batch_time.avg, args.test_batch_size))
 

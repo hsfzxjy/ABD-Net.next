@@ -105,7 +105,7 @@ def main():
 
     model = models.init_model(name=args.arch, num_classes=751, loss={'xent'}, use_gpu=args.gpu).cuda()
 
-    checkpoint = torch.load(args.model)
+    checkpoint = torch.load(args.model, map_location={'cuda:0': 'cpu'})
     pretrain_dict = checkpoint['state_dict']
     model_dict = model.state_dict()
     pretrain_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict and model_dict[k].size() == v.size()}

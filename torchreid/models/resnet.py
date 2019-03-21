@@ -51,10 +51,11 @@ class DummyFD(nn.Module):
         B, C, H, W = x.shape
 
         for cs, cam in self.fd_getter().cam_modules:
-            try:
-                c_tensor = torch.tensor(cs).cuda()
-            except RuntimeError:
-                c_tensor = torch.tensor(cs)
+            # try:
+            #     c_tensor = torch.tensor(cs).cuda()
+            # except RuntimeError:
+            c_tensor = torch.tensor(cs)
+            print('fuck!!!')
 
             new_x = x[:, c_tensor]
             new_x = cam(new_x)

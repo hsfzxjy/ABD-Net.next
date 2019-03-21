@@ -26,8 +26,8 @@ def process(fn):
         qpid = pid(qp[qidx])
         gps = gp[indices[qidx][:5]]
         gpid = [pid(x) for x in gps]
-        if len([x for x in gpid if x == qpid]) < 5:
-            print('\n'.join(gps))
+        # if len([x for x in gpid if x == qpid]) < 5:
+        #     print('\n'.join(gps))
         errors.append([
             5 - len([x for x in gpid if x == qpid]),
             qp[qidx],

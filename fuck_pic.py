@@ -2,6 +2,12 @@ import scipy.io as io
 import numpy as np
 
 
+def pid(s):
+
+    import re
+    return re.findall(r'(\d{4})_')[0]
+
+
 def process(fn):
 
     dct = io.loadmat(fn)
@@ -15,7 +21,11 @@ def process(fn):
     for qidx in range(10):
         print('index =', qidx)
         print(qp[qidx])
-        for i in range(5):
-            print(gp[indices[qidx][i]])
+        qpid = pid(qp[qidx])
+        gps = gp[indices[qidx][:5]]
+        gpid = [pid(x) for x in gps]
+        if len([x for x in gpid if x == qpid]) < 5:
+            print('\n'.join(gps))
+
 
 process('base_distmat.mat')

@@ -33,6 +33,8 @@ parser = argument_parser()
 args = parser.parse_args()
 dropout_optimizer = DropoutOptimizer(args)
 
+os.environ['TORCH_HOME'] = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.torch'))
+
 
 def get_criterions(num_classes: int, use_gpu: bool, args) -> ('criterion', 'fix_criterion', 'switch_criterion'):
 

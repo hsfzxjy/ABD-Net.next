@@ -36,11 +36,11 @@ def process(fn):
 
     return errors
 
+
 b_error = process('base_distmat.mat')
 f_error = process('final_distmat.mat')
 
 for be, fe in zip(b_error, f_error):
 
-    if be[0] > fe[0]:
+    if be[0] > fe[0] + 2:
         print(be[2], fe[2])
-

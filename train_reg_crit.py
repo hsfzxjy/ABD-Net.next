@@ -347,7 +347,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
                 features = (model(imgs0) + model(imgs1)) / 2.0
-                print(features.size())
+                # print(features.size())
             else:
                 (imgs, pids, camids, _) = package
                 if use_gpu:
@@ -375,7 +375,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             enumerator = enumerate(galleryloader[0])
 
         for batch_idx, package in enumerator:
-            print('fuck')
+            # print('fuck')
             end = time.time()
 
             if flip_eval:
@@ -383,7 +383,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
                 features = (model(imgs0) + model(imgs1)) / 2.0
-                print(features.size())
+                # print(features.size())
             else:
                 (imgs, pids, camids, _) = package
                 if use_gpu:

@@ -67,6 +67,6 @@ for be, fe, de in zip(b_error, f_error, d_error):
             for x in paths:
                 shutil.copy(x.strip(), d + os.path.basename(x.strip()))
 
-with open('pics/error.list') as f:
+with open('pics/error.list', 'w') as f:
     f.write('id baseline_error dan_error final_error\n')
     f.write('\n'.join(lines))

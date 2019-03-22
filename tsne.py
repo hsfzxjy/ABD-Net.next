@@ -5,7 +5,7 @@ from numpy.linalg import norm
 
 dct = {}
 
-for name, fn in [['base', 'base_feat.mat'], ['final', 'final_feat.mat']]:
+for name, fn in [['base', 'base_feat.mat'], ['dan', 'dan_feat.mat'], ['final', 'final_feat.mat']]:
 
     mat = io.loadmat(fn)
     t = mat['gt']

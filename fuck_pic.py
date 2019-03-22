@@ -64,8 +64,8 @@ for be, fe, de in zip(b_error, f_error, d_error):
         for base, paths in [['baseline', be[3]], ['final', fe[3]], ['dan', de[3]]]:
             d = directory + base + '/'
             os.makedirs(d)
-            for x in paths:
-                shutil.copy(x.strip(), d + os.path.basename(x.strip()))
+            for i, x in enumerate(paths):
+                shutil.copy(x.strip(), d + str(i) + '_' + os.path.basename(x.strip()))
 
 with open('pics/error.list', 'w') as f:
     f.write('id baseline_error dan_error final_error\n')

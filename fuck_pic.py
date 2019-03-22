@@ -47,6 +47,8 @@ import shutil
 shutil.rmtree('pics', True)
 os.makedirs('pics')
 
+lines = []
+
 for be, fe, de in zip(b_error, f_error, d_error):
 
     qidx = be[1]
@@ -54,6 +56,7 @@ for be, fe, de in zip(b_error, f_error, d_error):
 
     if be[0] > fe[0] + 2:
         print(qidx, be[0], de[0], fe[0])
+        lines.append('{} {} {} {}'.format(qidx, be[0], de[0], fe[0]))
         directory = 'pics/' + str(qidx) + '/'
         os.makedirs(directory)
         shutil.copy(qf.strip(), directory + 'query.jpg')
@@ -63,3 +66,7 @@ for be, fe, de in zip(b_error, f_error, d_error):
             os.makedirs(d)
             for x in paths:
                 shutil.copy(x.strip(), d + os.path.basename(x.strip()))
+
+with open('pics/error.list') as f:
+    f.write('id baseline_error dan_error final_error\n')
+    f.write('\n'.join(lines))

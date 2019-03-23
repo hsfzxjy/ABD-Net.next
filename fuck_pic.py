@@ -54,7 +54,7 @@ for be, fe, de in zip(b_error, f_error, d_error):
     qidx = be[1]
     qf = be[2]
 
-    if be[0] > fe[0] + 2:
+    if qidx in [521, 94, 156]:  # be[0] > fe[0] + 2:
         print(qidx, be[0], de[0], fe[0])
         lines.append('{} {} {} {}'.format(qidx, be[0], de[0], fe[0]))
         directory = 'pics/' + str(qidx) + '/'

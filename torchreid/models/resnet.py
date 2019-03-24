@@ -892,22 +892,23 @@ class ResNetAblation(nn.Module):
         normal_branch_stride = 1
         self.dummy_sum = DummySum()
 
-        self.layer4_normal_branch = nn.Sequential(
-            Bottleneck(
-                1024,
-                512,
-                stride=normal_branch_stride,
-                downsample=nn.Sequential(
-                    nn.Conv2d(
-                        1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
-                    ),
-                    nn.BatchNorm2d(2048)
-                )
-            ),
-            Bottleneck(2048, 512),
-            Bottleneck(2048, 512)
-        )
-        self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
+        if os.environ.get('tb') is not None:
+            self.layer4_normal_branch = nn.Sequential(
+                Bottleneck(
+                    1024,
+                    512,
+                    stride=normal_branch_stride,
+                    downsample=nn.Sequential(
+                        nn.Conv2d(
+                            1024, 2048, kernel_size=1, stride=normal_branch_stride, bias=False
+                        ),
+                        nn.BatchNorm2d(2048)
+                    )
+                ),
+                Bottleneck(2048, 512),
+                Bottleneck(2048, 512)
+            )
+            self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
 
         # Begin Feature Distilation
         if fd_config is None:

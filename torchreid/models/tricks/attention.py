@@ -90,7 +90,7 @@ class DANetHead(nn.Module):
         try:
             collapsion = int(os.environ.get('head_col'))
         except (TypeError, ValueError):
-            collapsion = 4
+            collapsion = 2
 
         inter_channels = in_channels // collapsion
 

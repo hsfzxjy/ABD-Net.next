@@ -1118,6 +1118,7 @@ class ResNetAblation(nn.Module):
         margin = 24 // self.part_num
 
         logger.info(f'part_num {self.part_num}')
+        logger.info(f'{x2.size()}')
 
         for p in range(1, self.part_num + 1):
 

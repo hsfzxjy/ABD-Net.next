@@ -28,6 +28,10 @@ from torchreid.regularizers import get_regularizer
 from torchreid.losses.wrapped_cross_entropy_loss import WrappedCrossEntropyLoss
 
 from torchreid.models.tricks.dropout import DropoutOptimizer
+
+import logging
+logging.basicConfig(level=os.environ.get('LOGLEVEL', 'CRITICAL'))
+
 # global variables
 parser = argument_parser()
 args = parser.parse_args()

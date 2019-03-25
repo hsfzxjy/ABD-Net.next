@@ -977,15 +977,15 @@ class ResNetAblation(nn.Module):
         in_channels = 1024
         out_channels = 1024
 
-        self.before_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
-        self.cam_module = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
-        self.sum_conv = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
+        self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
+        self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
+        self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
+        self.sum_conv1 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
 
-        self._init_params(self.before_module)
-        self._init_params(self.cam_module)
-        self._init_params(self.pam_module)
-        self._init_params(self.sum_conv)
+        self._init_params(self.before_module1)
+        self._init_params(self.cam_module1)
+        self._init_params(self.pam_module1)
+        self._init_params(self.sum_conv1)
 
     def backbone_convs(self):
 

@@ -6,6 +6,9 @@ import torch.nn as nn
 
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+
 w_rate = 1e-4
 
 
@@ -63,6 +66,8 @@ class SVMORegularizer(nn.Module):
         return tmp + largest, largest
 
     def forward(self, W: 'S x C x H x W'):
+
+        logger.debug('svmo')
 
         # old_W = W
         old_size = W.size()

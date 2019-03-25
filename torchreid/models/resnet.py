@@ -879,6 +879,7 @@ class ResNetAblation(nn.Module):
         # self.inplanes = 64
         super().__init__()
         self.feature_dim = 2048  # 512 * block.expansion
+        last_stride = 1
 
         # backbone network
         backbone = ResNetBackbone(Bottleneck, [3, 4, 6, 3], last_stride)

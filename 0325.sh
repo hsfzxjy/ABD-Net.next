@@ -10,7 +10,7 @@ part_num=2 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-fre
 
 part_num=1 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-freq 5 --flip-eval --label-smooth --criterion xent --lambda-htri 0.1  --dropout none --data-augment crop --regularizer none --margin 1.2 --train-batch-size 32 --switch-loss -178 --penalty-position before,after,cam,pam,layer5 --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_market_log/baseline_scam --arch resnet50_abl_fc1024_fd_abc_nohead_dan_none_nohead --gpu-devices 6&
 
-sleep 180m
+sleep 150m
 
 part_num=1 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-freq 5 --flip-eval --label-smooth --criterion xent --lambda-htri 0.1  --dropout none --data-augment crop --regularizer none --margin 1.2 --train-batch-size 32 --switch-loss -178 --penalty-position before,after,cam,pam,layer5 --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_market_log/baseline_dcam --arch resnet50_abl_fc1024_fd_none_nohead_dan_cam_nohead --gpu-devices 1&
 
@@ -18,7 +18,7 @@ part_num=1 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-fre
 
 sing_beta=1e-6 part_num=1 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-freq 5 --flip-eval --label-smooth --criterion singular --lambda-htri 0.1  --dropout none --data-augment crop --regularizer none --margin 1.2 --train-batch-size 32 --switch-loss -55 --penalty-position after --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_market_log/baseline_of --arch resnet50_abl_fc1024_fd_none_nohead_dan_none_nohead --gpu-devices 3&
 
-beta=1e-3 part_num=1 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-freq 5 --flip-eval --label-smooth --criterion xent --lambda-htri 0.1  --dropout none --data-augment crop --regularizer svmo --margin 1.2 --train-batch-size 32 --switch-loss -178 --penalty-position after --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_market_log/baseline_ow --arch resnet50_abl_fc1024_fd_none_nohead_dan_none_nohead --gpu-devices 4&
+beta=1e-3 part_num=1 nohup python train_reg_crit.py -s market1501 -t market1501 --eval-freq 5 --flip-eval --label-smooth --criterion xent --lambda-htri 0.1  --dropout none --data-augment none --regularizer svmo --margin 1.2 --train-batch-size 32 --switch-loss -178 --penalty-position after --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_market_log/baseline_ow --arch resnet50_abl_fc1024_fd_none_nohead_dan_none_nohead --gpu-devices 4&
 
 sleep 180m
 
@@ -42,4 +42,4 @@ part_num=1 nohup python train_reg_crit.py -s dukemtmcreid -t dukemtmcreid --eval
 
 sing_beta=1e-6 part_num=1 nohup python train_reg_crit.py -s dukemtmcreid -t dukemtmcreid --eval-freq 5 --flip-eval --label-smooth --criterion singular --lambda-htri 0.1  --dropout none --data-augment crop --regularizer none --margin 1.2 --train-batch-size 32 --switch-loss -55 --penalty-position after --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_duke_log/baseline_of --arch resnet50_abl_fc1024_fd_none_nohead_dan_none_nohead --gpu-devices 3&
 
-beta=1e-3 part_num=1 nohup python train_reg_crit.py -s dukemtmcreid -t dukemtmcreid --eval-freq 5 --flip-eval --label-smooth --criterion xent --lambda-htri 0.1  --dropout none --data-augment crop --regularizer svmo --margin 1.2 --train-batch-size 32 --switch-loss -178 --penalty-position after --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_duke_log/baseline_ow --arch resnet50_abl_fc1024_fd_none_nohead_dan_none_nohead --gpu-devices 4&
+beta=1e-3 part_num=1 nohup python train_reg_crit.py -s dukemtmcreid -t dukemtmcreid --eval-freq 5 --flip-eval --label-smooth --criterion xent --lambda-htri 0.1  --dropout none --data-augment none --regularizer svmo --margin 1.2 --train-batch-size 32 --switch-loss -178 --penalty-position after --height 384 --width 128 --fixbase-epoch 10 --optim adam --lr 0.0003 --stepsize 20 40 --max-epoch 60 --save-dir abl_duke_log/baseline_ow --arch resnet50_abl_fc1024_fd_none_nohead_dan_none_nohead --gpu-devices 4&

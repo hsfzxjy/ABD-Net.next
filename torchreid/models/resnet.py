@@ -1117,7 +1117,10 @@ class ResNetAblation(nn.Module):
 
             f = x2[:, :, margin * (p - 1):margin * p, :]
 
-            f_before1 = self.before_module1(f)
+            if self.attention_config['parts']:
+                f_before1 = self.before_module1(f)
+            else:
+                f_before1 = f
 
             f_sum1 = f_before1
 
@@ -1129,7 +1132,11 @@ class ResNetAblation(nn.Module):
                 f_pam1 = self.pam_module1(f)
                 feature_dict['pam'] = (*feature_dict['pam'], f_pam1)
                 f_sum1 = f_sum1 + f_pam1
-            f_after1 = self.sum_conv1(f_sum1)
+
+            if self.attention_config['parts']:
+                f_after1 = self.sum_conv1(f_sum1)
+            else:
+                f_after1 = f_sum1
 
             feature_dict['before'] = (*feature_dict['before'], f_before1)
             feature_dict['after'] = (*feature_dict['after'], f_after1)
@@ -3942,4 +3949,4 @@ for fragment in fragments:
         name += name_frag
         config.update({key: sub_config})
 
-    make_function_sf_tricky_50(name, config, 12, base_class=ResNetPAM)
+    make_function_sf_tricky_50(name, config, 12, base_class=ResNetAblation)

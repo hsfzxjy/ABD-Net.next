@@ -1068,7 +1068,7 @@ class ResNetAblation(nn.Module):
         B, C, H, W = x.shape
 
         for cs, cam in self.feature_distilation.cam_modules:
-            logger.info('SCAM')
+            logger.debug('SCAM')
             c_tensor = torch.tensor(cs).cuda()
 
             new_x = x[:, c_tensor]
@@ -1086,7 +1086,7 @@ class ResNetAblation(nn.Module):
 
         if os.environ.get('tb') is not None:
             # normal branch
-            logger.info('two branch')
+            logger.debug('two branch')
             x1 = x
             x1 = self.layer4_normal_branch(x1)
             layer4_1 = x1
@@ -1104,6 +1104,7 @@ class ResNetAblation(nn.Module):
         # our branch
         x2 = x
         x2 = self.layer4(x2)
+        logger.debug(f'{x2.size()}')
         layer4_2 = x2
         x2 = self.reduction_tr(x2)
 
@@ -1117,15 +1118,15 @@ class ResNetAblation(nn.Module):
 
         margin = 24 // self.part_num
 
-        logger.info(f'part_num {self.part_num}')
-        logger.info(f'{x2.size()}')
+        logger.debug(f'part_num {self.part_num}')
+        logger.debug(f'{x2.size()}')
 
         for p in range(1, self.part_num + 1):
 
             f = x2[:, :, margin * (p - 1):margin * p, :]
 
             if self.attention_config['parts']:
-                logger.info('before module')
+                logger.debug('before module')
                 f_before1 = self.before_module1(f)
             else:
                 f_before1 = f
@@ -1133,18 +1134,18 @@ class ResNetAblation(nn.Module):
             f_sum1 = f_before1
 
             if 'cam' in self.attention_config['parts']:
-                logger.info('dcam')
+                logger.debug('dcam')
                 f_cam1 = self.cam_module1(f)
                 feature_dict['cam'] = (*feature_dict['cam'], f_cam1)
                 f_sum1 = f_sum1 + f_cam1
             if 'pam' in self.attention_config['parts']:
-                logger.info('dpam')
+                logger.debug('dpam')
                 f_pam1 = self.pam_module1(f)
                 feature_dict['pam'] = (*feature_dict['pam'], f_pam1)
                 f_sum1 = f_sum1 + f_pam1
 
             if self.attention_config['parts']:
-                logger.info('after module')
+                logger.debug('after module')
                 f_after1 = self.sum_conv1(f_sum1)
             else:
                 f_after1 = f_sum1

@@ -76,7 +76,7 @@ class SingularLoss(nn.Module):
 
     def apply_penalty(self, k, x):
 
-        if isinstance(x, tuple):
+        if isinstance(x, (tuple, list)):
             return sum([self.apply_penalty(k, xx) for xx in x]) / len(x)
 
         batches, channels, height, width = x.size()

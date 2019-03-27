@@ -1110,10 +1110,10 @@ class ResNetAblation(nn.Module):
         x2 = self.reduction_tr(x2)
 
         feature_dict = {
-            'cam': [],
-            'pam': [],
-            'before': [],
-            'after': [],
+            'cam': (),
+            'pam': (),
+            'before': (),
+            'after': (),
             'layer5': layer5,
         }
 

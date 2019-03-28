@@ -26,7 +26,7 @@ class Market1501(BaseImageDataset):
     Zheng et al. Scalable Person Re-identification: A Benchmark. ICCV 2015.
 
     URL: http://www.liangzheng.org/Project/project_reid.html
-    
+
     Dataset statistics:
     # identities: 1501 (+1 for background)
     # images: 12936 (train) + 3368 (query) + 15913 (gallery)
@@ -76,7 +76,7 @@ class Market1501(BaseImageDataset):
         pid_container = set()
         for img_path in img_paths:
             pid, _ = map(int, pattern.search(img_path).groups())
-            if pid == -1: continue  # junk images are just ignored
+            if pid == -1 and os.environ.get('junk') is None: continue  # junk images are just ignored
             pid_container.add(pid)
         pid2label = {pid:label for label, pid in enumerate(pid_container)}
 

@@ -32,7 +32,8 @@ def process(fn):
             5 - len([x for x in gpid if x == qpid]),
             qidx,
             qp[qidx],
-            list(gps)
+            list(gps),
+            gpid
         ])
 
     return errors
@@ -55,7 +56,7 @@ for be, fe, de in zip(b_error, f_error, d_error):
     qf = be[2]
 
     # print(be[3]+fe[3]+de[3])
-    if '-1' in be[3] + fe[3] + de[3]:  # be[0] > fe[0] + 2:
+    if '-1' in be[4] + fe[4] + de[4]:  # be[0] > fe[0] + 2:
         print(qidx, be[0], de[0], fe[0])
         lines.append('{} {} {} {}'.format(qidx, [x for x in be[3] if x == '-1'], [x for x in de[3] if x == '-1'], [x for x in fe[0] if x == '-1']))
         directory = 'pics/' + str(qidx) + '/'

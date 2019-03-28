@@ -29,7 +29,7 @@ def process(fn):
         # if len([x for x in gpid if x == qpid]) < 5:
         #     print('\n'.join(gps))
         errors.append([
-            5 - len([x for x in gpid if x == qpid]),
+            len([x for x in gpid if x == '-1']),
             qidx,
             qp[qidx],
             list(gps),
@@ -58,7 +58,7 @@ for be, fe, de in zip(b_error, f_error, d_error):
     # print(be[3]+fe[3]+de[3])
     if '-1' in be[4] + fe[4] + de[4]:  # be[0] > fe[0] + 2:
         print(qidx, be[0], de[0], fe[0])
-        lines.append('{} {} {} {}'.format(qidx, len([x for x in be[4] if x == '-1']), len([x for x in de[4] if x == '-1']), len([x for x in fe[4] if x == '-1'])))
+        lines.append('{} {} {} {}'.format(qidx, be[0], de[0], fe[0]))
         directory = 'pics/' + str(qidx) + '/'
         os.makedirs(directory)
         shutil.copy(qf.strip(), directory + 'query.jpg')

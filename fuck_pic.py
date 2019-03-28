@@ -54,7 +54,7 @@ for be, fe, de in zip(b_error, f_error, d_error):
     qidx = be[1]
     qf = be[2]
 
-    print(be[3]+fe[3]+de[3])
+    # print(be[3]+fe[3]+de[3])
     if '-1' in be[3] + fe[3] + de[3]:  # be[0] > fe[0] + 2:
         print(qidx, be[0], de[0], fe[0])
         lines.append('{} {} {} {}'.format(qidx, [x for x in be[3] if x == '-1'], [x for x in de[3] if x == '-1'], [x for x in fe[0] if x == '-1']))

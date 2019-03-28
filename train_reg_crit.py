@@ -136,8 +136,8 @@ def main():
             print(e)
             checkpoint = torch.load(args.load_weights, map_location={'cuda:0': 'cpu'})
 
-        dropout_optimizer.set_p(checkpoint.get('dropout_p', 0))
-        print(list(checkpoint.keys()), checkpoint['dropout_p'])
+        # dropout_optimizer.set_p(checkpoint.get('dropout_p', 0))
+        # print(list(checkpoint.keys()), checkpoint['dropout_p'])
 
         pretrain_dict = checkpoint['state_dict']
         model_dict = model.state_dict()

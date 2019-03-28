@@ -32,7 +32,7 @@ def process(fn):
             5 - len([x for x in gpid if x == qpid]),
             qidx,
             qp[qidx],
-            gps
+            list(gps)
         ])
 
     return errors

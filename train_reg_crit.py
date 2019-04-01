@@ -283,9 +283,9 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             limited = float(os.environ.get('limited', None))
         except (ValueError, TypeError):
             limited = 1
-        print('################# limited', limited)
+        # print('################# limited', limited)
 
-        if (batch_idx + 1) > limited * len(trainloader):
+        if not fixbase and (batch_idx + 1) > limited * len(trainloader):
             break
 
         data_time.update(time.time() - end)

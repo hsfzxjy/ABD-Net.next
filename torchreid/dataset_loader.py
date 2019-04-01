@@ -39,7 +39,7 @@ class ImageDataset(Dataset):
             limited = float(os.environ.get('limited', None))
         except (ValueError, TypeError):
             limited = 1
-
+        print('################# limited', limited)
         self.max = int(len(self.dataset) * limited) - 1
 
     def __len__(self):

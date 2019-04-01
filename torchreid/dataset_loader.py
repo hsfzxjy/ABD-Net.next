@@ -35,15 +35,8 @@ class ImageDataset(Dataset):
         self.dataset = dataset
         self.transform = transform
 
-        try:
-            limited = float(os.environ.get('limited', None))
-        except (ValueError, TypeError):
-            limited = 1
-        print('################# limited', limited)
-        self.max = int(len(self.dataset) * limited) - 1
-
     def __len__(self):
-        return self.max + 1
+        return len(self.dataset)
 
     def __getitem__(self, index):
         img_path, pid, camid = self.dataset[index]

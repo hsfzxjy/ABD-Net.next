@@ -285,7 +285,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             limited = 1
         print('################# limited', limited)
 
-        if batch_idx > limited * len(trainloader):
+        if (batch_idx + 1) > limited * len(trainloader):
             break
 
         data_time.update(time.time() - end)

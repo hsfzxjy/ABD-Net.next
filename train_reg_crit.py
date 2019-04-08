@@ -180,6 +180,9 @@ def main():
     train_time = 0
     print("==> Start training")
 
+    if os.environ.get('test_first') is not None:
+        rank1 = test(model, queryloader, galleryloader, use_gpu)
+
     if args.fixbase_epoch > 0:
         oldenv = os.environ.get('sa', '')
         os.environ['sa'] = ''

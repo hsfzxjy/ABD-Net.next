@@ -181,9 +181,11 @@ def main():
     print("==> Start training")
 
     if os.environ.get('test_first') is not None:
-        queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
-        galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
-        rank1 = test(model, queryloader, galleryloader, use_gpu)
+        for name in args.target_names:
+            print("Evaluating {} ...".format(name))
+            queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
+            galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
+            rank1 = test(model, queryloader, galleryloader, use_gpu)
 
     if args.fixbase_epoch > 0:
         oldenv = os.environ.get('sa', '')

@@ -18,9 +18,11 @@ from .ilidsvid import iLIDSVID
 from .prid2011 import PRID2011
 from .dukemtmcvidreid import DukeMTMCVidReID
 from .valset import ValSet
+from .aicity19 import AICity19
 
 __imgreid_factory = {
     'market1501': Market1501,
+    'aicity19': AICity19,
     'cuhk03': CUHK03,
     'dukemtmcreid': DukeMTMCreID,
     'msmt17': MSMT17,

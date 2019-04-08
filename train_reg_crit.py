@@ -181,6 +181,8 @@ def main():
     print("==> Start training")
 
     if os.environ.get('test_first') is not None:
+        queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
+        galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
         rank1 = test(model, queryloader, galleryloader, use_gpu)
 
     if args.fixbase_epoch > 0:

@@ -163,7 +163,7 @@ class ResNetABDMGN(nn.Module):
         self.sum_fusion = True
         last_stride = 1
 
-        super(ResNetABD, self).__init__()
+        super(ResNetABDMGN, self).__init__()
         self.feature_dim = 2048  # 512 * block.expansion
 
         # backbone network
@@ -564,7 +564,7 @@ def resnet50_best(num_classes, loss, pretrained='imagenet', **kwargs):
     )
 
 #
-def make_function_sf_tricky_50(name, config, tricky, base_class=ResNet):
+def make_function_sf_tricky_50(name, config, tricky, base_class):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)

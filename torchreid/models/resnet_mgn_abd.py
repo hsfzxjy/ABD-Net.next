@@ -181,7 +181,7 @@ class ResNetABDMGN(nn.Module):
                    Bottleneck(1024, 512, downsample=nn.Sequential(nn.Conv2d(1024, 2048, 1, bias=False), nn.BatchNorm2d(2048))),
                    Bottleneck(2048, 512),
                    Bottleneck(2048, 512))
-        res_p_conv5.load_state_dict(resnet.layer4.state_dict())
+        res_p_conv5.load_state_dict(backbone.layer4.state_dict())
 
         self.layer4_1 = nn.Sequential(
             *deepcopy(backbone.layer3[1:]),
@@ -210,6 +210,8 @@ class ResNetABDMGN(nn.Module):
         # self.layer4_normal_branch.load_state_dict(backbone.layer4.state_dict())
         #
         self.layer4_abd = deepcopy(self.layer4_3)
+
+        feats = 256
 
         self.maxpool_zg_p1 = nn.MaxPool2d(kernel_size=(12, 4))
         self.maxpool_zg_p2 = nn.MaxPool2d(kernel_size=(24, 8))

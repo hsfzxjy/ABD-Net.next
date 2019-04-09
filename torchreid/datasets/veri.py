@@ -86,4 +86,6 @@ class VeRi(BaseImageDataset):
             if bn in q_files:
                 q_dataset.append((f, id, cid))
 
+            id_mapping[id] += 1
+
         return q_dataset, t_dataset

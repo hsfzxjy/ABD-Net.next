@@ -9,6 +9,29 @@ import torchvision
 import torch.utils.model_zoo as model_zoo
 from copy import deepcopy
 
+class DummyFD(nn.Module):
+
+    def __init__(self, fd_getter):
+
+        super().__init__()
+        self.fd_getter = fd_getter
+
+    def forward(self, x):
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.fd_getter().cam_modules:
+            # try:
+            #     c_tensor = torch.tensor(cs).cuda()
+            # except RuntimeError:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        return x
+
 
 channels = {
     'a': [4, 40, 64, 68, 70, 71, 101, 102, 127, 141, 152, 158, 162, 164, 171, 172, 175, 186, 201, 209, 225, 227, 246],

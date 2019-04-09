@@ -1,5 +1,5 @@
 import os
-import glob
+from glob import glob
 import re
 import sys
 import os.path as osp

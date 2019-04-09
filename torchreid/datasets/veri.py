@@ -60,7 +60,7 @@ class VeRi(BaseImageDataset):
         mapping = {v: i for i, v in enumerate(sorted(ids))}
 
         dataset = []
-        for k, fs in fns:
+        for k, fs in fns.items():
             for i, f in enumerate(fs):
                 dataset.append((f, mapping[k], i))
 

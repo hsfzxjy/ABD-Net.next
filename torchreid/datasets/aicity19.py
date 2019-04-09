@@ -27,7 +27,7 @@ class AICity19(BaseImageDataset):
         query = self.get_query(gallery)
 
         if verbose:
-            print("=> Market1501 loaded")
+            print("=> AICity19 loaded")
             self.print_dataset_statistics(train, query, gallery)
 
         self.train = train

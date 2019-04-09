@@ -226,12 +226,12 @@ def main():
         else:
             state_dict = model.state_dict()
 
-        # save_checkpoint({
-        #     'state_dict': state_dict,
-        #     'rank1': 0,
-        #     'epoch': epoch,
-        #     'dropout_p': dropout_optimizer.p,
-        # }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
+        save_checkpoint({
+            'state_dict': state_dict,
+            'rank1': 0,
+            'epoch': epoch,
+            'dropout_p': dropout_optimizer.p,
+        }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
 
         scheduler.step()
 

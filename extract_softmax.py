@@ -181,7 +181,8 @@ def extract_train_info(model, trainloader):
 
     import csv
 
-    with csv.writer('softmax_results.csv', 'w') as writer:
+    with open('softmax_results.csv', 'wb') as f:
+        writer = csv.writer(f)
         writer.writerow('id global_score global_correct p1_score p1_correct p2_score p2_correct'.split())
         for i, xs in enumerate(zip([score_list[0], correct_list[0], score_list[1], correct_list[1], score_list[2], correct_list[2]])):
             writer.writerow([i, *xs])

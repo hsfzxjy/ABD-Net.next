@@ -165,7 +165,7 @@ def main():
 def extract_train_info(model, trainloader):
 
     model.eval()
-    os.environ['fake'] = 1
+    os.environ['fake'] = '1'
 
     score_list = [[], [], []]
     correct_list = [[], [], []]

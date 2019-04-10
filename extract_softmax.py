@@ -175,7 +175,7 @@ def extract_train_info(model, trainloader):
         for i, xent_feature in enumerate(xent_features):
             print(xent_feature.size())
             scores, indexs = torch.max(F.softmax(xent_feature), 1)
-            corrects = indexs == pids
+            corrects = indexs == pids.cuda()
             score_list[i].extend(scores.data)
             correct_list[i].extend(corrects.data)
 

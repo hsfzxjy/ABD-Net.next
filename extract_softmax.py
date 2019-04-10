@@ -170,7 +170,7 @@ def extract_train_info(model, trainloader):
     correct_list = [[], [], []]
     for imgs, pids, _, _ in trainloader:
 
-        xent_features = model(imgs)
+        xent_features = model(imgs)[1]
         for i, xent_feature in enumerate(xent_features):
             print(xent_feature.size())
             scores, indexs = torch.max(F.softmax(xent_feature), 1)

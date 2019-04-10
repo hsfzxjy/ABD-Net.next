@@ -77,16 +77,14 @@ class VeRi(BaseImageDataset):
         id_mapping = defaultdict(int)
 
         for f in t_files:
-            id, _ = map(int, re.findall(r'/(\d{4})_c(\d{3})', f)[0])
+            id, cid = map(int, re.findall(r'/(\d{4})_c(\d{3})', f)[0])
             bn = osp.basename(f)
-            cid = id_mapping[id]
-            print(id, cid)
-
+            # cid = id_mapping[id]
+            # print(id, cid)
 
             if bn in q_files:
                 q_dataset.append((f, id, cid))
-            else:
-                t_dataset.append((f, id, cid))
+            t_dataset.append((f, id, cid))
 
             id_mapping[id] += 1
 

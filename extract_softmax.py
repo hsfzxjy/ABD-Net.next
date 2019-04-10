@@ -172,7 +172,7 @@ def extract_train_info(model, trainloader):
 
         xent_features = model(imgs)
         for i, xent_feature in enumerate(xent_features):
-            scores, indexs = torch.max(F.softmax(xent_feature))
+            scores, indexs = torch.max(F.softmax(xent_feature), 1)
             corrects = indexs == pids
             score_list[i].extend(scores.data)
             correct_list[i].extend(corrects.data)

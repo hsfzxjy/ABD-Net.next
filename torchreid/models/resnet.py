@@ -3105,7 +3105,7 @@ class ResNetABD(nn.Module):
             v = getattr(self, f'classifier_p{p}')(v)
             xent_features.append(v)
 
-        if not self.training:
+        if not self.training and os.environ.get('fake') is None:
             return torch.cat(predict_features, 1)
 
         return None, tuple(xent_features), tuple(triplet_features), feature_dict

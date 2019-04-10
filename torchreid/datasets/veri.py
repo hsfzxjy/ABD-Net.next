@@ -82,10 +82,11 @@ class VeRi(BaseImageDataset):
             cid = id_mapping[id]
             print(id, cid)
 
-            t_dataset.append((f, id, cid))
 
             if bn in q_files:
                 q_dataset.append((f, id, cid))
+            else:
+                t_dataset.append((f, id, cid))
 
             id_mapping[id] += 1
 

@@ -169,7 +169,8 @@ def extract_train_info(model, trainloader):
 
     score_list = [[], [], []]
     correct_list = [[], [], []]
-    for imgs, pids, _, _ in trainloader:
+    ps = []
+    for imgs, pids, _, paths in trainloader:
 
         xent_features = model(imgs)[1]
         for i, xent_feature in enumerate(xent_features):
@@ -179,12 +180,11 @@ def extract_train_info(model, trainloader):
             print(corrects)
             score_list[i].extend(scores.data)
             correct_list[i].extend(corrects.data)
-
-    import csv
+            ps.extend(paths.data)
 
     with open('softmax_results.csv', 'w') as f:
-        f.write('id global_score global_correct p1_score p1_correct p2_score p2_correct\n'.replace(' ', ','))
-        for i, xs in enumerate(zip(score_list[0], correct_list[0], score_list[1], correct_list[1], score_list[2], correct_list[2])):
+        f.write('id filename global_score global_correct p1_score p1_correct p2_score p2_correct\n'.replace(' ', ','))
+        for i, xs in enumerate(zip(ps, score_list[0], correct_list[0], score_list[1], correct_list[1], score_list[2], correct_list[2])):
             f.write(','.join(map(str, [i, *[x.item() for x in xs]])) + '\n')
 
 

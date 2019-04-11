@@ -3075,14 +3075,16 @@ class ResNetABD(nn.Module):
             'layer5': layer5
         }
 
-        margin = 24 // self.part_num
+        print(x.size(2))
+        margin = x.size(2) // self.part_num
 
         for p in range(1, self.part_num + 1):
 
             f = x2[:, :, margin * (p - 1):margin * p, :]
 
             if not self.attention_config['parts']:
-                f_after1 = f_before1 = self.before_module1(f)
+                # f_after1 = f_before1 = self.before_module1(f)
+                f_after1 = f_before1 = f
                 feature_dict['before'] = (*feature_dict['before'], f_before1)
                 feature_dict['after'] = (*feature_dict['after'], f_after1)
             else:

@@ -3075,7 +3075,6 @@ class ResNetABD(nn.Module):
             'layer5': layer5
         }
 
-        print(x.size(2))
         margin = x.size(2) // self.part_num
 
         for p in range(1, self.part_num + 1):

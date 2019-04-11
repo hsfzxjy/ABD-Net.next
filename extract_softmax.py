@@ -186,7 +186,7 @@ def extract_train_info(model, trainloader):
     with open('softmax_results.csv', 'w') as f:
         f.write('id filename global_score global_correct p1_score p1_correct p2_score p2_correct\n'.replace(' ', ','))
         for i, xs in enumerate(zip(ps, score_list[0], correct_list[0], score_list[1], correct_list[1], score_list[2], correct_list[2])):
-            f.write(','.join(map(str, [i, *[x.item() for x in xs]])) + '\n')
+            f.write(','.join(map(str, [i, *[x if isinstance(x, str) else x.item() for x in xs]])) + '\n')
 
 
 def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False, switch_loss=False):

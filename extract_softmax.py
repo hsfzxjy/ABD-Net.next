@@ -180,7 +180,8 @@ def extract_train_info(model, trainloader):
             print(corrects)
             score_list[i].extend(scores.data)
             correct_list[i].extend(corrects.data)
-            ps.extend(paths.data)
+            print(paths)
+            ps.extend(paths)
 
     with open('softmax_results.csv', 'w') as f:
         f.write('id filename global_score global_correct p1_score p1_correct p2_score p2_correct\n'.replace(' ', ','))

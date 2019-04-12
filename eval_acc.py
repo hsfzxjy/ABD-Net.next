@@ -202,11 +202,11 @@ def extract_train_info(model, trainloader):
     accs = [AverageMeter() for _ in range(3)]
     for imgs, pids, _, paths in trainloader:
 
-        xent_features = model(imgs)[1]
+        xent_features = model(imgs.cuda())[1]
         for i, xent_feature in enumerate(xent_features):
 
             accs[i].update(
-                accuracy(xent_feature, pids)[0].item(),
+                accuracy(xent_feature, pids.cuda())[0].item(),
                 pids.size(0),
             )
 

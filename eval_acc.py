@@ -200,15 +200,17 @@ def extract_train_info(model, trainloader):
     os.environ['fake'] = '1'
 
     accs = [AverageMeter() for _ in range(3)]
-    for imgs, pids, _, paths in trainloader:
 
-        xent_features = model(imgs.cuda())[1]
-        for i, xent_feature in enumerate(xent_features):
+    with torch.no_grad():
+        for imgs, pids, _, paths in trainloader:
 
-            accs[i].update(
-                accuracy(xent_feature, pids.cuda())[0].item(),
-                pids.size(0),
-            )
+            xent_features = model(imgs.cuda())[1]
+            for i, xent_feature in enumerate(xent_features):
+
+                accs[i].update(
+                    accuracy(xent_feature, pids.cuda())[0].item(),
+                    pids.size(0),
+                )
 
     with open(args.load_weights + '.acc', 'w') as f:
         print(*(acc.avg for acc in accs), file=f)

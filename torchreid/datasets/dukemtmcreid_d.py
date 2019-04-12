@@ -104,7 +104,7 @@ class DukeMTMCreID_D(BaseImageDataset):
         dataset = []
         with open(fn, 'r') as f:
 
-            for line in f.readlines[1:]:
+            for line in f.readlines()[1:]:
 
                 image_path, pid, cid, _ = line.split()
 

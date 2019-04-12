@@ -56,7 +56,7 @@ class DukeMTMCreID_D(BaseImageDataset):
         gallery = self._get_from_file(
             osp.join(root, 'distractors'),
             self.gallery_dir,
-            osp.join(root, 'distractors/duke_info/info/gallery_Distractors_All_info.txt')
+            osp.join(root, 'distractors/duke_info/info/gallery_Distractors_info.txt')
         )
 
         if verbose:

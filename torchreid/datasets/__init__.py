@@ -5,6 +5,7 @@ from __future__ import print_function
 from .market1501 import Market1501
 from .cuhk03 import CUHK03
 from .dukemtmcreid import DukeMTMCreID
+from .dukemtmcreid_d import DukeMTMCreID_D
 from .msmt17 import MSMT17
 from .viper import VIPeR
 from .grid import GRID
@@ -27,6 +28,7 @@ __imgreid_factory = {
     'veri': VeRi,
     'cuhk03': CUHK03,
     'dukemtmcreid': DukeMTMCreID,
+    'dukemtmcreid_d': DukeMTMCreID_D,
     'msmt17': MSMT17,
     'viper': VIPeR,
     'grid': GRID,

@@ -46,12 +46,12 @@ class Market1501_D(BaseImageDataset):
         query = self._get_from_file(
             osp.join(root, 'distractors'),
             self.query_dir,
-            osp.join(root, 'distractors/duke_info/info/query_Distractors_info.txt')
+            osp.join(root, 'distractors/market_info/info/query_Distractors_info.txt')
         )
         gallery = self._get_from_file(
             osp.join(root, 'distractors'),
             self.gallery_dir,
-            osp.join(root, 'distractors/duke_info/info/gallery_Distractors_info.txt')
+            osp.join(root, 'distractors/market_info/info/gallery_Distractors_info.txt')
         )
 
         if verbose:

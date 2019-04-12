@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 from .market1501 import Market1501
+from .market1501_d import Market1501_D
 from .cuhk03 import CUHK03
 from .dukemtmcreid import DukeMTMCreID
 from .dukemtmcreid_d import DukeMTMCreID_D
@@ -24,6 +25,7 @@ from .veri import VeRi
 
 __imgreid_factory = {
     'market1501': Market1501,
+    'market1501_d': Market1501_D,
     'aicity19': AICity19,
     'veri': VeRi,
     'cuhk03': CUHK03,

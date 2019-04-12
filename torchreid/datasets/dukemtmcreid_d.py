@@ -51,7 +51,7 @@ class DukeMTMCreID_D(BaseImageDataset):
         query = self._get_from_file(
             osp.join(root, 'distractors'),
             self.query_dir,
-            osp.join(root, 'distractors/duke_info/info/query_Distractors_All_info.txt')
+            osp.join(root, 'distractors/duke_info/info/query_Distractors_info.txt')
         )
         gallery = self._get_from_file(
             osp.join(root, 'distractors'),

@@ -2880,6 +2880,9 @@ class ResNetABD(nn.Module):
         #
         self.layer4_normal_branch = deepcopy(self.layer4)
 
+        dim = fc_dims[0]
+        self.dim = dim
+
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
@@ -2913,8 +2916,6 @@ class ResNetABD(nn.Module):
             dropout = []
 
         # fc_dims = [1024]
-        dim = fc_dims[0]
-        self.dim = dim
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 

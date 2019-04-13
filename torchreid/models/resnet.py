@@ -2912,13 +2912,15 @@ class ResNetABD(nn.Module):
         else:
             dropout = []
 
-        fc_dims = [1024]
+        # fc_dims = [1024]
+        dim = fc_dims[0]
+        self.dim = dim
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self.reduction_tr = nn.Sequential(
-            nn.Conv2d(2048, 1024, kernel_size=1, bias=False),
-            nn.BatchNorm2d(1024),
+            nn.Conv2d(2048, dim, kernel_size=1, bias=False),
+            nn.BatchNorm2d(dim),
             nn.ReLU(inplace=True),
             *dropout
         )
@@ -2932,7 +2934,7 @@ class ResNetABD(nn.Module):
         self.part_num = part_num
 
         for i in range(1, part_num + 1):
-            c = nn.Linear(1024, num_classes)
+            c = nn.Linear(dim, num_classes)
             setattr(self, f'classifier_p{i}', c)
             self._init_params(c)
 
@@ -2943,8 +2945,8 @@ class ResNetABD(nn.Module):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
 
-        in_channels = 1024
-        out_channels = 1024
+        in_channels = dim
+        out_channels = dim
 
         self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
         self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)

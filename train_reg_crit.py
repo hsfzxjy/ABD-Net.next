@@ -370,7 +370,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
                 features = (model(imgs0) + model(imgs1)) / 2.0
                 # print(features.size())
             else:
-                (imgs, pids, camids, _) = package
+                (imgs, pids, camids, paths) = package
                 if use_gpu:
                     imgs = imgs.cuda()
 

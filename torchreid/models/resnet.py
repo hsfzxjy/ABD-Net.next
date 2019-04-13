@@ -2945,8 +2945,8 @@ class ResNetABD(nn.Module):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
 
-        in_channels = dim
-        out_channels = dim
+        in_channels = self.dim
+        out_channels = self.dim
 
         self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
         self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)

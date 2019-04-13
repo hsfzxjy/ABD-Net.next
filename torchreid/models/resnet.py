@@ -4261,3 +4261,13 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_sf_tricky_50(name, config, 12, base_class=ResNetAblation)
+
+for fragment in fragments:
+
+    name = f'resnet50_abd_concat'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_sf_tricky_50(name, config, 12, base_class=ResNetABDConcat)

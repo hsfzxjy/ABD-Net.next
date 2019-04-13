@@ -3354,7 +3354,7 @@ class ResNetABDConcat(nn.Module):
         # triplet_features.append(x1)
         x1 = self.fc(x1)
         predict_features.append(x1)
-        x1 = self.classifier(x1)
+        # x1 = self.classifier(x1)
         # xent_features.append(x1)
 
         # our branch

@@ -2841,6 +2841,7 @@ class ResNetABD(nn.Module):
                  fd_config=None,
                  attention_config=None,
                  dropout_optimizer=None,
+                 fc_dims=(),
                  **kwargs):
 
         self.sum_fusion = True

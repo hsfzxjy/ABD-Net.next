@@ -3404,7 +3404,7 @@ class ResNetABDConcat(nn.Module):
         if not self.training and os.environ.get('fake') is None:
             return torch.cat(predict_features, 1)
 
-        xent_features.append(torch.cat(predict_features, 1))
+        xent_features.append(self.classifier(torch.cat(predict_features, 1)))
         triplet_features.append(torch.cat(predict_features, 1))
 
         return None, tuple(xent_features), tuple(triplet_features), feature_dict

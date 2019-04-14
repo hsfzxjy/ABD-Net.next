@@ -138,6 +138,7 @@ class DenseNet(nn.Module):
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
         self.feature_dim = num_features
+        self.orig_feature_dim = num_features
         self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_p)
 
         # Linear layer
@@ -245,7 +246,7 @@ class DensenetABD(nn.Module):
 
         self.global_avgpool = backbone.global_avgpool
 
-        output_dim = backbone.feature_dim
+        output_dim = backbone.orig_feature_dim
         feature_dim = fc_dims[0]
 
         self.global_reduction = nn.Sequential(

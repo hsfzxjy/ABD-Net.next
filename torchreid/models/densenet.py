@@ -353,10 +353,10 @@ class DensenetABD(nn.Module):
         x2 = self.abd_reduction(x2)
 
         feature_dict = {
-            'cam': [],
-            'pam': [],
-            'before': [],
-            'after': [],
+            'cam': (),
+            'pam': (),
+            'before': (),
+            'after': (),
             'layer5': layer5
         }
 
@@ -514,7 +514,7 @@ def densenet121_fc512(num_classes, loss='softmax', pretrained=True, **kwargs):
     return model
 
 
-def make_function_abd(name, config, base_class=DenseNet, url=model_urls['densenet121']):
+def make_function_abd(name, config, base_class=DenseNet, url=model_urls['densenet121'], last_stride=2):
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)

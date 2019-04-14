@@ -143,7 +143,8 @@ class DenseNet(nn.Module):
         # Linear layer
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
-        self._init_params()
+        self._init_params(self.fc)
+        self._init_params(self.classifier)
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
         """Constructs fully connected layer.

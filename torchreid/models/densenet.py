@@ -495,7 +495,7 @@ def make_function_abd(name, config, base_class=DenseNet, url=model_urls['densene
 
     def _func(num_classes, loss, pretrained='imagenet', **kwargs):
         print(config)
-        backbone = base_class(num_classes)
+        backbone = base_class(num_classes, fc_dims=config['fc_dims'])
         init_pretrained_weights(backbone, url)
         return DensenetABD(
             num_classes=num_classes,
@@ -510,7 +510,6 @@ def make_function_abd(name, config, base_class=DenseNet, url=model_urls['densene
     globals()[name] = _func
 
 
-#
 from collections import OrderedDict
 
 configurations = OrderedDict([

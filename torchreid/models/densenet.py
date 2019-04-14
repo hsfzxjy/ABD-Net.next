@@ -53,13 +53,13 @@ class _DenseBlock(nn.Sequential):
 
 
 class _Transition(nn.Sequential):
-    def __init__(self, num_input_features, num_output_features):
+    def __init__(self, num_input_features, num_output_features, stride=2):
         super(_Transition, self).__init__()
         self.add_module('norm', nn.BatchNorm2d(num_input_features))
         self.add_module('relu', nn.ReLU(inplace=True))
         self.add_module('conv', nn.Conv2d(num_input_features, num_output_features,
                                           kernel_size=1, stride=1, bias=False))
-        self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
+        self.add_module('pool', nn.AvgPool2d(kernel_size=stride, stride=stride))
 
 
 class DenseNet(nn.Module):
@@ -92,16 +92,19 @@ class DenseNet(nn.Module):
         # Each denseblock
         num_features = num_init_features
 
-        block_config = list(block_config)
-        block_config[-1] -= 1
-
         for i, num_layers in enumerate(block_config):
             block = _DenseBlock(num_layers=num_layers, num_input_features=num_features,
                                 bn_size=bn_size, growth_rate=growth_rate, drop_rate=drop_rate)
             self.features.add_module('denseblock%d' % (i + 1), block)
             num_features = num_features + num_layers * growth_rate
             if i != len(block_config) - 1:
-                trans = _Transition(num_input_features=num_features, num_output_features=num_features // 2)
+
+                if i == len(block_config) - 2:
+                    stride = 1
+                else:
+                    stride = 2
+
+                trans = _Transition(num_input_features=num_features, num_output_features=num_features // 2, stride=stride)
                 self.features.add_module('transition%d' % (i + 1), trans)
                 num_features = num_features // 2
 

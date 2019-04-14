@@ -337,7 +337,9 @@ class DensenetABD(nn.Module):
         predict, xent, triplet = [], [], []
 
         x1 = self.backbone3_1(x)
+        x1 = F.relu(x1)
         x1 = self.global_avgpool(x1)
+        x1 = x1.view(x1.size(0), -1)
         x1 = self.global_reduction(x1)
         predict.append(x1)
         triplet.append(x1)
@@ -345,6 +347,7 @@ class DensenetABD(nn.Module):
         xent.append(x1)
 
         x2 = self.backbone3_2(x)
+        x2 = F.relu(x2)
         x2 = self.global_reduction(x2)
 
         feature_dict = {

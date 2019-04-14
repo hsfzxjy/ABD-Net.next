@@ -602,3 +602,13 @@ for fragment in fragments:
         config.update({key: sub_config})
 
     make_function_abd(name, config)
+
+for fragment in fragments:
+
+    name = 'densenet121_ls1'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_abd(name, config, last_stride=1)

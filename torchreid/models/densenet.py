@@ -270,6 +270,7 @@ class DensenetABD(nn.Module):
         )
         backbone._init_params(self.abd_reduction)
         self.get_attention_module()
+        self.attention_config = attention_config
 
         try:
             part_num = int(os.environ.get('part_num'))

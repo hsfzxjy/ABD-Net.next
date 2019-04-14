@@ -239,7 +239,7 @@ class DensenetABD(nn.Module):
             channels={'a': [], 'b': [], 'c': list(range(128))},
             use_conv_head=fd_config['use_conv_head']
         )
-        self._init_params(self.feature_distilation)
+        backbone._init_params(self.feature_distilation)
         self.dummy_fd = DummyFD(lambda: self.feature_distilation)
         # End Feature Distilation
 

@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 from __future__ import division
 
+__all__ = ['densenet121', 'densenet169', 'densenet201', 'densenet161', 'densenet121_fc512']
+
 from collections import OrderedDict
 import math
 import re
-import os
+
 import torch
 import torch.nn as nn
 from torch.utils import model_zoo
@@ -19,29 +21,20 @@ model_urls = {
     'densenet161': 'https://download.pytorch.org/models/densenet161-8d451a50.pth',
 }
 
-channels = {
-    'a': [5, 10, 11, 26, 41, 44, 54, 58, 63, 67, 70, 79, 92, 105, 107, 112],
-    'b': [8, 13, 14, 16, 46, 47, 49, 51, 56, 60, 64, 66, 73, 74, 84, 90, 94, 96, 97, 99, 100, 117, 120, 126],
-    'c': [0, 1, 2, 3, 4, 6, 7, 9, 12, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 45, 48, 50, 52, 53, 55, 57, 59, 61, 62, 65, 68, 69, 71, 72, 75, 76, 77, 78, 80, 81, 82, 83, 85, 86, 87, 88, 89, 91, 93, 95, 98, 101, 102, 103, 104, 106, 108, 109, 110, 111, 113, 114, 115, 116, 118, 119, 121, 122, 123, 124, 125, 127]
-}
-
-if os.environ.get('relu_inplace', ''):
-    relu_inplace = True
-else:
-    relu_inplace = False
-
 
 class _DenseLayer(nn.Sequential):
     def __init__(self, num_input_features, growth_rate, bn_size, drop_rate):
         super(_DenseLayer, self).__init__()
         self.add_module('norm1', nn.BatchNorm2d(num_input_features)),
-        self.add_module('relu1', nn.ReLU(inplace=relu_inplace)),
-        self.add_module('conv1', nn.Conv2d(num_input_features, bn_size *
-                                           growth_rate, kernel_size=1, stride=1, bias=False)),
+        self.add_module('relu1', nn.ReLU(inplace=True)),
+        self.add_module('conv1', nn.Conv2d(
+            num_input_features, bn_size *
+            growth_rate, kernel_size=1, stride=1, bias=False)),
         self.add_module('norm2', nn.BatchNorm2d(bn_size * growth_rate)),
-        self.add_module('relu2', nn.ReLU(inplace=relu_inplace)),
-        self.add_module('conv2', nn.Conv2d(bn_size * growth_rate, growth_rate,
-                                           kernel_size=3, stride=1, padding=1, bias=False)),
+        self.add_module('relu2', nn.ReLU(inplace=True)),
+        self.add_module('conv2', nn.Conv2d(
+            bn_size * growth_rate, growth_rate,
+            kernel_size=3, stride=1, padding=1, bias=False)),
         self.drop_rate = drop_rate
 
     def forward(self, x):
@@ -63,39 +56,27 @@ class _Transition(nn.Sequential):
     def __init__(self, num_input_features, num_output_features):
         super(_Transition, self).__init__()
         self.add_module('norm', nn.BatchNorm2d(num_input_features))
-        self.add_module('relu', nn.ReLU(inplace=relu_inplace))
+        self.add_module('relu', nn.ReLU(inplace=True))
         self.add_module('conv', nn.Conv2d(num_input_features, num_output_features,
                                           kernel_size=1, stride=1, bias=False))
         self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
 
 
 class DenseNet(nn.Module):
-    """
-    Densely connected network
+    """Densely connected network.
 
     Reference:
-    Huang et al. Densely Connected Convolutional Networks. CVPR 2017.
+        Huang et al. Densely Connected Convolutional Networks. CVPR 2017.
+
+    Public keys:
+        - ``densenet121``: DenseNet121.
+        - ``densenet169``: DenseNet169.
+        - ``densenet201``: DenseNet201.
+        - ``densenet161``: DenseNet161.
+        - ``densenet121_fc512``: DenseNet121 + FC.
     """
-
-    def __init__(
-            self,
-            num_classes,
-            loss,
-            growth_rate=32,
-            block_config=(6, 12, 24, 16),
-            num_init_features=64,
-            bn_size=4,
-            drop_rate=0,
-            fc_dims=None,
-            dropout_p=None,
-            *,
-            fd_config=None,
-            sum_fusion=False,
-            attention_config=None,
-            dropout_optimizer=None,
-            **kwargs):
-
-        self.sum_fusion = sum_fusion
+    def __init__(self, num_classes, loss, growth_rate=32, block_config=(6, 12, 24, 16),
+                 num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, **kwargs):
 
         super(DenseNet, self).__init__()
         self.loss = loss
@@ -104,7 +85,7 @@ class DenseNet(nn.Module):
         self.features = nn.Sequential(OrderedDict([
             ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
             ('norm0', nn.BatchNorm2d(num_init_features)),
-            ('relu0', nn.ReLU(inplace=relu_inplace)),
+            ('relu0', nn.ReLU(inplace=True)),
             ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
         ]))
 
@@ -124,92 +105,35 @@ class DenseNet(nn.Module):
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
-
-        self.init_fd(fd_config)
-
-        # Begin Attention Module
-        if attention_config is None:
-            attention_config = {'parts': (), 'use_conv_head': False}
-        from .tricks.attention import AttentionModule
-
-        self.attention_module = AttentionModule(
-            attention_config['parts'],
-            num_features,
-            use_conv_head=attention_config['use_conv_head'],
-            sum_fusion=self.sum_fusion
-        )
-        if not sum_fusion:
-            self.feature_dim = num_features = num_features + self.attention_module.output_dim
-        # End Attention Module
-
-        # Begin Dropout Module
-        if dropout_optimizer is None:
-            from .tricks.dropout import SimpleDropoutOptimizer
-            dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
-        # End Dropout Module
-
-        self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_optimizer)
+        self.feature_dim = num_features
+        self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_p)
 
         # Linear layer
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self._init_params()
 
-    def init_fd(self, fd_config):
-        # Begin Feature Distilation
-        if fd_config is None:
-            fd_config = {'parts': (), 'use_conv_head': False}
-        from .tricks.feature_distilation import FeatureDistilationTrick
-        self.feature_distilation = FeatureDistilationTrick(
-            fd_config['parts'],
-            channels=channels,
-            use_conv_head=fd_config['use_conv_head']
-        )
-        # End Feature Distilation
+    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
+        """Constructs fully connected layer.
 
-    def forward_feature_distilation(self, x):
-
-        layer_5_feature = None
-
-        for index, layer in enumerate(self.features):
-            x = layer(x)
-            if index == 5:
-                B, C, H, W = x.shape
-
-                for cs, cam in self.feature_distilation.cam_modules:
-                    c_tensor = torch.tensor(cs).cuda()
-
-                    new_x = x[:, c_tensor]
-                    new_x = cam(new_x)
-                    x[:, c_tensor] = new_x
-
-                layer_5_feature = x
-
-        return x, layer_5_feature
-
-    def _construct_fc_layer(self, fc_dims, input_dim, dropout_optimizer):
-        """
-        Construct fully connected layer
-
-        - fc_dims (list or tuple): dimensions of fc layers, if None,
-                                   no fc layers are constructed
-        - input_dim (int): input dimension
-        - dropout_p (float): dropout probability, if None, dropout is unused
+        Args:
+            fc_dims (list or tuple): dimensions of fc layers, if None, no fc layers are constructed
+            input_dim (int): input dimension
+            dropout_p (float): dropout probability, if None, dropout is unused
         """
         if fc_dims is None:
             self.feature_dim = input_dim
             return None
 
-        assert isinstance(fc_dims, (list, tuple)), "fc_dims must be either list or tuple, but got {}".format(type(fc_dims))
+        assert isinstance(fc_dims, (list, tuple)), 'fc_dims must be either list or tuple, but got {}'.format(type(fc_dims))
 
         layers = []
         for dim in fc_dims:
             layers.append(nn.Linear(input_dim, dim))
             layers.append(nn.BatchNorm1d(dim))
-            layers.append(nn.ReLU(inplace=relu_inplace))
-            layers.append(dropout_optimizer)
-            # if dropout_p is not None:
-            #     layers.append(nn.Dropout(p=dropout_p))
+            layers.append(nn.ReLU(inplace=True))
+            if dropout_p is not None:
+                layers.append(nn.Dropout(p=dropout_p))
             input_dim = dim
 
         self.feature_dim = fc_dims[-1]
@@ -233,117 +157,32 @@ class DenseNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def backbone_convs(self):
-
-        return self.features
-
     def forward(self, x):
-        f, layer_5_feature = self.forward_feature_distilation(x)
+        f = self.features(x)
+        print(f.size())
+        f = F.relu(f, inplace=True)
+        v = self.global_avgpool(f)
+        v = v.view(v.size(0), -1)
 
-        # feature_dict = self.attention_module(f)
-        # attention_parts = [
-        #     part.view(part.size(0), -1) for part in
-        #     feature_dict.values()
-        # ]
-        # feature_dict['before'] = f
-        # feature_dict['layer5'] = layer_5_feature
-
-        # f = F.relu(f, inplace=False)
-        # v = self.global_avgpool(f)
-        # v = v.view(v.size(0), -1)
-
-        # v = torch.cat([v, *attention_parts], 1)
-
-        feature_dict, pooling = self.attention_module(f)
-
-        if not self.sum_fusion:
-            attention_parts = []
-            for k in feature_dict:
-                pool = pooling[k]
-                _f = pool(feature_dict[k])
-                attention_parts.append(_f.view(_f.size(0), -1))
-
-            feature_dict['before'] = f
-
-            f = F.relu(f, inplace=False)
-            v = self.global_avgpool(f)
-            v = v.view(v.size(0), -1)
-
-            v = torch.cat([v, *attention_parts], 1)
-        else:
-            feature_dict['before'] = f
-            f = sum(feature_dict.values())
-            feature_dict['after'] = f
-            v = self.global_avgpool(f)
-            v = v.view(v.size(0), -1)
-
-        v_before_fc = v
         if self.fc is not None:
             v = self.fc(v)
+
         if not self.training:
-            if os.environ.get('NOFC'):
-                return v_before_fc
-            else:
-                return v
+            return v
 
         y = self.classifier(v)
 
-        return f, y, v, feature_dict
-
-        if self.loss == {'xent'}:
+        if self.loss == 'softmax':
             return y
-        elif self.loss == {'xent', 'htri'}:
+        elif self.loss == 'triplet':
             return y, v
         else:
-            return f, y, v
-            # raise KeyError("Unsupported loss: {}".format(self.loss))
-
-
-class NewFDDenseNet(DenseNet):
-
-    def init_fd(self, fd_config):
-
-        from .tricks.feature_distilation import FeatureDistilationTrick
-
-        self.feature_distilation = nn.Sequential()
-        for _ in range(6):
-            if fd_config is None:
-                fd_config = {'parts': (), 'use_conv_head': False}
-            fd = FeatureDistilationTrick(
-                fd_config['parts'],
-                channels=channels,
-                use_conv_head=fd_config['use_conv_head']
-            )
-            self.feature_distilation.add_module('_fd_%s' % _, fd)
-
-    def forward_feature_distilation(self, x):
-
-        layer_5_feature = None
-
-        for index, layer in enumerate(self.features):
-            if index != 5:
-                x = layer(x)
-                continue
-
-            for fd, dense_layer in zip(self.feature_distilation, layer):
-
-                x = dense_layer(x)
-
-                for cs, cam in fd.cam_modules:
-                    c_tensor = torch.tensor(cs).cuda()
-
-                    new_x = x[:, c_tensor]
-                    new_x = cam(new_x)
-                    x[:, c_tensor] = new_x
-
-                layer_5_feature = x
-
-        return x, layer_5_feature
+            raise KeyError('Unsupported loss: {}'.format(self.loss))
 
 
 def init_pretrained_weights(model, model_url):
-    """
-    Initialize model with pretrained weights.
+    """Initializes model with pretrained weights.
+
     Layers that don't match with pretrained layers in name or size are kept unchanged.
     """
     pretrain_dict = model_zoo.load_url(model_url)
@@ -365,7 +204,7 @@ def init_pretrained_weights(model, model_url):
     pretrain_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
     model_dict.update(pretrain_dict)
     model.load_state_dict(model_dict)
-    print("Initialized model with pretrained weights from {}".format(model_url))
+    print('Initialized model with pretrained weights from {}'.format(model_url))
 
 
 """
@@ -378,162 +217,81 @@ densenet161: num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24)
 """
 
 
-def make_function_121(name, config):
-
-    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
-        print(config)
-        model = DenseNet(
-            num_classes=num_classes,
-            loss=loss,
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 24, 16),
-            dropout_p=None,
-            **config,
-            **kwargs
-        )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['densenet121'])
-        return model
-
-    _func.config = config
-
-    name_function_mapping[name] = _func
-    globals()[name] = _func
-
-
-def make_function_121_new_fd(name, config):
-
-    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
-        print(config)
-        model = NewFDDenseNet(
-            num_classes=num_classes,
-            loss=loss,
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 24, 16),
-            dropout_p=None,
-            **config,
-            **kwargs
-        )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['densenet121'])
-        return model
-
-    _func.config = config
-
-    name_function_mapping[name] = _func
-    globals()[name] = _func
-
-
-def make_function_161(name, config):
-
-    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
-
-        model = DenseNet(
-            num_classes=num_classes,
-            loss=loss,
-            num_init_features=96,
-            growth_rate=48,
-            block_config=(6, 12, 36, 24),
-            dropout_p=None,
-            **config,
-            **kwargs
-        )
-        if pretrained == 'imagenet':
-            init_pretrained_weights(model, model_urls['densenet161'])
-        return model
-
-    _func.config = config
-
-    name_function_mapping[name] = _func
-    globals()[name] = _func
-
-
-configurations = OrderedDict([
-    (
-        'fc_dims',
-        [
-            (None, '_nofc'),
-            ([512], '_fc512'),
-        ],
-    ),
-    (
-        'fd_config',
-        [
-            (
-                {
-                    'parts': parts,
-                    'use_conv_head': use_conv_head
-                },
-                f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
-            )
-            for parts, parts_name in [
-                [('ab', 'c'), 'ab_c'],
-                [('ab',), 'ab'],
-                [('a',), 'a'],
-                [(), 'none']
-            ]
-            for use_conv_head in (True, False)
-        ],
-    ),
-    (
-        'attention_config',
-        [
-            (
-                {
-                    'parts': parts,
-                    'use_conv_head': use_conv_head
-                },
-                f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
-            )
-            for parts, parts_name in [
-                [('cam', 'pam'), 'cam_pam'],
-                [('cam',), 'cam'],
-                [('pam',), 'pam'],
-                [(), 'none'],
-            ]
-            for use_conv_head in (True, False)
-        ]
+def densenet121(num_classes, loss='softmax', pretrained=True, **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 24, 16),
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs
     )
-])
-
-configurations: 'Dict[str, List[Tuple[config, name_frag]]]'
-
-import itertools
-
-fragments = list(itertools.product(*configurations.values()))
-keys = list(configurations.keys())
-
-name_function_mapping = {}
-
-for fragment in fragments:
-
-    name = 'densenet121'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
-
-    make_function_121(name, config)
-
-for fragment in fragments:
-
-    name = 'densenet161'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
-
-    make_function_161(name, config)
+    if pretrained:
+        init_pretrained_weights(model, model_urls['densenet121'])
+    return model
 
 
-for fragment in fragments:
+def densenet169(num_classes, loss='softmax', pretrained=True, **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 32, 32),
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls['densenet169'])
+    return model
 
-    name = 'densenet121_newfd'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
 
-    make_function_121_new_fd(name, config)
+def densenet201(num_classes, loss='softmax', pretrained=True, **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 48, 32),
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls['densenet201'])
+    return model
+
+
+def densenet161(num_classes, loss='softmax', pretrained=True, **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=96,
+        growth_rate=48,
+        block_config=(6, 12, 36, 24),
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls['densenet161'])
+    return model
+
+
+def densenet121_fc512(num_classes, loss='softmax', pretrained=True, **kwargs):
+    model = DenseNet(
+        num_classes=num_classes,
+        loss=loss,
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 24, 16),
+        fc_dims=[512],
+        dropout_p=None,
+        **kwargs
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls['densenet121'])
+    return model

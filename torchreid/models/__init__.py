@@ -30,7 +30,7 @@ from . import resnet_mgn_abd
 from . import densenet, resnet
 
 __model_factory = {
-    **densenet.name_function_mapping,
+    'densenet121': densenet.densenet121,
     **resnet.name_function_mapping,
     **resnet_mgn_abd.name_function_mapping,
     'resnet50_best': resnet_best.resnet50_best,

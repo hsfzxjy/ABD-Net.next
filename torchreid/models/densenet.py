@@ -338,7 +338,9 @@ class DensenetABD(nn.Module):
 
         x1 = self.backbone3_1(x)
         x1 = F.relu(x1)
+        print(x1.size())
         x1 = self.global_avgpool(x1)
+        print(x1.size())
         x1 = x1.view(x1.size(0), -1)
         x1 = self.global_reduction(x1)
         predict.append(x1)

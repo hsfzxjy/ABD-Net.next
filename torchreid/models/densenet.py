@@ -13,6 +13,7 @@ from torch.utils import model_zoo
 from torch.nn import functional as F
 import torchvision
 
+from copy import deepcopy
 
 model_urls = {
     'densenet121': 'https://download.pytorch.org/models/densenet121-a639ec97.pth',
@@ -75,11 +76,10 @@ class DenseNet(nn.Module):
         - ``densenet161``: DenseNet161.
         - ``densenet121_fc512``: DenseNet121 + FC.
     """
-    def __init__(self, num_classes, loss, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, **kwargs):
+    def __init__(self, num_classes, growth_rate=32, block_config=(6, 12, 24, 16),
+                 num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, last_stride=2, **kwargs):
 
         super(DenseNet, self).__init__()
-        self.loss = loss
 
         # First convolution
         self.features = nn.Sequential(OrderedDict([
@@ -100,7 +100,7 @@ class DenseNet(nn.Module):
             if i != len(block_config) - 1:
 
                 if i == len(block_config) - 2:
-                    stride = 1
+                    stride = last_stride
                 else:
                     stride = 2
 
@@ -166,7 +166,6 @@ class DenseNet(nn.Module):
 
     def forward(self, x):
         f = self.features(x)
-        print(f.size())
         f = F.relu(f, inplace=True)
         v = self.global_avgpool(f)
         v = v.view(v.size(0), -1)
@@ -186,6 +185,28 @@ class DenseNet(nn.Module):
         else:
             raise KeyError('Unsupported loss: {}'.format(self.loss))
 
+
+class DensenetABD(nn.Module):
+
+    def __init__(self, num_classes,
+                 backbone,
+                 *,
+                 fd_config=None,
+                 attention_config=None,
+                 dropout_optimizer=None,
+                 fc_dims=(),
+                 **kwargs):
+
+        super().__init__()
+
+        self.backbone1 = backbone.features[:6]
+        self.backbone2 = backbone.features[6:-1]
+        self.backbone3_1 = deepcopy(backbone.features[-1])
+        self.backbone3_2 = deepcopy(backbone.features[-1])
+
+    def forward(self, x):
+
+        print(self.backbone1(x).size())
 
 def init_pretrained_weights(model, model_url):
     """Initializes model with pretrained weights.
@@ -302,3 +323,94 @@ def densenet121_fc512(num_classes, loss='softmax', pretrained=True, **kwargs):
     if pretrained:
         init_pretrained_weights(model, model_urls['densenet121'])
     return model
+
+
+def make_function_abd(name, config, base_class=DenseNet, url=model_urls['densenet121']):
+
+    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
+        print(config)
+        backbone = base_class(num_classes)
+        init_pretrained_weights(backbone, url)
+        return DensenetABD(
+            num_classes=num_classes,
+            backbone=backbone,
+            **config,
+            **kwargs
+        )
+
+    _func.config = config
+
+    name_function_mapping[name] = _func
+    globals()[name] = _func
+
+
+#
+from collections import OrderedDict
+
+configurations = OrderedDict([
+    (
+        'fc_dims',
+        [
+            (None, '_nofc'),
+            ([256], '_fc256'),
+            ([512], '_fc512'),
+            ([1024], '_fc1024'),
+        ],
+    ),
+    (
+        'fd_config',
+        [
+            (
+                {
+                    'parts': parts,
+                    'use_conv_head': use_conv_head
+                },
+                f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
+            )
+            for parts, parts_name in [
+                [('ab', 'c'), 'ab_c'],
+                [('ab',), 'ab'],
+                [('a',), 'a'],
+                [(), 'none'],
+                [('abc',), 'abc']
+            ]
+            for use_conv_head in (True, False)
+        ],
+    ),
+    (
+        'attention_config',
+        [
+            (
+                {
+                    'parts': parts,
+                    'use_conv_head': use_conv_head
+                },
+                f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
+            )
+            for parts, parts_name in [
+                [('cam', 'pam'), 'cam_pam'],
+                [('cam',), 'cam'],
+                [('pam',), 'pam'],
+                [(), 'none'],
+            ]
+            for use_conv_head in (True, False)
+        ]
+    )
+])
+
+import itertools
+
+fragments = list(itertools.product(*configurations.values()))
+keys = list(configurations.keys())
+
+name_function_mapping = {}
+
+for fragment in fragments:
+
+    name = 'densenet121'
+    config = {}
+    for key, (sub_config, name_frag) in zip(keys, fragment):
+        name += name_frag
+        config.update({key: sub_config})
+
+    make_function_abd(name, config)

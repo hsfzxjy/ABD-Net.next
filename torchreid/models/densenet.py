@@ -310,7 +310,6 @@ class DensenetABD(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-
     def get_attention_module(self):
 
         from .tricks.attention import DANetHead, CAM_Module, PAM_Module
@@ -338,6 +337,7 @@ class DensenetABD(nn.Module):
         predict, xent, triplet = [], [], []
 
         x1 = self.backbone3_1(x)
+        x1 = self.global_avgpool(x1)
         x1 = self.global_reduction(x1)
         predict.append(x1)
         triplet.append(x1)

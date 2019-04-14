@@ -6,6 +6,7 @@ __all__ = ['densenet121', 'densenet169', 'densenet201', 'densenet161', 'densenet
 from collections import OrderedDict
 import math
 import re
+import os
 
 import torch
 import torch.nn as nn
@@ -21,6 +22,30 @@ model_urls = {
     'densenet201': 'https://download.pytorch.org/models/densenet201-c1103571.pth',
     'densenet161': 'https://download.pytorch.org/models/densenet161-8d451a50.pth',
 }
+
+
+class DummyFD(nn.Module):
+
+    def __init__(self, fd_getter):
+
+        super().__init__()
+        self.fd_getter = fd_getter
+
+    def forward(self, x):
+
+        B, C, H, W = x.shape
+
+        for cs, cam in self.fd_getter().cam_modules:
+            # try:
+            #     c_tensor = torch.tensor(cs).cuda()
+            # except RuntimeError:
+            c_tensor = torch.tensor(cs).cuda()
+
+            new_x = x[:, c_tensor]
+            new_x = cam(new_x)
+            x[:, c_tensor] = new_x
+
+        return x
 
 
 class _DenseLayer(nn.Sequential):
@@ -147,8 +172,8 @@ class DenseNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _init_params(self):
-        for m in self.modules():
+    def _init_params(self, x):
+        for m in x.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
@@ -200,13 +225,153 @@ class DensenetABD(nn.Module):
         super().__init__()
 
         self.backbone1 = backbone.features[:6]
-        self.backbone2 = backbone.features[6:-1]
-        self.backbone3_1 = deepcopy(backbone.features[-1])
-        self.backbone3_2 = deepcopy(backbone.features[-1])
+        self.backbone2 = backbone.features[6:-2]
+        self.backbone3_1 = deepcopy(backbone.features[-2:])
+        self.backbone3_2 = deepcopy(backbone.features[-2:])
+
+        # Begin Feature Distilation
+        if fd_config is None:
+            fd_config = {'parts': (), 'use_conv_head': False}
+        from .tricks.feature_distilation import FeatureDistilationTrick
+        self.feature_distilation = FeatureDistilationTrick(
+            fd_config['parts'],
+            channels={'a': [], 'b': [], 'c': list(range(128))},
+            use_conv_head=fd_config['use_conv_head']
+        )
+        self._init_params(self.feature_distilation)
+        self.dummy_fd = DummyFD(lambda: self.feature_distilation)
+        # End Feature Distilation
+
+        self.global_avgpool = backbone.global_avgpool
+
+        output_dim = backbone.feature_dim
+        feature_dim = fc_dims[0]
+
+        self.global_reduction = nn.Sequential(
+            nn.Linear(output_dim, feature_dim),
+            nn.BatchNorm1d(feature_dim),
+            nn.ReLU(inplace=True),
+            *([dropout_optimizer] if dropout_optimizer is not None else [])
+        )
+
+        self.global_classifier = nn.Linear(feature_dim, num_classes)
+        backbone._init_params(self.global_reduction)
+        backbone._init_params(self.global_classifier)
+
+        self.dim = feature_dim
+
+        self.abd_reduction = nn.Sequential(
+            nn.Conv2d(output_dim, feature_dim, kernel_size=1, bias=False),
+            nn.BatchNorm2d(feature_dim),
+            nn.ReLU(inplace=True),
+            *([dropout_optimizer] if dropout_optimizer is not None else [])
+        )
+        backbone._init_params(self.abd_reduction)
+        self.get_attention_module()
+
+        try:
+            part_num = int(os.environ.get('part_num'))
+        except (TypeError, ValueError):
+            part_num = 2
+
+        self.part_num = part_num
+
+        for i in range(1, part_num + 1):
+            c = nn.Linear(feature_dim, num_classes)
+            setattr(self, f'classifier_p{i}', c)
+            self._init_params(c)
+
+    def backbone_convs(self):
+
+        convs = [
+            self.backbone1,
+            self.backbone2,
+            self.backbone3_1,
+            self.backbone3_2,
+        ]
+
+        return convs
+
+    def get_attention_module(self):
+
+        from .tricks.attention import DANetHead, CAM_Module, PAM_Module
+
+        in_channels = self.dim
+        out_channels = self.dim
+
+        self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
+        self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
+        self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
+        self.sum_conv1 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
+
+        self._init_params(self.before_module1)
+        self._init_params(self.cam_module1)
+        self._init_params(self.pam_module1)
+        self._init_params(self.sum_conv1)
 
     def forward(self, x):
 
-        print(self.backbone1(x).size())
+        x = self.backbone1(x)
+        x = self.dummy_fd(x)
+        layer5 = x
+        x = self.backbone2(x)
+
+        predict, xent, triplet = [], [], []
+
+        x1 = self.backbone3_1(x)
+        x1 = self.global_reduction(x1)
+        predict.append(x1)
+        triplet.append(x1)
+        x1 = self.global_classifier(x1)
+        xent.append(x1)
+
+        x2 = self.backbone3_2(x)
+        x2 = self.global_reduction(x2)
+
+        feature_dict = {
+            'cam': [],
+            'pam': [],
+            'before': [],
+            'after': [],
+            'layer5': layer5
+        }
+
+        margin = x2.size(2) // self.part_num
+
+        for p in range(1, self.part_num + 1):
+
+            f = x2[:, :, margin * (p - 1):margin * p, :]
+
+            if not self.attention_config['parts']:
+                # f_after1 = f_before1 = self.before_module1(f)
+                f_after1 = f_before1 = f
+                feature_dict['before'] = (*feature_dict['before'], f_before1)
+                feature_dict['after'] = (*feature_dict['after'], f_after1)
+            else:
+                f_before1 = self.before_module1(f)
+                f_cam1 = self.cam_module1(f)
+                f_pam1 = self.pam_module1(f)
+
+                f_sum1 = f_cam1 + f_pam1 + f_before1
+                f_after1 = self.sum_conv1(f_sum1)
+
+                feature_dict['cam'] = (*feature_dict['cam'], f_cam1)
+                feature_dict['pam'] = (*feature_dict['pam'], f_pam1)
+                feature_dict['before'] = (*feature_dict['before'], f_before1)
+                feature_dict['after'] = (*feature_dict['after'], f_after1)
+
+            v = self.global_avgpool(f_after1)
+            v = v.view(v.size(0), -1)
+            triplet.append(v)
+            predict.append(v)
+            v = getattr(self, f'classifier_p{p}')(v)
+            xent.append(v)
+
+        if not self.training and os.environ.get('fake') is None:
+            return torch.cat(predict, 1)
+
+        return None, tuple(xent), tuple(triplet), feature_dict
+
 
 def init_pretrained_weights(model, model_url):
     """Initializes model with pretrained weights.

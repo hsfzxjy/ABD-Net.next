@@ -188,7 +188,17 @@ class ResNetDeepBranch(nn.Module):
 
         super().__init__()
 
-        layer4 = backbone._make_layer(Bottleneck, 512, 3, stride=1)
+        layer4 = nn.Sequential(
+            Bottleneck(
+                1024, 512,
+                downsample=nn.Sequential(
+                    nn.Conv2d(1024, 2048, 1, bias=False),
+                    nn.BatchNorm2d(2048)
+                )
+            ),
+            Bottleneck(2048, 512),
+            Bottleneck(2048, 512)
+        )
         layer4.load_state_dict(backbone.layer4.state_dict())
 
         self.backbone = layer4

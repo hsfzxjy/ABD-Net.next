@@ -188,7 +188,9 @@ class ResNetDeepBranch(nn.Module):
 
         super().__init__()
 
-        self.backbone = deepcopy(backbone.layer4)
+        self.backbone = backbone._make_layer(Bottleneck, 512, 3, stride=1)
+        self.backbone.load_state_dict(backbone.layer4.state_dict())
+
         owner.add_module(f'deep_backbone_{index}', self.backbone)
         self.out_dim = 2048
 
@@ -197,12 +199,6 @@ class ResNetDeepBranch(nn.Module):
         return [self.backbone]
 
     def forward(self, x):
-
-        print('------')
-        print('x', x.size(), x.device)
-
-        for p in self.backbone.parameters():
-            print(p.device)
 
         return self.backbone(x)
 

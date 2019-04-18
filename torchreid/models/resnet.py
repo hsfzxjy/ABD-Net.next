@@ -164,7 +164,7 @@ class ResNetCommonBranch(nn.Module):
             backbone.maxpool,
             backbone.layer1
         )
-        self.shallow_cam = ShallowCAM(256)
+        self.shallow_cam = ShallowCAM(args, 256)
         self.backbone2 = nn.Sequential(
             backbone.layer2,
             backbone.layer3,

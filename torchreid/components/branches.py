@@ -263,4 +263,6 @@ class ABDBranch(nn.Module):
             v = classifier(v)
             xent.append(v)
 
+        print('ABD done')
+
         return predict, xent, triplet, fmap

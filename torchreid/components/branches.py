@@ -165,6 +165,7 @@ class ABDBranch(nn.Module):
             classifier = nn.Linear(self.output_dim, self.num_classes)
             init_params(classifier)
             self.classifiers.append(classifier)
+            self.add_module(f'classifier_p{p}', classifier)
 
     def _init_reduction_layer(self):
 

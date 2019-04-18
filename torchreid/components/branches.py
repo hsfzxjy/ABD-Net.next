@@ -12,9 +12,9 @@ class MultiBranchNetwork(nn.Module):
     def __init__(self, backbone, args, num_classes, **kwargs):
         super().__init__()
 
+        self.num_classes = num_classes
         self.common_branch = self._get_common_branch(backbone, args)
         self.branches = self._get_branches(backbone, args)
-        self.num_classes = num_classes
 
         for i, branch in enumerate(self.branches):
             self.add_module(f'branch_{i}', branch)

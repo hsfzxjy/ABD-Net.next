@@ -212,7 +212,7 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
         branch_list = []
 
         if 'global' in branch_names:
-            deep_branch = ResNetDeepBranch(self, backbone, args)
+            deep_branch = ResNetDeepBranch(self, backbone, args, index=0)
             branch_list.append(
                 branches.Sequential(
                     deep_branch,
@@ -221,7 +221,7 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
             )
 
         if 'abd' in branch_names:
-            deep_branch = ResNetDeepBranch(self, backbone, args)
+            deep_branch = ResNetDeepBranch(self, backbone, args, index=1)
             branch_list.append(
                 branches.Sequential(
                     deep_branch,

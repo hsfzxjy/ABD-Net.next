@@ -27,7 +27,7 @@ from torchreid.optimizers import init_optimizer
 from torchreid.regularizers import get_regularizer
 from torchreid.losses.wrapped_cross_entropy_loss import WrappedCrossEntropyLoss
 
-from torchreid.models.tricks.dropout import DropoutOptimizer
+from torchreid.components.dropout import DropoutOptimizer
 
 import logging
 logging.basicConfig(level=os.environ.get('LOGLEVEL', 'CRITICAL'))
@@ -117,7 +117,7 @@ def main():
     trainloader, testloader_dict = dm.return_dataloaders()
 
     print("Initializing model: {}".format(args.arch))
-    model = models.init_model(name=args.arch, num_classes=dm.num_train_pids, loss={'xent'}, use_gpu=use_gpu, dropout_optimizer=dropout_optimizer)
+    model = models.init_model(name=args.arch, num_classes=dm.num_train_pids, loss={'xent'}, use_gpu=use_gpu, dropout_optimizer=dropout_optimizer, args=vars(args))
     print(model)
     print("Model size: {:.3f} M".format(count_num_param(model)))
 

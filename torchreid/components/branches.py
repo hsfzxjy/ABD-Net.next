@@ -9,7 +9,7 @@ from torchreid.components.attention import get_attention_module_instance
 
 class MultiBranchNetwork(nn.Module):
 
-    def __init__(self, backbone, args, num_classes):
+    def __init__(self, backbone, args, num_classes, **kwargs):
         super().__init__()
 
         self.common_branch = self._get_common_branch(backbone, args)

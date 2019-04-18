@@ -62,19 +62,19 @@ class Sequential(nn.Module):
 
         super().__init__()
 
-        self._modules = nn.ModuleList(modules)
+        self.modules = nn.ModuleList(modules)
 
     def backbone_modules(self):
 
         backbone_modules = []
-        for m in self._modules:
+        for m in self.modules:
             backbone_modules.append(m.backbone_modules())
 
         return backbone_modules
 
     def forward(self, x):
 
-        for module in self._modules:
+        for module in self.modules:
             x = module(x)
 
         return x

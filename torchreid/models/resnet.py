@@ -239,7 +239,7 @@ def resnet50_backbone():
     return network
 
 
-def resnet50(num_classes, args):
+def resnet50(num_classes, args, **kw):
 
     backbone = resnet50_backbone()
     return MultiBranchResNet(backbone, args, num_classes)

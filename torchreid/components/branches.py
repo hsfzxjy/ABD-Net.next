@@ -176,6 +176,7 @@ class ABDBranch(nn.Module):
         )
         init_params(reduction)
 
+        self.reduction = reduction
         self.owner().reduction_tr = reduction
 
     def _init_attention_modules(self):

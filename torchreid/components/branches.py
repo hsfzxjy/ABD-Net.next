@@ -241,7 +241,7 @@ class ABDBranch(nn.Module):
 
                 to_sum = []
                 for name, module in self.dan_module_mapping.items():
-                    print(name, x_sliced.device)
+                    print(name, x_sliced.device, module.conv5c.weight.device)
                     x_out = module(x_sliced)
                     to_sum.append(x_out)
                     fmap[name].append(x_out)

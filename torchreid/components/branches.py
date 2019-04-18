@@ -34,7 +34,7 @@ class MultiBranchNetwork(nn.Module):
         return lst
 
     def forward(self, x):
-        x, *intermediate_fmaps = self.common_branch()
+        x, *intermediate_fmaps = self.common_branch(x)
 
         fmap_dict = defaultdict(list)
         fmap_dict['intermediate'].extend(intermediate_fmaps)

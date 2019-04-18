@@ -165,6 +165,9 @@ class CAM_Module(Module):
 
 class Identity(nn.Module):
 
+    def __init__(self, dim):
+        super().__init__()
+
     def forward(self, x):
 
         return x

@@ -188,8 +188,10 @@ class ResNetDeepBranch(nn.Module):
 
         super().__init__()
 
-        self.backbone = backbone._make_layer(Bottleneck, 512, 3, stride=1)
-        self.backbone.load_state_dict(backbone.layer4.state_dict())
+        layer4 = backbone._make_layer(Bottleneck, 512, 3, stride=1)
+        layer4.load_state_dict(backbone.layer4.state_dict())
+
+        self.backbone = layer4
 
         owner.add_module(f'deep_backbone_{index}', self.backbone)
         self.out_dim = 2048

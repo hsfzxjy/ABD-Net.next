@@ -79,6 +79,7 @@ class Bottleneck(nn.Module):
     def forward(self, x):
         residual = x
 
+        print('---')
         for p in self.conv1.parameters():
             print(x.device, p.device)
 

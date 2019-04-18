@@ -236,6 +236,7 @@ class ABDBranch(nn.Module):
         margin = x.size(2) // self.part_num
         for p, classifier in enumerate(self.classifiers, 1):
             x_sliced = x[:, :, margin * (p - 1):margin * p, :]
+            print(x_sliced.device)
 
             if self.use_dan:
 

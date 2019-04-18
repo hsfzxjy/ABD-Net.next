@@ -155,6 +155,8 @@ class ResNetCommonBranch(nn.Module):
 
     def __init__(self, owner, backbone, args):
 
+        super().__init__()
+
         self.backbone1 = nn.Sequential(
             backbone.conv1,
             backbone.bn1,
@@ -183,6 +185,8 @@ class ResNetCommonBranch(nn.Module):
 class ResNetDeepBranch(nn.Module):
 
     def __init__(self, owner, backbone, args):
+
+        super().__init__()
 
         self.backbone = deepcopy(backbone.layer4)
         self.out_dim = 2048

@@ -240,7 +240,9 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
             branch_list.append(
                 branches.Sequential(
                     deep_branch,
-                    branches.ABDBranch(self, backbone, args, deep_branch.out_dim)
+                    branches.GlobalBranch(self, backbone, args, deep_branch.out_dim)
+
+                    # branches.ABDBranch(self, backbone, args, deep_branch.out_dim)
                 )
             )
 

@@ -33,7 +33,8 @@ __model_factory = {
     'densenet121': densenet.densenet121,
     'densenet161': densenet.densenet161,
     **densenet.name_function_mapping,
-    **resnet.name_function_mapping,
+    'resnet50': resnet.resnet50,
+    # **resnet.name_function_mapping,
     **resnet_mgn_abd.name_function_mapping,
     'resnet50_best': resnet_best.resnet50_best,
     # image classification models

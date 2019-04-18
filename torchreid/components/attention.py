@@ -14,85 +14,19 @@ logger = logging.getLogger(__name__)
 
 torch_ver = torch.__version__[:3]
 
-__all__ = ['PAM_Module', 'CAM_Module', 'get_attention_module_instance', 'AttentionModule']
-
-
-class AttentionModule(nn.Module):
-
-    def __init__(
-        self,
-        module_names: 'subset of ("pam", "cam")',
-        dim: int,
-        *,
-        use_conv_head: bool=False,
-        use_avg_pool: bool=True,
-        sum_fusion: bool=False
-    ):
-        super().__init__()
-        print(module_names)
-        self.modules_list = []
-
-        if sum_fusion:
-            use_avg_pool = False
-
-        for name in module_names:
-            module = get_attention_module_instance(name, dim, use_conv_head=use_conv_head, sum_fusion=sum_fusion)
-            setattr(self, f'_{name}_module', module)  # force gpu
-
-            if use_avg_pool:
-                pool = nn.AdaptiveAvgPool2d(1)
-                setattr(self, f'_{name}_avgpool', pool)  # force gpu
-            else:
-                pool = None
-
-            self.modules_list.append((name, module, pool))
-
-        self.output_dim = len(self.modules_list) * dim if not sum_fusion else dim
-
-    def forward(self, x):
-
-        xs = {}
-        pooling = {}
-        for name, module, pool in self.modules_list:
-            f = module(x)
-            xs[name] = f
-            pooling[name] = pool
-            # xs.append(f.view(f.size(0), -1))
-        return xs, pooling
-
-
-def get_attention_module_instance(
-    name: 'cam|pam',
-    dim: int,
-    *,
-    use_conv_head: bool=False,  # DEPRECATED
-    sum_fusion: bool=True
-):
-
-    name = name.lower()
-    assert name in ('cam', 'pam')
-
-    module_class = {'cam': CAM_Module, 'pam': PAM_Module}[name]
-
-    use_conv_head = not sum_fusion and name == 'cam'
-
-    if use_conv_head:
-        return DANetHead(dim, dim, nn.BatchNorm2d, module_class)
-    else:
-        return module_class(dim)
+__all__ = ['PAM_Module', 'CAM_Module', 'get_attention_module_instance']
 
 
 class DANetHead(nn.Module):
-    def __init__(self, in_channels, out_channels, norm_layer, module_class):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 norm_layer: nn.Module,
+                 module_class: type,
+                 dim_collapsion: int=2):
         super(DANetHead, self).__init__()
 
-        import os
-        try:
-            collapsion = int(os.environ.get('head_col'))
-        except (TypeError, ValueError):
-            collapsion = 2
-
-        inter_channels = in_channels // collapsion
+        inter_channels = in_channels // dim_collapsion
 
         self.conv5c = nn.Sequential(
             nn.Conv2d(
@@ -142,9 +76,21 @@ class PAM_Module(Module):
         super(PAM_Module, self).__init__()
         self.channel_in = in_dim
 
-        self.query_conv = Conv2d(in_channels=in_dim, out_channels=in_dim // 8, kernel_size=1)
-        self.key_conv = Conv2d(in_channels=in_dim, out_channels=in_dim // 8, kernel_size=1)
-        self.value_conv = Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+        self.query_conv = Conv2d(
+            in_channels=in_dim,
+            out_channels=in_dim // 8,
+            kernel_size=1
+        )
+        self.key_conv = Conv2d(
+            in_channels=in_dim,
+            out_channels=in_dim // 8,
+            kernel_size=1
+        )
+        self.value_conv = Conv2d(
+            in_channels=in_dim,
+            out_channels=in_dim,
+            kernel_size=1
+        )
         self.gamma = Parameter(torch.zeros(1))
 
         self.softmax = Softmax(dim=-1)
@@ -158,24 +104,34 @@ class PAM_Module(Module):
                 attention: B X (HxW) X (HxW)
         """
         m_batchsize, C, height, width = x.size()
-        proj_query = self.query_conv(x).view(m_batchsize, -1, width * height).permute(0, 2, 1)
-        proj_key = self.key_conv(x).view(m_batchsize, -1, width * height)
+        proj_query = self\
+            .query_conv(x)\
+            .view(m_batchsize, -1, width * height)\
+            .permute(0, 2, 1)
+        proj_key = self\
+            .key_conv(x)\
+            .view(m_batchsize, -1, width * height)
         energy = torch.bmm(proj_query, proj_key)
         attention = self.softmax(energy)
-        proj_value = self.value_conv(x).view(m_batchsize, -1, width * height)
+        proj_value = self\
+            .value_conv(x)\
+            .view(m_batchsize, -1, width * height)
 
-        out = torch.bmm(proj_value, attention.permute(0, 2, 1))
+        out = torch.bmm(
+            proj_value,
+            attention.permute(0, 2, 1)
+        )
         attention_mask = out.view(m_batchsize, C, height, width)
 
         out = self.gamma * attention_mask + x
-        return out  # , attention_mask
+        return out
 
 
 class CAM_Module(Module):
     """ Channel attention module"""
 
     def __init__(self, in_dim):
-        super(CAM_Module, self).__init__()
+        super().__init__()
         self.channel_in = in_dim
 
         self.gamma = Parameter(torch.zeros(1))
@@ -205,3 +161,36 @@ class CAM_Module(Module):
         gamma = self.gamma.to(out.device)
         out = gamma * out + x
         return out
+
+
+name_module_class_mapping = {
+    'cam': CAM_Module,
+    'pam': PAM_Module,
+
+    # A fake callable to simulate identity
+    'identity': lambda _: lambda x: x,
+}
+
+
+def get_attention_module_instance(
+    name: 'cam | pam | identity',
+    dim: int,
+    *,
+    use_head: bool=False,
+    dim_collapsion=2  # Used iff `used_head` set to True
+):
+
+    name = name.lower()
+    assert name in ('cam', 'pam', 'identity')
+
+    module_class = name_module_class_mapping[name]
+
+    if use_head:
+        return DANetHead(
+            dim, dim,
+            nn.BatchNorm2d,
+            module_class,
+            dim_collapsion=dim_collapsion
+        )
+    else:
+        return module_class(dim)

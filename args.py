@@ -161,6 +161,18 @@ def argument_parser():
     parser.add_argument('--visualize-ranks', action='store_true',
                         help="visualize ranked results, only available in evaluation mode")
 
+    # ************************************************************
+    # Branches Related
+    # ************************************************************
+    parser.add_argument('--compatibility', action='store_true')
+    parser.add_argument('--branches', nargs='+', type=str, default=['global', 'abd'])
+    parser.add_argument('--global-dim', type=int, default=1024)
+    parser.add_argument('--dropout', type=float)
+
+    parser.add_argument('--abd-dim', type=int, default=1024)
+    parser.add_argument('--abd-np', type=int, default=2)
+    parser.add_argument('--abd-dan', nargs='+', type=str, default=['cam', 'pam'])
+
     return parser
 
 

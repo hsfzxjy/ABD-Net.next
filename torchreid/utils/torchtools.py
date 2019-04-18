@@ -5,6 +5,27 @@ from __future__ import division
 import torch
 import torch.nn as nn
 
+def init_params(x):
+
+    if x is None:
+        return
+
+    for m in x.modules():
+        if isinstance(m, nn.Conv2d):
+            nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.BatchNorm2d):
+            nn.init.normal_(m.weight, 1, 0.02)
+            nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.BatchNorm1d):
+            nn.init.normal_(m.weight, 1, 0.02)
+            nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.Linear):
+            nn.init.normal_(m.weight, 0, 0.01)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+
 
 def adjust_learning_rate(optimizer, base_lr, epoch, stepsize=20, gamma=0.1,
                          linear_decay=False, final_lr=0, max_epoch=100):

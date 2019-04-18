@@ -236,12 +236,12 @@ class ABDBranch(nn.Module):
         margin = x.size(2) // self.part_num
         for p, classifier in enumerate(self.classifiers, 1):
             x_sliced = x[:, :, margin * (p - 1):margin * p, :]
-            print(x_sliced.device, x.device)
 
             if self.use_dan:
 
                 to_sum = []
                 for name, module in self.dan_module_mapping.items():
+                    print(name, x_sliced.device)
                     x_out = module(x_sliced)
                     to_sum.append(x_out)
                     fmap[name].append(x_out)

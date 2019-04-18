@@ -16,8 +16,8 @@ class MultiBranchNetwork(nn.Module):
         self.common_branch = self._get_common_branch(backbone, args)
         self.branches = self._get_branches(backbone, args)
 
-        # for i, branch in enumerate(self.branches):
-        #     self.add_module(f'branch_{i}', branch)
+        for i, branch in enumerate(self.branches):
+            self.add_module(f'branch_{i}', branch)
 
     def _get_common_branch(self, backbone, args):
         return NotImplemented

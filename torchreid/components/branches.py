@@ -42,7 +42,6 @@ class MultiBranchNetwork(nn.Module):
         predict_features, xent_features, triplet_features = [], [], []
 
         for branch in self.branches:
-            print(x.size(), x.device)
             predict, xent, triplet, fmap = branch(x)
             predict_features.extend(predict)
             xent_features.extend(xent)
@@ -263,7 +262,5 @@ class ABDBranch(nn.Module):
             predict.append(v)
             v = classifier(v)
             xent.append(v)
-
-        print('ABD done')
 
         return predict, xent, triplet, fmap

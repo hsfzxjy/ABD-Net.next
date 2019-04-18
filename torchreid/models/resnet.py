@@ -198,6 +198,12 @@ class ResNetDeepBranch(nn.Module):
 
     def forward(self, x):
 
+        print('------')
+        print('x', x.size(), x.device)
+
+        for p in self.backbone.parameters():
+            print(p, p.device)
+
         return self.backbone(x)
 
 class MultiBranchResNet(branches.MultiBranchNetwork):

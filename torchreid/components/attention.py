@@ -163,12 +163,17 @@ class CAM_Module(Module):
         return out
 
 
+class Identity(nn.Module):
+
+    def forward(self, x):
+
+        return x
+
+
 name_module_class_mapping = {
     'cam': CAM_Module,
     'pam': PAM_Module,
-
-    # A fake callable to simulate identity
-    'identity': lambda _: lambda x: x,
+    'identity': Identity,
 }
 
 

@@ -184,49 +184,47 @@ class ABDBranch(nn.Module):
         args = self.args
         DAN_module_names = {'cam', 'pam'} & set(args['abd_dan'])
         use_head = not args['abd_dan_no_head']
+        self.use_dan = bool(DAN_module_names)
 
-        if not DAN_module_names:
-            self.use_dan = False
-            self.dan_module_mapping['before'] = lambda x: x
-        else:
-            self.use_dan = True
-            before_module = get_attention_module_instance(
-                'identity',
+        before_module = get_attention_module_instance(
+            'identity',
+            self.output_dim,
+            use_head=use_head
+        )
+        self.dan_module_mapping['before'] = before_module
+        if use_head:
+            init_params(before_module)
+            self.owner().add_module('before_module1', before_module)
+
+        if 'cam' in DAN_module_names:
+            cam_module = get_attention_module_instance(
+                'cam',
                 self.output_dim,
                 use_head=use_head
             )
-            self.dan_module_mapping['before'] = before_module
-            if use_head:
-                init_params(before_module)
-                self.owner().add_module('before_module1', before_module)
+            init_params(cam_module)
+            self.dan_module_mapping['cam'] = cam_module
+            self.owner().add_module('cam_module1', cam_module)
 
-            if 'cam' in DAN_module_names:
-                cam_module = get_attention_module_instance(
-                    'cam',
-                    self.output_dim,
-                    use_head=use_head
-                )
-                init_params(cam_module)
-                self.dan_module_mapping['cam'] = cam_module
-                self.owner().add_module('cam_module1', cam_module)
-
-            if 'pam' in DAN_module_names:
-                pam_module = get_attention_module_instance(
-                    'pam',
-                    self.output_dim,
-                    use_head=use_head
-                )
-                init_params(pam_module)
-                self.dan_module_mapping['pam'] = pam_module
-                self.owner().add_module('pam_module1', pam_module)
-
-            sum_conv = nn.Sequential(
-                nn.Dropout2d(0.1, False),
-                nn.Conv2d(self.output_dim, self.output_dim, kernel_size=1)
+        if 'pam' in DAN_module_names:
+            pam_module = get_attention_module_instance(
+                'pam',
+                self.output_dim,
+                use_head=use_head
             )
-            init_params(sum_conv)
-            self.sum_conv = sum_conv
-            self.owner().sum_conv1 = sum_conv
+            init_params(pam_module)
+            self.dan_module_mapping['pam'] = pam_module
+            self.owner().add_module('pam_module1', pam_module)
+
+        sum_conv = nn.Sequential(
+            nn.Dropout2d(0.1, False),
+            nn.Conv2d(self.output_dim, self.output_dim, kernel_size=1)
+        )
+        init_params(sum_conv)
+        self.sum_conv = sum_conv
+        self.owner().sum_conv1 = sum_conv
+
+        self._dummy_list = nn.ModuleList(self.dan_module_mapping.values())
 
     def forward(self, x):
 

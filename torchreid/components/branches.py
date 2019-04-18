@@ -16,8 +16,8 @@ class MultiBranchNetwork(nn.Module):
         self.common_branch = self._get_common_branch(backbone, args)
         self.branches = self._get_branches(backbone, args)
 
-        for i, branch in enumerate(self.branches):
-            self.add_module(f'branch_{i}', branch)
+        # for i, branch in enumerate(self.branches):
+        #     self.add_module(f'branch_{i}', branch)
 
     def _get_common_branch(self, backbone, args):
         return NotImplemented
@@ -93,8 +93,7 @@ class GlobalBranch(nn.Module):
 
         self.classifier = classifier
 
-        if self.args['compatibility']:
-            self.owner().classifier = classifier  # Forward Compatibility
+        self.owner().classifier = classifier  # Forward Compatibility
 
     def _init_fc_layer(self):
 
@@ -114,6 +113,7 @@ class GlobalBranch(nn.Module):
         init_params(fc)
 
         self.fc = fc
+        self.owner().fc = fc
 
     def forward(self, x):
 
@@ -165,7 +165,7 @@ class ABDBranch(nn.Module):
             classifier = nn.Linear(self.output_dim, self.num_classes)
             init_params(classifier)
             self.classifiers.append(classifier)
-            self.add_module(f'classifier_p{p}', classifier)
+            self.owner().add_module(f'classifier_p{p}', classifier)
 
     def _init_reduction_layer(self):
 
@@ -176,7 +176,7 @@ class ABDBranch(nn.Module):
         )
         init_params(reduction)
 
-        self.reduction = reduction
+        self.owner().reduction_tr = reduction
 
     def _init_attention_modules(self):
 
@@ -197,7 +197,7 @@ class ABDBranch(nn.Module):
             self.dan_module_mapping['before'] = before_module
             if use_head:
                 init_params(before_module)
-                self.add_module('before', before_module)
+                self.owner().add_module('before_module1', before_module)
 
             if 'cam' in DAN_module_names:
                 cam_module = get_attention_module_instance(
@@ -207,7 +207,7 @@ class ABDBranch(nn.Module):
                 )
                 init_params(cam_module)
                 self.dan_module_mapping['cam'] = cam_module
-                self.add_module('cam', cam_module)
+                self.owner().add_module('cam_module1', cam_module)
 
             if 'pam' in DAN_module_names:
                 pam_module = get_attention_module_instance(
@@ -217,7 +217,7 @@ class ABDBranch(nn.Module):
                 )
                 init_params(pam_module)
                 self.dan_module_mapping['pam'] = pam_module
-                self.add_module('pam', pam_module)
+                self.owner().add_module('pam_module1', pam_module)
 
             sum_conv = nn.Sequential(
                 nn.Dropout2d(0.1, False),

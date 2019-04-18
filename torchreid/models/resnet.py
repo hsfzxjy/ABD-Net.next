@@ -184,11 +184,12 @@ class ResNetCommonBranch(nn.Module):
 
 class ResNetDeepBranch(nn.Module):
 
-    def __init__(self, owner, backbone, args):
+    def __init__(self, owner, backbone, args, index=0):
 
         super().__init__()
 
-        owner.backbone = self.backbone = deepcopy(backbone.layer4)
+        self.backbone = deepcopy(backbone.layer4)
+        owner.add_module(f'deep_backbone_{index}', self.backbone)
         self.out_dim = 2048
 
     def backbone_modules(self):

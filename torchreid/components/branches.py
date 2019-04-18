@@ -193,8 +193,10 @@ class ABDBranch(nn.Module):
                 self.output_dim,
                 use_head=use_head
             )
-            init_params(before_module)
             self.dan_module_mapping['before'] = before_module
+            if use_head:
+                init_params(before_module)
+                self.add_module('before', before_module)
 
             if 'cam' in DAN_module_names:
                 cam_module = get_attention_module_instance(
@@ -204,6 +206,7 @@ class ABDBranch(nn.Module):
                 )
                 init_params(cam_module)
                 self.dan_module_mapping['cam'] = cam_module
+                self.add_module('cam', cam_module)
 
             if 'pam' in DAN_module_names:
                 pam_module = get_attention_module_instance(
@@ -212,7 +215,8 @@ class ABDBranch(nn.Module):
                     use_head=use_head
                 )
                 init_params(pam_module)
-                self.dan_module_mapping['pam'] = cam_module
+                self.dan_module_mapping['pam'] = pam_module
+                self.add_module('pam', pam_module)
 
             sum_conv = nn.Sequential(
                 nn.Dropout2d(0.1, False),

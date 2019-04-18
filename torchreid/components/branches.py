@@ -181,7 +181,7 @@ class ABDBranch(nn.Module):
 
         args = self.args
         DAN_module_names = {'cam', 'pam'} & set(args['abd_dan'])
-        use_head = args['abd_dan_head']
+        use_head = not args['abd_dan_no_head']
 
         if not DAN_module_names:
             self.use_dan = False

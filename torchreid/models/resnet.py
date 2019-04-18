@@ -79,10 +79,6 @@ class Bottleneck(nn.Module):
     def forward(self, x):
         residual = x
 
-        print('---')
-        for p in self.conv1.parameters():
-            print(x.device, p.device)
-
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
@@ -208,6 +204,7 @@ class ResNetDeepBranch(nn.Module):
         self.backbone = layer4
 
         owner.add_module(f'deep_backbone_{index}', self.backbone)
+        self.index = index
         self.out_dim = 2048
 
     def backbone_modules(self):
@@ -215,7 +212,7 @@ class ResNetDeepBranch(nn.Module):
         return [self.backbone]
 
     def forward(self, x):
-
+        print(self.index, x.device)
         return self.backbone(x)
 
 class MultiBranchResNet(branches.MultiBranchNetwork):

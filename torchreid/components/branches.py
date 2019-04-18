@@ -42,6 +42,7 @@ class MultiBranchNetwork(nn.Module):
         predict_features, xent_features, triplet_features = [], [], []
 
         for branch in self.branches:
+            print(branch)
             predict, xent, triplet, fmap = branch(x)
             predict_features.extend(predict)
             xent_features.extend(xent)

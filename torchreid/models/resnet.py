@@ -202,7 +202,7 @@ class ResNetDeepBranch(nn.Module):
         print('x', x.size(), x.device)
 
         for p in self.backbone.parameters():
-            print(p, p.device)
+            print(p.device)
 
         return self.backbone(x)
 

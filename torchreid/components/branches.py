@@ -224,7 +224,7 @@ class ABDBranch(nn.Module):
         self.sum_conv = sum_conv
         self.owner().sum_conv1 = sum_conv
 
-        self._dummy_list = nn.ModuleList(self.dan_module_mapping.values())
+        self.owner()._dummy_list = nn.ModuleList(self.dan_module_mapping.values())
 
     def forward(self, x):
 

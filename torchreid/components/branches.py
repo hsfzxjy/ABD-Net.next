@@ -56,7 +56,13 @@ class MultiBranchNetwork(nn.Module):
             tuple(triplet_features), fmap_dict
 
 
-class Sequential(nn.Sequential):
+class Sequential(nn.Module):
+
+    def __init__(self, *modules):
+
+        super().__init__()
+
+        self._modules = nn.ModuleList(modules)
 
     def backbone_modules(self):
 
@@ -65,6 +71,13 @@ class Sequential(nn.Sequential):
             backbone_modules.append(m.backbone_modules())
 
         return backbone_modules
+
+    def forward(self, x):
+
+        for module in self._modules:
+            x = module(x)
+
+        return x
 
 class GlobalBranch(nn.Module):
 

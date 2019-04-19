@@ -157,7 +157,7 @@ class ABDBranch(nn.Module):
         self.part_num = args['abd_np']
         self.num_classes = owner.num_classes
 
-        self._dummy_list = nn.ModuleList()
+        self.owner()._dummy_list = nn.ModuleList()
         self._init_reduction_layer()
 
         self.dan_module_mapping = dict()
@@ -180,8 +180,8 @@ class ABDBranch(nn.Module):
             classifier = nn.Linear(self.output_dim, self.num_classes)
             init_params(classifier)
             self.classifiers.append(classifier)
-            self.owner().add_module(f'classifier_p{p}', classifier)
-            self._dummy_list.append(classifier)
+            # self.owner().add_module(f'classifier_p{p}', classifier)
+            self.onwer()._dummy_list.append(classifier)
 
     def _init_reduction_layer(self):
 
@@ -193,8 +193,8 @@ class ABDBranch(nn.Module):
         init_params(reduction)
 
         self.reduction = reduction
-        self.owner().reduction_tr = reduction
-        self._dummy_list.append(reduction)
+        # self.owner().reduction_tr = reduction
+        self.owner()._dummy_list.append(reduction)
 
     def _init_attention_modules(self):
 
@@ -241,7 +241,7 @@ class ABDBranch(nn.Module):
         self.sum_conv = sum_conv
         self.owner().sum_conv1 = sum_conv
 
-        self._dummy_list.extend(list(self.dan_module_mapping.values()))
+        self.owner()._dummy_list.extend(list(self.dan_module_mapping.values()))
 
     def forward(self, x):
 

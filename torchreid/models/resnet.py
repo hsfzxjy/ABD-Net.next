@@ -157,18 +157,19 @@ class ResNetCommonBranch(nn.Module):
 
         super().__init__()
 
-        owner.backbone1 = self.backbone1 = nn.Sequential(
+        self.backbone1 = nn.Sequential(
             backbone.conv1,
             backbone.bn1,
             backbone.relu,
             backbone.maxpool,
             backbone.layer1
         )
-        # owner.shallow_cam = self.shallow_cam = ShallowCAM(args, 256)
-        # owner.backbone2 = self.backbone2 = nn.Sequential(
-        #     backbone.layer2,
-        #     backbone.layer3,
-        # )
+        # owner.shallow_cam =
+        self.shallow_cam = ShallowCAM(args, 256)
+        self.backbone2 = nn.Sequential(
+            backbone.layer2,
+            backbone.layer3,
+        )
 
     def backbone_modules(self):
 

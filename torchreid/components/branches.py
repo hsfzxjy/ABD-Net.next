@@ -157,6 +157,7 @@ class ABDBranch(nn.Module):
         self.part_num = args['abd_np']
         self.num_classes = owner.num_classes
 
+        self._dummy_list = nn.ModuleList()
         self._init_reduction_layer()
 
         self.dan_module_mapping = dict()
@@ -165,6 +166,7 @@ class ABDBranch(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d(1)
 
         self._init_classifiers()
+
 
     def backbone_modules(self):
 
@@ -179,6 +181,7 @@ class ABDBranch(nn.Module):
             init_params(classifier)
             self.classifiers.append(classifier)
             self.owner().add_module(f'classifier_p{p}', classifier)
+            self._dummy_list.append(classifier)
 
     def _init_reduction_layer(self):
 
@@ -191,6 +194,7 @@ class ABDBranch(nn.Module):
 
         self.reduction = reduction
         self.owner().reduction_tr = reduction
+        self._dummy_list.append(reduction)
 
     def _init_attention_modules(self):
 
@@ -237,7 +241,7 @@ class ABDBranch(nn.Module):
         self.sum_conv = sum_conv
         self.owner().sum_conv1 = sum_conv
 
-        self.owner()._dummy_list = nn.ModuleList(self.dan_module_mapping.values())
+        self._dummy_list.extend(list(self.dan_module_mapping.values()))
 
     def forward(self, x):
 

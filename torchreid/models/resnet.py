@@ -236,14 +236,14 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
                 )
             )
 
-        # if 'abd' in branch_names:
-        #     deep_branch = ResNetDeepBranch(self, backbone, args, index=1)
-        #     branch_list.append(
-        #         branches.Sequential(
-        #             deep_branch,
-        #             branches.ABDBranch(self, backbone, args, deep_branch.out_dim)
-        #         )
-        #     )
+        if 'abd' in branch_names:
+            deep_branch = ResNetDeepBranch(self, backbone, args, index=1)
+            branch_list.append(
+                branches.Sequential(
+                    deep_branch,
+                    branches.ABDBranch(self, backbone, args, deep_branch.out_dim)
+                )
+            )
 
         assert len(branch_list) != 0, 'Should specify at least one branch.'
         return branch_list

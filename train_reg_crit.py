@@ -305,6 +305,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             loss = DeepSupervision(criterion, outputs, pids)
         else:
             loss = criterion(outputs, pids)
+        print(loss)
         # if True or (fixbase and args.fix_custom_loss) or not fixbase and ((switch_loss and args.switch_loss < 0) or (not switch_loss and args.switch_loss > 0)):
         if not fixbase:
             reg = regularizer(model)

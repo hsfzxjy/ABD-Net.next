@@ -94,8 +94,6 @@ class GlobalBranch(nn.Module):
 
         self.classifier = classifier
 
-        # self.owner().classifier = classifier  # Forward Compatibility
-
     def _init_fc_layer(self):
 
         dropout_p = self.args['dropout']
@@ -114,7 +112,6 @@ class GlobalBranch(nn.Module):
         init_params(fc)
 
         self.fc = fc
-        # self.owner().fc = fc
 
     def forward(self, x):
 
@@ -164,8 +161,6 @@ class ABDBranch(nn.Module):
             classifier = nn.Linear(self.output_dim, self.num_classes)
             init_params(classifier)
             self.classifiers.append(classifier)
-            # # self.owner().add_module(f'classifier_p{p}', classifier)
-            # self.owner()._dummy_list.append(classifier)
 
     def _init_reduction_layer(self):
 
@@ -177,8 +172,6 @@ class ABDBranch(nn.Module):
         init_params(reduction)
 
         self.reduction = reduction
-        # self.owner().reduction_tr = reduction
-        # self.owner()._dummy_list.append(reduction)
 
     def _init_attention_modules(self):
 
@@ -197,7 +190,6 @@ class ABDBranch(nn.Module):
         self.before_module = before_module
         if use_head:
             init_params(before_module)
-            # self.owner().add_module('before_module1', before_module)
 
         if 'cam' in DAN_module_names:
             cam_module = get_attention_module_instance(
@@ -208,7 +200,6 @@ class ABDBranch(nn.Module):
             init_params(cam_module)
             self.dan_module_names.add('cam_module')
             self.cam_module = cam_module
-            # self.owner().add_module('cam_module1', cam_module)
 
         if 'pam' in DAN_module_names:
             pam_module = get_attention_module_instance(
@@ -218,9 +209,7 @@ class ABDBranch(nn.Module):
             )
             init_params(pam_module)
             self.dan_module_names.add('pam_module')
-            # self.dan_module_mapping['pam'] = pam_module
             self.pam_module = pam_module
-            # self.owner().add_module('pam_module1', pam_module)
 
         sum_conv = nn.Sequential(
             nn.Dropout2d(0.1, False),
@@ -228,9 +217,6 @@ class ABDBranch(nn.Module):
         )
         init_params(sum_conv)
         self.sum_conv = sum_conv
-        # self.owner().sum_conv1 = sum_conv
-
-        # self.owner()._dummy_list.extend(list(self.dan_module_mapping.values()))
 
     def forward(self, x):
 
@@ -266,6 +252,7 @@ class ABDBranch(nn.Module):
             triplet.append(v)
             predict.append(v)
             v = self.classifiers[p](v)
+            print(v.size())
             xent.append(v)
 
         return predict, xent, triplet, fmap

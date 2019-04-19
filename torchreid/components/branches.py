@@ -167,7 +167,6 @@ class ABDBranch(nn.Module):
 
         self._init_classifiers()
 
-
     def backbone_modules(self):
 
         return []
@@ -181,7 +180,7 @@ class ABDBranch(nn.Module):
             init_params(classifier)
             self.classifiers.append(classifier)
             # self.owner().add_module(f'classifier_p{p}', classifier)
-            self.onwer()._dummy_list.append(classifier)
+            self.owner()._dummy_list.append(classifier)
 
     def _init_reduction_layer(self):
 

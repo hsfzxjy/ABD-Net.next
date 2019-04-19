@@ -56,28 +56,16 @@ class MultiBranchNetwork(nn.Module):
             tuple(triplet_features), fmap_dict
 
 
-class Sequential(nn.Module):
-
-    def __init__(self, *modules):
-
-        super().__init__()
-
-        self.module_list = nn.ModuleList(modules)
+class Sequential(nn.Sequential):
 
     def backbone_modules(self):
 
         backbone_modules = []
-        for m in self.module_list:
+        for m in self._modules:
             backbone_modules.append(m.backbone_modules())
 
         return backbone_modules
 
-    def forward(self, x):
-
-        for module in self.module_list:
-            x = module(x)
-
-        return x
 
 class GlobalBranch(nn.Module):
 
@@ -106,7 +94,7 @@ class GlobalBranch(nn.Module):
 
         self.classifier = classifier
 
-        self.owner().classifier = classifier  # Forward Compatibility
+        # self.owner().classifier = classifier  # Forward Compatibility
 
     def _init_fc_layer(self):
 
@@ -126,7 +114,7 @@ class GlobalBranch(nn.Module):
         init_params(fc)
 
         self.fc = fc
-        self.owner().fc = fc
+        # self.owner().fc = fc
 
     def forward(self, x):
 
@@ -157,10 +145,7 @@ class ABDBranch(nn.Module):
         self.part_num = args['abd_np']
         self.num_classes = owner.num_classes
 
-        self.owner()._dummy_list = nn.ModuleList()
         self._init_reduction_layer()
-
-        self.dan_module_mapping = dict()
         self._init_attention_modules()
 
         self.avgpool = nn.AdaptiveAvgPool2d(1)
@@ -173,14 +158,14 @@ class ABDBranch(nn.Module):
 
     def _init_classifiers(self):
 
-        self.classifiers = []
+        self.classifiers = nn.ModuleList()
 
         for p in range(1, self.part_num + 1):
             classifier = nn.Linear(self.output_dim, self.num_classes)
             init_params(classifier)
             self.classifiers.append(classifier)
-            # self.owner().add_module(f'classifier_p{p}', classifier)
-            self.owner()._dummy_list.append(classifier)
+            # # self.owner().add_module(f'classifier_p{p}', classifier)
+            # self.owner()._dummy_list.append(classifier)
 
     def _init_reduction_layer(self):
 
@@ -193,11 +178,12 @@ class ABDBranch(nn.Module):
 
         self.reduction = reduction
         # self.owner().reduction_tr = reduction
-        self.owner()._dummy_list.append(reduction)
+        # self.owner()._dummy_list.append(reduction)
 
     def _init_attention_modules(self):
 
         args = self.args
+        self.dan_module_names = set()
         DAN_module_names = {'cam', 'pam'} & set(args['abd_dan'])
         use_head = not args['abd_dan_no_head']
         self.use_dan = bool(DAN_module_names)
@@ -207,7 +193,7 @@ class ABDBranch(nn.Module):
             self.output_dim,
             use_head=use_head
         )
-        self.dan_module_mapping['before'] = before_module
+        self.dan_module_names.add('before_module')
         self.before_module = before_module
         if use_head:
             init_params(before_module)
@@ -220,7 +206,7 @@ class ABDBranch(nn.Module):
                 use_head=use_head
             )
             init_params(cam_module)
-            self.dan_module_mapping['cam'] = cam_module
+            self.dan_module_names.add('cam_module')
             self.cam_module = cam_module
             # self.owner().add_module('cam_module1', cam_module)
 
@@ -231,7 +217,8 @@ class ABDBranch(nn.Module):
                 use_head=use_head
             )
             init_params(pam_module)
-            self.dan_module_mapping['pam'] = pam_module
+            self.dan_module_names.add('pam_module')
+            # self.dan_module_mapping['pam'] = pam_module
             self.pam_module = pam_module
             # self.owner().add_module('pam_module1', pam_module)
 
@@ -241,9 +228,9 @@ class ABDBranch(nn.Module):
         )
         init_params(sum_conv)
         self.sum_conv = sum_conv
-        self.owner().sum_conv1 = sum_conv
+        # self.owner().sum_conv1 = sum_conv
 
-        self.owner()._dummy_list.extend(list(self.dan_module_mapping.values()))
+        # self.owner()._dummy_list.extend(list(self.dan_module_mapping.values()))
 
     def forward(self, x):
 
@@ -253,17 +240,17 @@ class ABDBranch(nn.Module):
         x = self.reduction(x)
 
         margin = x.size(2) // self.part_num
-        for p, classifier in enumerate(self.classifiers, 1):
-            x_sliced = x[:, :, margin * (p - 1):margin * p, :]
+        for p in range(self.part_num):
+            x_sliced = x[:, :, margin * p:margin * (p + 1), :]
 
             if self.use_dan:
-
                 to_sum = []
-                for name in self.dan_module_mapping.keys():
+                module_name: str
+                for module_name in self.dan_module_mapping:
                     # print(p, name, x_sliced.device, module.conv5c[0].weight.device, self.reduction[0].weight.device)
-                    x_out = getattr(self, f'{name}_module')(x_sliced)
+                    x_out = getattr(self, module_name)(x_sliced)
                     to_sum.append(x_out)
-                    fmap[name].append(x_out)
+                    fmap[module_name.partition('_')[0]].append(x_out)
 
                 fmap_after = self.sum_conv(sum(to_sum))
                 fmap['after'].append(fmap_after)
@@ -278,7 +265,7 @@ class ABDBranch(nn.Module):
             v = v.view(v.size(0), -1)
             triplet.append(v)
             predict.append(v)
-            v = classifier(v)
+            v = self.classifiers[p](v)
             xent.append(v)
 
         return predict, xent, triplet, fmap

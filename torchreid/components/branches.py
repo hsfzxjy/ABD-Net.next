@@ -2,6 +2,7 @@ import weakref
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from collections import defaultdict
 
 from torchreid.utils.torchtools import init_params
@@ -362,5 +363,97 @@ class ABDBranch(nn.Module):
             predict.append(v)
             v = self.classifiers[p](v)
             xent.append(v)
+
+        return predict, xent, triplet, fmap
+
+
+class ABDBranch(nn.Module):
+
+    def __init__(self, owner, backbone, args, input_dim):
+        super().__init__()
+
+        self.owner = weakref.ref(owner)
+
+        self.input_dim = input_dim
+        self.output_dim = args['dan_dim']
+        self.args = args
+        self.num_classes = owner.num_classes
+
+        self._init_reduction_layer()
+        self._init_attention_modules()
+
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+
+        self._init_classifier()
+
+    def backbone_modules(self):
+
+        return []
+
+    def _init_classifier(self):
+
+        classifier = nn.Linear((1 + len(self.dan_module_names)), self.owner().num_classes)
+        init_params(classifier)
+        self.classifier = classifier
+
+    def _init_attention_modules(self):
+
+        args = self.args
+        self.dan_module_names = set()
+        DAN_module_names = {'cam', 'pam'} & set(args['dan_dan'])
+        use_head = not args['dan_dan_no_head']
+        self.use_dan = bool(DAN_module_names)
+
+        before_module = get_attention_module_instance(
+            'identity',
+            self.output_dim,
+            use_head=False
+        )
+        self.dan_module_names.add('before_module')
+        self.before_module = before_module
+        if use_head:
+            init_params(before_module)
+
+        if 'cam' in DAN_module_names:
+            cam_module = get_attention_module_instance(
+                'cam',
+                self.input_dim,
+                out_dim=self.output_dim,
+                use_head=use_head
+            )
+            init_params(cam_module)
+            self.dan_module_names.add('cam_module')
+            self.cam_module = cam_module
+
+        if 'pam' in DAN_module_names:
+            pam_module = get_attention_module_instance(
+                'pam',
+                self.input_dim,
+                out_dim=self.output_dim,
+
+                use_head=use_head
+            )
+            init_params(pam_module)
+            self.dan_module_names.add('pam_module')
+            self.pam_module = pam_module
+
+    def forward(self, x):
+
+        predict, xent, triplet = [], [], []
+
+        x = F.relu(x)
+
+        feats = []
+        module_name: str
+        for module_name in self.dan_module_names:
+            x_out = getattr(self, module_name)(x)
+            feats.append(x_out)
+
+        v = self.avgpool(torch.cat(feats, 1))
+        v = v.view(v.size(0), -1)
+        triplet.append(v)
+        predict.append(v)
+        v = self.classifier(v)
+        xent.append(v)
 
         return predict, xent, triplet, fmap

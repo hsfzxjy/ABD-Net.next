@@ -184,6 +184,7 @@ def get_attention_module_instance(
     name: 'cam | pam | identity',
     dim: int,
     *,
+    out_dim=None,
     use_head: bool=False,
     dim_collapsion=2  # Used iff `used_head` set to True
 ):
@@ -193,9 +194,12 @@ def get_attention_module_instance(
 
     module_class = name_module_class_mapping[name]
 
+    if out_dim is None:
+        out_dim = dim
+
     if use_head:
         return DANetHead(
-            dim, dim,
+            dim, out_dim,
             nn.BatchNorm2d,
             module_class,
             dim_collapsion=dim_collapsion

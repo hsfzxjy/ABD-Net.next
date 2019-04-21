@@ -465,4 +465,4 @@ class DANBranch(nn.Module):
         v = self.classifier(v)
         xent.append(v)
 
-        return predict, xent, triplet, fmap
+        return predict, xent, triplet, {}

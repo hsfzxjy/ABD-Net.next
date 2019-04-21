@@ -16,12 +16,18 @@ class TripletLoss(nn.Module):
     - margin (float): margin for triplet.
     """
 
-    def __init__(self, margin=0.3):
+    def __init__(self, num_classes, args, use_gpu=True):
         super(TripletLoss, self).__init__()
+        margin = args['margin']
         self.margin = margin
         self.ranking_loss = nn.MarginRankingLoss(margin=margin)
 
-    def forward(self, inputs, targets):
+        from .cross_entropy_loss import CrossEntropyLoss
+        self.xent = CrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=args['label_smooth'])
+        self.lambda_xent = args['lambda_xent']
+        self.lambda_htri = args['lambda_htri']
+
+    def _forward(self, inputs, targets):
 
         if not isinstance(inputs, tuple):
             inputs_tuple = (inputs,)
@@ -30,6 +36,13 @@ class TripletLoss(nn.Module):
 
         results = sum([self.apply_loss(x, targets) for x in inputs_tuple])
         return results / len(inputs_tuple)
+
+    def forward(self, inputs, targets):
+
+        xent_loss = self.xent(inputs, targets)
+        htri_loss = self._forward(inputs[2], targets)
+
+        return self.lambda_xent * xent_loss + self.lambda_htri * htri_loss
 
     def apply_loss(self, inputs, targets):
         """

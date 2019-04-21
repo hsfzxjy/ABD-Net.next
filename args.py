@@ -73,8 +73,6 @@ def argument_parser():
     # ************************************************************
     # Training hyperparameters
     # ************************************************************
-    parser.add_argument('--clip-grad', default=0.5, type=float)
-    parser.add_argument('--use-clip-grad', default=False, action='store_true')
     parser.add_argument('--max-epoch', default=60, type=int,
                         help="maximum epochs to run")
     parser.add_argument('--start-epoch', default=0, type=int,
@@ -97,11 +95,11 @@ def argument_parser():
                         help="open specified layers for training while keeping others frozen")
 
     parser.add_argument('--criterion', type=str, default='xent')
-    parser.add_argument('--switch-loss', type=int, default=0)
-    parser.add_argument('--fix-custom-loss', action='store_true', default=False)
-    parser.add_argument('--regularizer', type=str, default='none')
-    # parser.add_argument('--dropout', type=str, default='none', choices=['none', 'incr', 'fix'])
-    parser.add_argument('--penalty-position', type=str, default='before', choices=['before', 'after', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5', 'all_layers', 'before,layer5', 'after,layer5', 'after,cam', 'before,after,cam,pam', 'after,pam', 'before,before2,after,cam,pam', 'before,after,cam,pam,layer5', 'before,after'])
+    # parser.add_argument('--switch-loss', type=int, default=0)
+    # parser.add_argument('--fix-custom-loss', action='store_true', default=False)
+    # parser.add_argument('--regularizer', type=str, default='none')
+    # # parser.add_argument('--dropout', type=str, default='none', choices=['none', 'incr', 'fix'])
+    # parser.add_argument('--penalty-position', type=str, default='before', choices=['before', 'after', 'pam', 'cam', 'pam,cam', 'before,pam', 'before,cam', 'before,pam,cam', 'layer5', 'all_layers', 'before,layer5', 'after,layer5', 'after,cam', 'before,after,cam,pam', 'after,pam', 'before,before2,after,cam,pam', 'before,after,cam,pam,layer5', 'before,after'])
 
     # ************************************************************
     # Cross entropy loss-specific setting
@@ -174,6 +172,14 @@ def argument_parser():
     parser.add_argument('--abd-dan', nargs='+', type=str, default=['cam', 'pam'])
     parser.add_argument('--abd-dan-no-head', action='store_true')
     parser.add_argument('--shallow-cam', action='store_true')
+
+    parser.add_argument('--use-of', action='store_true')
+    parser.add_argument('--of-beta', type=float, default=1e-6)
+    parser.add_argument('--of-start-epoch', type=int, default=23)
+    parser.add_argument('--of-position', nargs='+', type=str, default=['before'])
+
+    parser.add_argument('--use-ow', action='store_true')
+    parser.add_argument('--ow-beta', type=float, default=1e-3)
 
     return parser
 

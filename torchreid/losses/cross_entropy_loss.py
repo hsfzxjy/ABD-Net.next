@@ -37,7 +37,7 @@ class CrossEntropyLoss(nn.Module):
         loss = (- targets * log_probs).mean(0).sum()
         return loss
 
-    def forward(self, inputs, targets):
+    def _forward(self, inputs, targets):
         """
         Args:
         - inputs: prediction matrix (before softmax) with shape (batch_size, num_classes)
@@ -50,3 +50,7 @@ class CrossEntropyLoss(nn.Module):
             inputs_tuple = inputs
 
         return sum([self.apply_loss(x, targets) for x in inputs_tuple]) / len(inputs_tuple)
+
+    def forward(self, inputs, targets):
+
+        return self._forward(inputs[1], targets)

@@ -16,9 +16,6 @@ class MultiBranchNetwork(nn.Module):
         self.common_branch = self._get_common_branch(backbone, args)
         self.branches = nn.ModuleList(self._get_branches(backbone, args))
 
-        # for i, branch in enumerate(self.branches):
-        #     self.add_module(f'branch_{i}', branch)
-
     def _get_common_branch(self, backbone, args):
         return NotImplemented
 
@@ -233,7 +230,6 @@ class ABDBranch(nn.Module):
                 to_sum = []
                 module_name: str
                 for module_name in self.dan_module_names:
-                    # print(p, name, x_sliced.device, module.conv5c[0].weight.device, self.reduction[0].weight.device)
                     x_out = getattr(self, module_name)(x_sliced)
                     to_sum.append(x_out)
                     fmap[module_name.partition('_')[0]].append(x_out)
@@ -252,7 +248,6 @@ class ABDBranch(nn.Module):
             triplet.append(v)
             predict.append(v)
             v = self.classifiers[p](v)
-            print(v.size())
             xent.append(v)
 
         return predict, xent, triplet, fmap

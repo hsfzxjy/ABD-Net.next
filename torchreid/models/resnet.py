@@ -213,7 +213,6 @@ class ResNetDeepBranch(nn.Module):
         return [self.backbone]
 
     def forward(self, x):
-        print(self.index, x.device)
         return self.backbone(x)
 
 class MultiBranchResNet(branches.MultiBranchNetwork):

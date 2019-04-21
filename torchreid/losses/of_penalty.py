@@ -12,36 +12,14 @@ from .cross_entropy_loss import CrossEntropyLoss
 
 logger = logging.getLogger(__name__)
 
-USE_LOG = os.environ.get('use_log') is not None
-CONSTRAINT_WEIGHTS = os.environ.get('constraint_weights') is not None
-print('CONSTRAINT_WEIGHTS:', CONSTRAINT_WEIGHTS)
 
+class OFPenalty(nn.Module):
 
-class SingularLoss(nn.Module):
-
-    def __init__(self, num_classes, *, use_gpu=True, label_smooth=True, beta=None, penalty_position='before'):
+    def __init__(self, num_classes, args):
         super().__init__()
 
-        os_beta = None
-
-        sing_beta = os.environ.get('sing_beta')
-        if sing_beta is not None:
-            try:
-                os_beta = float(sing_beta)
-            except (ValueError, TypeError):
-                pass
-
-        if os_beta is None:
-
-            try:
-                os_beta = float(os.environ.get('beta'))
-            except (ValueError, TypeError):
-                raise RuntimeError('No beta specified. ABORTED.')
-        print('USE_GPU', use_gpu)
-        self.beta = beta if not os_beta else os_beta
-        print('beta', self.beta)
-        self.xent_loss = CrossEntropyLoss(num_classes=num_classes, use_gpu=use_gpu, label_smooth=label_smooth)
-        self.penalty_position = frozenset(penalty_position.split(','))
+        self.penalty_position = args['of_position']
+        self.beta = args['of_beta']
 
     def dominant_eigenvalue(self, A):
 
@@ -56,11 +34,6 @@ class SingularLoss(nn.Module):
             x
         ).squeeze()
         denominator = (torch.norm(x.view(B, N), p=2, dim=1) ** 2).squeeze()
-        # denominator = torch.norm(
-        #     x.view(B, 1, N),
-        #     x
-        # ).squeeze()
-        # # print(denominator)
 
         return numerator / denominator
 
@@ -84,15 +57,12 @@ class SingularLoss(nn.Module):
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)
         smallest, largest = self.get_singular_values(W)
-        if not USE_LOG:
-            singular_penalty = (largest - smallest) * self.beta
-        else:
-            singular_penalty = (torch.log1p(largest) - torch.log1p(smallest)) * self.beta
+        singular_penalty = (largest - smallest) * self.beta
 
-        if k == 'layer5':
+        if k == 'intermediate':
             singular_penalty *= 0.01
 
-        return singular_penalty.sum() / (x.size()[0] / 32.)  # Quirk: normalize to 32-batch case
+        return singular_penalty.sum() / (x.size(0) / 32.)  # Quirk: normalize to 32-batch case
 
     def forward(self, inputs, pids):
 
@@ -107,6 +77,5 @@ class SingularLoss(nn.Module):
 
         singular_penalty = sum([self.apply_penalty(k, x) for k, x in feature_dict.items() if k in self.penalty_position])
 
-        xloss = self.xent_loss(y, pids)
         logger.debug(str(singular_penalty))
-        return singular_penalty + xloss
+        return singular_penalty

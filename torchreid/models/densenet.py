@@ -195,6 +195,7 @@ def densenet121_backbone():
         num_init_features=64,
         growth_rate=32,
         block_config=(6, 12, 24, 16),
+        last_stride=1,
         fc_dims=None,
         dropout_p=None,
     )
@@ -208,10 +209,11 @@ def densent161_backbone():
         num_init_features=96,
         growth_rate=48,
         block_config=(6, 12, 36, 24),
+        last_stride=1,
         fc_dims=None,
         dropout_p=None,
     )
-    init_pretrained_weights(model, model_urls['densenet121'])
+    init_pretrained_weights(model, model_urls['densenet161'])
     return model
 
 def _copy_dense_layer(denseblock, start, end):

@@ -181,8 +181,6 @@ def main():
                 print("Evaluating {} ...".format(name))
                 queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
                 galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
-                print('!!!!!!!!FC!!!!!!!!')
-                os.environ['NOFC'] = ''
                 rank1 = test(model, queryloader, galleryloader, use_gpu)
                 ranklogger.write(name, epoch + 1, rank1)
 
@@ -235,7 +233,6 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             limited = float(os.environ.get('limited', None))
         except (ValueError, TypeError):
             limited = 1
-        # print('################# limited', limited)
 
         if not fixbase and (batch_idx + 1) > limited * len(trainloader):
             break
@@ -277,13 +274,10 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
 
 def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], return_distmat=False):
 
-    if os.environ.get('flip_eval'):
-        flip_eval = True
-    else:
-        flip_eval = args.flip_eval
+    flip_eval = args.flip_eval
 
     if flip_eval:
-        print('Flip Eval!')
+        print('# Using Flip Eval')
 
     batch_time = AverageMeter()
 

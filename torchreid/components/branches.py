@@ -401,7 +401,7 @@ class DANBranch(nn.Module):
 
     def _init_classifier(self):
 
-        classifier = nn.Linear((1 + len(self.dan_module_names)), self.owner().num_classes)
+        classifier = nn.Linear(len(self.dan_module_names) * self.output_dim, self.owner().num_classes)
         init_params(classifier)
         self.classifier = classifier
 

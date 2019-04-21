@@ -14,7 +14,8 @@ make
 Example:
 
 ```bash
-python train.py -s market1501 -t market1501 --eval-freq 1 \
+python train.py -s market1501 -t market1501 \
+    --flip-eval --eval-freq 1 \
     --label-smooth \
     --criterion htri \
     --lambda-htri 0.1  \
@@ -25,10 +26,10 @@ python train.py -s market1501 -t market1501 --eval-freq 1 \
     --width 224 \
     --optim adam --lr 0.0003 \
     --stepsize 20 40 \
+     --gpu-devices 4,5 \
      --max-epoch 80 \
      --save-dir path/to/dir \
      --arch resnet50 \
-     --gpu-devices 4,5 \
      --use-of \
      --abd-dan cam pam \
      --abd-np 2 \

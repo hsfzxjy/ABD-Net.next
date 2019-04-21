@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class OFPenalty(nn.Module):
 
-    def __init__(self, num_classes, args):
+    def __init__(self, args):
         super().__init__()
 
         self.penalty_position = args['of_position']
@@ -64,7 +64,7 @@ class OFPenalty(nn.Module):
 
         return singular_penalty.sum() / (x.size(0) / 32.)  # Quirk: normalize to 32-batch case
 
-    def forward(self, inputs, pids):
+    def forward(self, inputs):
 
         _, y, _, feature_dict = inputs
 

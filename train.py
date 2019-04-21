@@ -155,7 +155,7 @@ def main():
 
     for epoch in range(args.start_epoch, args.max_epoch):
         start_train_time = time.time()
-        print(epoch, args.switch_loss)
+        print(epoch)
         print(criterion)
 
         train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False)
@@ -209,6 +209,11 @@ def main():
 
 
 def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False):
+
+    from torchreid.losses.of_penalty import OFPenalty
+
+    of_penalty = OFPenalty(vars(args))
+
     losses = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -241,9 +246,12 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         loss = criterion(outputs, pids)
         if not fixbase:
             reg = regularizer(model)
-            # print('use reg', reg)
-            # print('use reg', reg)
             loss += reg
+        if not fixbase and args.use_of and epoch >= args.of_start_epoch:
+
+            penalty = of_penalty(outputs)
+            loss += penalty
+
         optimizer.zero_grad()
         loss.backward()
 

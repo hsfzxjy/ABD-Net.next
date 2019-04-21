@@ -4,8 +4,6 @@ from __future__ import division
 import torch
 import torch.nn as nn
 
-import os
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -14,18 +12,10 @@ w_rate = 1e-4
 
 class SVMORegularizer(nn.Module):
 
-    def __init__(self, controller):
+    def __init__(self, args):
         super().__init__()
 
-        os_beta = None
-
-        # try:
-        #     os_beta = float(os.environ.get('beta'))
-        # except (ValueError, TypeError):
-        #     raise RuntimeError('No beta specified. ABORTED.')
-        # self.beta = os_beta
-        #
-        self.param_controller = controller
+        self.beta = args['ow_beta']
 
     def dominant_eigenvalue(self, A: 'N x N'):
 
@@ -79,5 +69,5 @@ class SVMORegularizer(nn.Module):
 
         smallest, largest = self.get_singular_values(W)
         return (
-            self.param_controller._value * 10 * (largest - smallest)**2
+            self.beta * 10 * (largest - smallest)**2
         ).squeeze()

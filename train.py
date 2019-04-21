@@ -83,7 +83,7 @@ def main():
     print("Model size: {:.3f} M".format(count_num_param(model)))
 
     criterion = get_criterion(dm.num_train_pids, use_gpu, args)
-    regularizer, reg_param_controller = get_regularizer(args.regularizer)
+    regularizer = get_regularizer(vars(args))
     optimizer = init_optimizer(model.parameters(), **optimizer_kwargs(args))
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=args.stepsize, gamma=args.gamma)
 

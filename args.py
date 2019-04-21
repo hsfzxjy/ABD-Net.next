@@ -165,11 +165,11 @@ def argument_parser():
     parser.add_argument('--compatibility', action='store_true')
     parser.add_argument('--branches', nargs='+', type=str, default=['global', 'abd'])
     parser.add_argument('--global-dim', type=int, default=1024)
-    parser.add_argument('--dropout', type=float)
+    parser.add_argument('--dropout', type=float, default=0.5)
 
     parser.add_argument('--abd-dim', type=int, default=1024)
     parser.add_argument('--abd-np', type=int, default=2)
-    parser.add_argument('--abd-dan', nargs='+', type=str, default=['cam', 'pam'])
+    parser.add_argument('--abd-dan', nargs='+', type=str, default=[])
     parser.add_argument('--abd-dan-no-head', action='store_true')
     parser.add_argument('--shallow-cam', action='store_true')
 

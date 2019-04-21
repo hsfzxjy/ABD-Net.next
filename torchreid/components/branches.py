@@ -78,7 +78,7 @@ class MultiBranchNetwork(nn.Module):
 
         fmap_dict = {k: tuple(v) for k, v in fmap_dict.items()}
 
-        return torch.cat(predict_features, 1), tuple(xent_features),
+        return torch.cat(predict_features, 1), tuple(xent_features),\
             tuple(triplet_features), fmap_dict
 
 

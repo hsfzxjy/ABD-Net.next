@@ -222,6 +222,9 @@ class ABDBranch(nn.Module):
 
         x = self.reduction(x)
 
+        assert x.size(2) % self.part_num == 0, \
+            f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
+
         margin = x.size(2) // self.part_num
         for p in range(self.part_num):
             x_sliced = x[:, :, margin * p:margin * (p + 1), :]

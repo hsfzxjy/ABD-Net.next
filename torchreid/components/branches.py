@@ -50,6 +50,16 @@ class MultiBranchNetwork(nn.Module):
                 )
             )
 
+        if 'np' in branch_names:
+            middle_subbranch = self._get_middle_subbranch_for(backbone, args, NPBranch)
+            np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim)
+            branch_list.append(
+                Sequential(
+                    middle_subbranch,
+                    np_branch
+                )
+            )
+
         assert len(branch_list) != 0, 'Should specify at least one branch.'
         return branch_list
 
@@ -156,6 +166,73 @@ class GlobalBranch(nn.Module):
 
         return predict, xent, triplet, {}
 
+class NPBranch(nn.Module):
+
+    def __init__(self, owner, backbone, args, input_dim):
+        super().__init__()
+
+        self.owner = weakref.ref(owner)
+
+        self.input_dim = input_dim
+        self.output_dim = args['np_dim']
+        self.args = args
+        self.num_classes = owner.num_classes
+        self.part_num = args['np_np']
+
+        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(self.part_num)])
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(self.part_num)])
+
+    def backbone_modules(self):
+
+        return []
+
+    def _init_classifier(self):
+
+        classifier = nn.Linear(self.output_dim, self.num_classes)
+        init_params(classifier)
+
+        return classifier
+
+    def _init_fc_layer(self):
+
+        dropout_p = self.args['dropout']
+
+        if dropout_p is not None:
+            dropout_layer = [nn.Dropout(p=dropout_p)]
+        else:
+            dropout_layer = []
+
+        fc = nn.Sequential(
+            nn.Linear(self.input_dim, self.output_dim),
+            nn.BatchNorm1d(self.output_dim),
+            nn.ReLU(inplace=True),
+            *dropout_layer
+        )
+        init_params(fc)
+
+        return fc
+
+    def forward(self, x):
+
+        triplet, xent, predict = [], [], []
+
+        assert x.size(2) % self.part_num == 0,\
+            f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
+        margin = x.size(2) // self.part_num
+
+        for p in range(self.part_num):
+            x_sliced = self.avgpool(x[:, :, p * margin:(p + 1) * margin, :])
+            x_sliced = x_sliced.view(x_sliced.size(0), -1)
+
+            x_sliced = self.fcs[p](x_sliced)
+            triplet.append(x_sliced)
+            predict.append(x_sliced)
+            x_sliced = self.classifiers[p](x_sliced)
+            xent.append(x_sliced)
+
+        return predict, xent, triplet, {}
+
 
 class ABDBranch(nn.Module):
 
@@ -253,7 +330,7 @@ class ABDBranch(nn.Module):
 
         x = self.reduction(x)
 
-        assert x.size(2) % self.part_num == 0, \
+        assert x.size(2) % self.part_num == 0,\
             f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
 
         margin = x.size(2) // self.part_num

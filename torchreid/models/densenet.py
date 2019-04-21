@@ -203,7 +203,7 @@ def densenet121_backbone():
     return model
 
 
-def densent161_backbone():
+def densenet161_backbone():
 
     model = DenseNet(
         num_init_features=96,

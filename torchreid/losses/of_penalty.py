@@ -18,7 +18,7 @@ class OFPenalty(nn.Module):
     def __init__(self, args):
         super().__init__()
 
-        self.penalty_position = args['of_position']
+        self.penalty_position = frozenset(args['of_position'])
         self.beta = args['of_beta']
 
     def dominant_eigenvalue(self, A):

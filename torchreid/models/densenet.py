@@ -220,7 +220,7 @@ def _copy_dense_layer(denseblock, start, end):
 
     return [
         deepcopy(getattr(denseblock, 'denselayer%s' % i))
-        for i in range(start, end)
+        for i in range(start, end + 1)
     ]
 
 

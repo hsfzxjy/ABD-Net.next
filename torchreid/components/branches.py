@@ -58,7 +58,7 @@ class Sequential(nn.Sequential):
     def backbone_modules(self):
 
         backbone_modules = []
-        for m in self._modules:
+        for m in self._modules.values():
             print(m)
             backbone_modules.append(m.backbone_modules())
 

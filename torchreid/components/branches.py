@@ -30,20 +30,22 @@ class MultiBranchNetwork(nn.Module):
 
         if 'global' in branch_names:
 
-            global_branch = GlobalBranch(self, backbone, args, deep_branch.out_dim)
+            middle_subbranch = self._get_middle_subbranch_for(backbone, args, GlobalBranch)
+            global_branch = GlobalBranch(self, backbone, args, middle_subbranch.out_dim)
 
             branch_list.append(
                 Sequential(
-                    self._get_middle_subbranch_for(backbone, args, global_branch),
+                    middle_subbranch,
                     global_branch
                 )
             )
 
         if 'abd' in branch_names:
-            abd_branch = ABDBranch(self, backbone, args, deep_branch.out_dim)
+            middle_subbranch = self._get_middle_subbranch_for(backbone, args, abd_branch)
+            abd_branch = ABDBranch(self, backbone, args, middle_subbranch.out_dim)
             branch_list.append(
                 Sequential(
-                    self._get_middle_subbranch_for(backbone, args, abd_branch),
+                    middle_subbranch,
                     abd_branch
                 )
             )

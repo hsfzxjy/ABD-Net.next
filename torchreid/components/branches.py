@@ -389,7 +389,6 @@ class DANBranch(nn.Module):
         self.args = args
         self.num_classes = owner.num_classes
 
-        self._init_reduction_layer()
         self._init_attention_modules()
 
         self.avgpool = nn.AdaptiveAvgPool2d(1)

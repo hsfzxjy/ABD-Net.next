@@ -206,7 +206,7 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
 
         return ResNetCommonBranch(self, backbone, args)
 
-    def _get_middle_subbranch_for(self, backbone, args, last_branch):
+    def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
 
         return ResNetDeepBranch(self, backbone, args)
 

@@ -19,7 +19,7 @@ class MultiBranchNetwork(nn.Module):
     def _get_common_branch(self, backbone, args):
         return NotImplemented
 
-    def _get_middle_subbranch_for(self, backbone, args, last_branch):
+    def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
 
         return NotImplemented
 
@@ -41,7 +41,7 @@ class MultiBranchNetwork(nn.Module):
             )
 
         if 'abd' in branch_names:
-            middle_subbranch = self._get_middle_subbranch_for(backbone, args, abd_branch)
+            middle_subbranch = self._get_middle_subbranch_for(backbone, args, ABDBranch)
             abd_branch = ABDBranch(self, backbone, args, middle_subbranch.out_dim)
             branch_list.append(
                 Sequential(

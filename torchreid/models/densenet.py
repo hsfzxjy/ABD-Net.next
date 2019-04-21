@@ -264,19 +264,19 @@ class DenseNetDeepBranch(nn.Module):
         type_ = owner.type_
 
         if type_ == 'd4':
-            backbone = nn.Sequential(*backbone.features[-2:])
+            backbone_ = nn.Sequential(*backbone.features[-2:])
         elif type_ == 't3_d4':
-            backbone = nn.Sequential(*backbone.features[-3:])
+            backbone_ = nn.Sequential(*backbone.features[-3:])
         elif type_ == 'd3_t3_d4':
             denseblock_3 = backbone.features[-4]
             total_layers = len(denseblock_3._modules)
-            backbone = nn.Sequential(
+            backbone_ = nn.Sequential(
                 *_copy_dense_layer(denseblock_3, total_layers // 6 + 1, total_layers),
                 *backbone.features[-3:]
             )
 
-        self.backbone = deepcopy(backbone)
-        self.out_dim = 2048
+        self.backbone = deepcopy(backbone_)
+        self.out_dim = backbone.feature_dim
 
     def backbone_modules(self):
 

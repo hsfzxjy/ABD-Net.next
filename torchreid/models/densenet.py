@@ -289,8 +289,8 @@ class DenseNetDeepBranch(nn.Module):
 class MultiBranchDenseNet(branches.MultiBranchNetwork):
 
     def __init__(self, backbone, args, num_classes, _type, **kwargs):
-        super().__init__(backbone, args, num_classes, **kwargs)
         self._type = _type
+        super().__init__(backbone, args, num_classes, **kwargs)
 
     def _get_common_branch(self, backbone, args):
 

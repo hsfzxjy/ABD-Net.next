@@ -28,37 +28,39 @@ class MultiBranchNetwork(nn.Module):
         branch_names = frozenset(args['branches'])
         branch_list = []
 
-        if 'global' in branch_names:
+        for branch_name in branch_names:
 
-            middle_subbranch = self._get_middle_subbranch_for(backbone, args, GlobalBranch)
-            global_branch = GlobalBranch(self, backbone, args, middle_subbranch.out_dim)
+            if 'global' == branch_name:
 
-            branch_list.append(
-                Sequential(
-                    middle_subbranch,
-                    global_branch
+                middle_subbranch = self._get_middle_subbranch_for(backbone, args, GlobalBranch)
+                global_branch = GlobalBranch(self, backbone, args, middle_subbranch.out_dim)
+
+                branch_list.append(
+                    Sequential(
+                        middle_subbranch,
+                        global_branch
+                    )
                 )
-            )
 
-        if 'abd' in branch_names:
-            middle_subbranch = self._get_middle_subbranch_for(backbone, args, ABDBranch)
-            abd_branch = ABDBranch(self, backbone, args, middle_subbranch.out_dim)
-            branch_list.append(
-                Sequential(
-                    middle_subbranch,
-                    abd_branch
+            if 'abd' == branch_name:
+                middle_subbranch = self._get_middle_subbranch_for(backbone, args, ABDBranch)
+                abd_branch = ABDBranch(self, backbone, args, middle_subbranch.out_dim)
+                branch_list.append(
+                    Sequential(
+                        middle_subbranch,
+                        abd_branch
+                    )
                 )
-            )
 
-        if 'np' in branch_names:
-            middle_subbranch = self._get_middle_subbranch_for(backbone, args, NPBranch)
-            np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim)
-            branch_list.append(
-                Sequential(
-                    middle_subbranch,
-                    np_branch
+            if 'np' == branch_name:
+                middle_subbranch = self._get_middle_subbranch_for(backbone, args, NPBranch)
+                np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim)
+                branch_list.append(
+                    Sequential(
+                        middle_subbranch,
+                        np_branch
+                    )
                 )
-            )
 
         assert len(branch_list) != 0, 'Should specify at least one branch.'
         return branch_list

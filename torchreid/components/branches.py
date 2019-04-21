@@ -19,27 +19,56 @@ class MultiBranchNetwork(nn.Module):
     def _get_common_branch(self, backbone, args):
         return NotImplemented
 
-    def _get_branches(self, backbone, args) -> list:
+    def _get_middle_subbranch_for(self, backbone, args, last_branch):
+
         return NotImplemented
+
+    def _get_branches(self, backbone, args) -> list:
+
+        branch_names = frozenset(args['branches'])
+        branch_list = []
+
+        if 'global' in branch_names:
+
+            global_branch = GlobalBranch(self, backbone, args, deep_branch.out_dim)
+
+            branch_list.append(
+                Sequential(
+                    self._get_middle_subbranch_for(backbone, args, global_branch),
+                    global_branch
+                )
+            )
+
+        if 'abd' in branch_names:
+            abd_branch = ABDBranch(self, backbone, args, deep_branch.out_dim)
+            branch_list.append(
+                Sequential(
+                    self._get_middle_subbranch_for(backbone, args, abd_branch),
+                    abd_branch
+                )
+            )
+
+        assert len(branch_list) != 0, 'Should specify at least one branch.'
+        return branch_list
 
     def backbone_modules(self):
 
-        lst = [*self.common_branch.backbone_modules()]
+        lst=[*self.common_branch.backbone_modules()]
         for branch in self.branches:
             lst.extend(branch.backbone_modules())
 
         return lst
 
     def forward(self, x):
-        x, *intermediate_fmaps = self.common_branch(x)
+        x, *intermediate_fmaps=self.common_branch(x)
 
-        fmap_dict = defaultdict(list)
+        fmap_dict=defaultdict(list)
         fmap_dict['intermediate'].extend(intermediate_fmaps)
 
-        predict_features, xent_features, triplet_features = [], [], []
+        predict_features, xent_features, triplet_features=[], [], []
 
         for branch in self.branches:
-            predict, xent, triplet, fmap = branch(x)
+            predict, xent, triplet, fmap=branch(x)
             predict_features.extend(predict)
             xent_features.extend(xent)
             triplet_features.extend(triplet)
@@ -47,9 +76,9 @@ class MultiBranchNetwork(nn.Module):
             for name, fmap_list in fmap.items():
                 fmap_dict[name].extend(fmap_list)
 
-        fmap_dict = {k: tuple(v) for k, v in fmap_dict.items()}
+        fmap_dict={k: tuple(v) for k, v in fmap_dict.items()}
 
-        return torch.cat(predict_features, 1), tuple(xent_features), \
+        return torch.cat(predict_features, 1), tuple(xent_features),
             tuple(triplet_features), fmap_dict
 
 
@@ -57,7 +86,7 @@ class Sequential(nn.Sequential):
 
     def backbone_modules(self):
 
-        backbone_modules = []
+        backbone_modules=[]
         for m in self._modules.values():
             backbone_modules.append(m.backbone_modules())
 
@@ -69,15 +98,15 @@ class GlobalBranch(nn.Module):
     def __init__(self, owner, backbone, args, input_dim):
         super().__init__()
 
-        self.owner = weakref.ref(owner)
+        self.owner=weakref.ref(owner)
 
-        self.input_dim = input_dim
-        self.output_dim = args['global_dim']
-        self.args = args
-        self.num_classes = owner.num_classes
+        self.input_dim=input_dim
+        self.output_dim=args['global_dim']
+        self.args=args
+        self.num_classes=owner.num_classes
 
         self._init_fc_layer()
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.avgpool=nn.AdaptiveAvgPool2d(1)
         self._init_classifier()
 
     def backbone_modules(self):
@@ -86,21 +115,21 @@ class GlobalBranch(nn.Module):
 
     def _init_classifier(self):
 
-        classifier = nn.Linear(self.output_dim, self.num_classes)
+        classifier=nn.Linear(self.output_dim, self.num_classes)
         init_params(classifier)
 
-        self.classifier = classifier
+        self.classifier=classifier
 
     def _init_fc_layer(self):
 
-        dropout_p = self.args['dropout']
+        dropout_p=self.args['dropout']
 
         if dropout_p is not None:
-            dropout_layer = [nn.Dropout(p=dropout_p)]
+            dropout_layer=[nn.Dropout(p = dropout_p)]
         else:
-            dropout_layer = []
+            dropout_layer=[]
 
-        fc = nn.Sequential(
+        fc=nn.Sequential(
             nn.Linear(self.input_dim, self.output_dim),
             nn.BatchNorm1d(self.output_dim),
             nn.ReLU(inplace=True),
@@ -108,19 +137,19 @@ class GlobalBranch(nn.Module):
         )
         init_params(fc)
 
-        self.fc = fc
+        self.fc=fc
 
     def forward(self, x):
 
-        triplet, xent, predict = [], [], []
+        triplet, xent, predict=[], [], []
 
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
+        x=self.avgpool(x)
+        x=x.view(x.size(0), -1)
 
-        x = self.fc(x)
+        x=self.fc(x)
         triplet.append(x)
         predict.append(x)
-        x = self.classifier(x)
+        x=self.classifier(x)
         xent.append(x)
 
         return predict, xent, triplet, {}
@@ -131,18 +160,18 @@ class ABDBranch(nn.Module):
     def __init__(self, owner, backbone, args, input_dim):
         super().__init__()
 
-        self.owner = weakref.ref(owner)
+        self.owner=weakref.ref(owner)
 
-        self.input_dim = input_dim
-        self.output_dim = args['abd_dim']
-        self.args = args
-        self.part_num = args['abd_np']
-        self.num_classes = owner.num_classes
+        self.input_dim=input_dim
+        self.output_dim=args['abd_dim']
+        self.args=args
+        self.part_num=args['abd_np']
+        self.num_classes=owner.num_classes
 
         self._init_reduction_layer()
         self._init_attention_modules()
 
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.avgpool=nn.AdaptiveAvgPool2d(1)
 
         self._init_classifiers()
 
@@ -152,47 +181,47 @@ class ABDBranch(nn.Module):
 
     def _init_classifiers(self):
 
-        self.classifiers = nn.ModuleList()
+        self.classifiers=nn.ModuleList()
 
         for p in range(1, self.part_num + 1):
-            classifier = nn.Linear(self.output_dim, self.num_classes)
+            classifier=nn.Linear(self.output_dim, self.num_classes)
             init_params(classifier)
             self.classifiers.append(classifier)
 
     def _init_reduction_layer(self):
 
-        reduction = nn.Sequential(
+        reduction=nn.Sequential(
             nn.Conv2d(self.input_dim, self.output_dim, kernel_size=1, bias=False),
             nn.BatchNorm2d(self.output_dim),
             nn.ReLU(inplace=True)
         )
         init_params(reduction)
 
-        self.reduction = reduction
+        self.reduction=reduction
 
     def _init_attention_modules(self):
 
-        args = self.args
-        self.dan_module_names = set()
-        DAN_module_names = {'cam', 'pam'} & set(args['abd_dan'])
-        use_head = not args['abd_dan_no_head']
-        self.use_dan = bool(DAN_module_names)
+        args=self.args
+        self.dan_module_names=set()
+        DAN_module_names={'cam', 'pam'} & set(args['abd_dan'])
+        use_head=not args['abd_dan_no_head']
+        self.use_dan=bool(DAN_module_names)
 
-        before_module = get_attention_module_instance(
+        before_module=get_attention_module_instance(
             'identity',
             self.output_dim,
-            use_head=use_head
+            use_head = use_head
         )
         self.dan_module_names.add('before_module')
-        self.before_module = before_module
+        self.before_module=before_module
         if use_head:
             init_params(before_module)
 
         if 'cam' in DAN_module_names:
-            cam_module = get_attention_module_instance(
+            cam_module=get_attention_module_instance(
                 'cam',
                 self.output_dim,
-                use_head=use_head
+                use_head = use_head
             )
             init_params(cam_module)
             self.dan_module_names.add('cam_module')

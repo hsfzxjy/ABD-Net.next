@@ -185,27 +185,12 @@ class ResNetCommonBranch(nn.Module):
 
 class ResNetDeepBranch(nn.Module):
 
-    def __init__(self, owner, backbone, args, index=0):
+    def __init__(self, owner, backbone, args):
 
         super().__init__()
 
-        layer4 = nn.Sequential(
-            Bottleneck(
-                1024, 512,
-                downsample=nn.Sequential(
-                    nn.Conv2d(1024, 2048, 1, bias=False),
-                    nn.BatchNorm2d(2048)
-                )
-            ),
-            Bottleneck(2048, 512),
-            Bottleneck(2048, 512)
-        )
-        layer4.load_state_dict(backbone.layer4.state_dict())
+        self.backbone = deepcopy(backbone.layer4)
 
-        self.backbone = layer4
-
-        # owner.add_module(f'deep_backbone_{index}', self.backbone)
-        self.index = index
         self.out_dim = 2048
 
     def backbone_modules(self):
@@ -221,31 +206,9 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
 
         return ResNetCommonBranch(self, backbone, args)
 
-    def _get_branches(self, backbone, args) -> list:
+    def _get_middle_subbranch_for(self, backbone, args, last_branch):
 
-        branch_names = frozenset(args['branches'])
-        branch_list = []
-
-        if 'global' in branch_names:
-            deep_branch = ResNetDeepBranch(self, backbone, args, index=0)
-            branch_list.append(
-                branches.Sequential(
-                    deep_branch,
-                    branches.GlobalBranch(self, backbone, args, deep_branch.out_dim)
-                )
-            )
-
-        if 'abd' in branch_names:
-            deep_branch = ResNetDeepBranch(self, backbone, args, index=1)
-            branch_list.append(
-                branches.Sequential(
-                    deep_branch,
-                    branches.ABDBranch(self, backbone, args, deep_branch.out_dim)
-                )
-            )
-
-        assert len(branch_list) != 0, 'Should specify at least one branch.'
-        return branch_list
+        return ResNetDeepBranch(self, backbone, args)
 
 def resnet50_backbone():
 

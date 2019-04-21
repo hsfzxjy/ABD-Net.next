@@ -210,6 +210,9 @@ def main():
 
 def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False):
 
+    if not fixbase and args.use_of and epoch >= args.of_start_epoch:
+        print('Using OF')
+
     from torchreid.losses.of_penalty import OFPenalty
 
     of_penalty = OFPenalty(vars(args))

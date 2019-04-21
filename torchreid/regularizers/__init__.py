@@ -34,7 +34,7 @@ class ConvRegularizer(nn.Module):
         if ignore:
             return accumulator
 
-        for conv in self.get_all_conv_layers(net.module.backbone_convs()):
+        for conv in self.get_all_conv_layers(net.module.backbone_modules()):
             accumulator += self.reg_instance(conv.weight)
 
         # print(accumulator.data)

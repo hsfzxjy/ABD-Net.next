@@ -63,6 +63,16 @@ class MultiBranchNetwork(nn.Module):
                     )
                 )
 
+            if 'dan' == branch_name:
+                middle_subbranch = self._get_middle_subbranch_for(backbone, args, DANBranch)
+                dan_branch = DANBranch(self, backbone, args, middle_subbranch.out_dim)
+                branch_list.append(
+                    Sequential(
+                        middle_subbranch,
+                        dan_branch
+                    )
+                )
+
         assert len(branch_list) != 0, 'Should specify at least one branch.'
         return branch_list
 
@@ -367,7 +377,7 @@ class ABDBranch(nn.Module):
         return predict, xent, triplet, fmap
 
 
-class ABDBranch(nn.Module):
+class DANBranch(nn.Module):
 
     def __init__(self, owner, backbone, args, input_dim):
         super().__init__()

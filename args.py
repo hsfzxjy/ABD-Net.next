@@ -89,7 +89,7 @@ def argument_parser():
 
     parser.add_argument('--fixbase', action='store_true',
                         help="always fix base network")
-    parser.add_argument('--fixbase-epoch', type=int, default=0,
+    parser.add_argument('--fixbase-epoch', type=int, default=10,
                         help="how many epochs to fix base network (only train randomly initialized classifier)")
     parser.add_argument('--open-layers', type=str, nargs='+', default=['classifier'],
                         help="open specified layers for training while keeping others frozen")
@@ -118,7 +118,7 @@ def argument_parser():
                         help="only use hard triplet loss")
     parser.add_argument('--lambda-xent', type=float, default=1,
                         help="weight to balance cross entropy loss")
-    parser.add_argument('--lambda-htri', type=float, default=1,
+    parser.add_argument('--lambda-htri', type=float, default=0.1,
                         help="weight to balance hard triplet loss")
 
     # ************************************************************

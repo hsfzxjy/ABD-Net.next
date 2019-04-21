@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 class OFPenalty(nn.Module):
 
+    _WARNED = False
+
     def __init__(self, args):
         super().__init__()
 
@@ -72,8 +74,11 @@ class OFPenalty(nn.Module):
 
         existed_positions = frozenset(feature_dict.keys())
         missing = self.penalty_position - existed_positions
-        if missing:
-            raise RuntimeError('Cannot apply singular loss, as positions {!r} are missing.'.format(list(missing)))
+        if missing and not self._WARNED:
+            self._WARNED = True
+
+            import warnings
+            warnings.warn('OF positions {!r} are missing. IGNORED.'.format(list(missing)))
 
         singular_penalty = sum([self.apply_penalty(k, x) for k, x in feature_dict.items() if k in self.penalty_position])
 

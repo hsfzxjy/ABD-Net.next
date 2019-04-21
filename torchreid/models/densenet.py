@@ -1,18 +1,16 @@
 from __future__ import absolute_import
 from __future__ import division
 
-__all__ = ['densenet121', 'densenet169', 'densenet201', 'densenet161', 'densenet121_fc512']
-
 from collections import OrderedDict
-import math
 import re
-import os
 
 import torch
 import torch.nn as nn
 from torch.utils import model_zoo
 from torch.nn import functional as F
-import torchvision
+
+from torchreid.components.shallow_cam import ShallowCAM
+from torchreid.components import branches
 
 from copy import deepcopy
 
@@ -101,7 +99,7 @@ class DenseNet(nn.Module):
         - ``densenet161``: DenseNet161.
         - ``densenet121_fc512``: DenseNet121 + FC.
     """
-    def __init__(self, num_classes, growth_rate=32, block_config=(6, 12, 24, 16),
+    def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
                  num_init_features=64, bn_size=4, drop_rate=0, fc_dims=None, dropout_p=None, last_stride=2, **kwargs):
 
         super(DenseNet, self).__init__()
@@ -136,44 +134,7 @@ class DenseNet(nn.Module):
         # Final batch norm
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
-        self.global_avgpool = nn.AdaptiveAvgPool2d(1)
         self.feature_dim = num_features
-        self.orig_feature_dim = num_features
-        self.fc = self._construct_fc_layer(fc_dims, num_features, dropout_p)
-
-        # Linear layer
-        self.classifier = nn.Linear(self.feature_dim, num_classes)
-
-        self._init_params(self.fc)
-        self._init_params(self.classifier)
-
-    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
-        """Constructs fully connected layer.
-
-        Args:
-            fc_dims (list or tuple): dimensions of fc layers, if None, no fc layers are constructed
-            input_dim (int): input dimension
-            dropout_p (float): dropout probability, if None, dropout is unused
-        """
-        if fc_dims is None:
-            self.feature_dim = input_dim
-            return None
-
-        assert isinstance(fc_dims, (list, tuple)), 'fc_dims must be either list or tuple, but got {}'.format(type(fc_dims))
-
-        layers = []
-        for dim in fc_dims:
-            layers.append(nn.Linear(input_dim, dim))
-            layers.append(nn.BatchNorm1d(dim))
-            layers.append(nn.ReLU(inplace=True))
-            if dropout_p is not None:
-                layers.append(nn.Dropout(p=dropout_p))
-            input_dim = dim
-
-        self.feature_dim = fc_dims[-1]
-
-        return nn.Sequential(*layers)
-
     def _init_params(self, x):
         for m in x.modules():
             if isinstance(m, nn.Conv2d):
@@ -190,211 +151,6 @@ class DenseNet(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
-
-    def forward(self, x):
-        f = self.features(x)
-        f = F.relu(f, inplace=True)
-        v = self.global_avgpool(f)
-        v = v.view(v.size(0), -1)
-
-        if self.fc is not None:
-            v = self.fc(v)
-
-        if not self.training:
-            return v
-
-        y = self.classifier(v)
-
-        if self.loss == 'softmax':
-            return y
-        elif self.loss == 'triplet':
-            return y, v
-        else:
-            raise KeyError('Unsupported loss: {}'.format(self.loss))
-
-
-class DensenetABD(nn.Module):
-
-    def __init__(self, num_classes,
-                 backbone,
-                 *,
-                 fd_config=None,
-                 attention_config=None,
-                 dropout_optimizer=None,
-                 fc_dims=(),
-                 **kwargs):
-
-        super().__init__()
-
-        self.backbone1 = backbone.features[:6]
-        self.backbone2 = backbone.features[6:-2]
-        self.backbone3_1 = deepcopy(backbone.features[-2:])
-        self.backbone3_2 = deepcopy(backbone.features[-2:])
-
-        # Begin Feature Distilation
-        if fd_config is None:
-            fd_config = {'parts': (), 'use_conv_head': False}
-        from .tricks.feature_distilation import FeatureDistilationTrick
-        self.feature_distilation = FeatureDistilationTrick(
-            fd_config['parts'],
-            channels={'a': [], 'b': [], 'c': list(range(128))},
-            use_conv_head=fd_config['use_conv_head']
-        )
-        backbone._init_params(self.feature_distilation)
-        self.dummy_fd = DummyFD(lambda: self.feature_distilation)
-        # End Feature Distilation
-
-        self.global_avgpool = backbone.global_avgpool
-
-        output_dim = backbone.orig_feature_dim
-        feature_dim = fc_dims[0]
-
-        self.global_reduction = nn.Sequential(
-            nn.Linear(output_dim, feature_dim),
-            nn.BatchNorm1d(feature_dim),
-            nn.ReLU(inplace=True),
-            *([dropout_optimizer] if dropout_optimizer is not None else [])
-        )
-
-        self.global_classifier = nn.Linear(feature_dim, num_classes)
-        backbone._init_params(self.global_reduction)
-        backbone._init_params(self.global_classifier)
-
-        self.dim = feature_dim
-
-        self.abd_reduction = nn.Sequential(
-            nn.Conv2d(output_dim, feature_dim, kernel_size=1, bias=False),
-            nn.BatchNorm2d(feature_dim),
-            nn.ReLU(inplace=True),
-            *([dropout_optimizer] if dropout_optimizer is not None else [])
-        )
-        backbone._init_params(self.abd_reduction)
-        self.get_attention_module()
-        self.attention_config = attention_config
-
-        try:
-            part_num = int(os.environ.get('part_num'))
-        except (TypeError, ValueError):
-            part_num = 2
-
-        self.part_num = part_num
-
-        for i in range(1, part_num + 1):
-            c = nn.Linear(feature_dim, num_classes)
-            setattr(self, f'classifier_p{i}', c)
-            self._init_params(c)
-
-    def backbone_convs(self):
-
-        convs = [
-            self.backbone1,
-            self.backbone2,
-            self.backbone3_1,
-            self.backbone3_2,
-        ]
-
-        return convs
-
-    def _init_params(self, x):
-        for m in x.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-
-    def get_attention_module(self):
-
-        from .tricks.attention import DANetHead, CAM_Module, PAM_Module
-
-        in_channels = self.dim
-        out_channels = self.dim
-
-        self.before_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, lambda _: lambda x: x)
-        self.pam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, PAM_Module)
-        self.cam_module1 = DANetHead(in_channels, out_channels, nn.BatchNorm2d, CAM_Module)
-        self.sum_conv1 = nn.Sequential(nn.Dropout2d(0.1, False), nn.Conv2d(out_channels, out_channels, 1))
-
-        self._init_params(self.before_module1)
-        self._init_params(self.cam_module1)
-        self._init_params(self.pam_module1)
-        self._init_params(self.sum_conv1)
-
-    def forward(self, x):
-
-        x = self.backbone1(x)
-        x = self.dummy_fd(x)
-        layer5 = x
-        x = self.backbone2(x)
-
-        predict, xent, triplet = [], [], []
-
-        x1 = self.backbone3_1(x)
-        x1 = F.relu(x1)
-        x1 = self.global_avgpool(x1)
-        x1 = x1.view(x1.size(0), -1)
-        x1 = self.global_reduction(x1)
-        predict.append(x1)
-        triplet.append(x1)
-        x1 = self.global_classifier(x1)
-        xent.append(x1)
-
-        x2 = self.backbone3_2(x)
-        x2 = F.relu(x2)
-        x2 = self.abd_reduction(x2)
-
-        feature_dict = {
-            'cam': (),
-            'pam': (),
-            'before': (),
-            'after': (),
-            'layer5': layer5
-        }
-
-        margin = x2.size(2) // self.part_num
-
-        for p in range(1, self.part_num + 1):
-
-            f = x2[:, :, margin * (p - 1):margin * p, :]
-
-            if not self.attention_config['parts']:
-                # f_after1 = f_before1 = self.before_module1(f)
-                f_after1 = f_before1 = f
-                feature_dict['before'] = (*feature_dict['before'], f_before1)
-                feature_dict['after'] = (*feature_dict['after'], f_after1)
-            else:
-                f_before1 = self.before_module1(f)
-                f_cam1 = self.cam_module1(f)
-                f_pam1 = self.pam_module1(f)
-
-                f_sum1 = f_cam1 + f_pam1 + f_before1
-                f_after1 = self.sum_conv1(f_sum1)
-
-                feature_dict['cam'] = (*feature_dict['cam'], f_cam1)
-                feature_dict['pam'] = (*feature_dict['pam'], f_pam1)
-                feature_dict['before'] = (*feature_dict['before'], f_before1)
-                feature_dict['after'] = (*feature_dict['after'], f_after1)
-
-            v = self.global_avgpool(f_after1)
-            v = v.view(v.size(0), -1)
-            triplet.append(v)
-            predict.append(v)
-            v = getattr(self, f'classifier_p{p}')(v)
-            xent.append(v)
-
-        if not self.training and os.environ.get('fake') is None:
-            return torch.cat(predict, 1)
-
-        return None, tuple(xent), tuple(triplet), feature_dict
 
 
 def init_pretrained_weights(model, model_url):
@@ -433,182 +189,136 @@ densenet201: num_init_features=64, growth_rate=32, block_config=(6, 12, 48, 32)
 densenet161: num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24)
 """
 
+def densenet121_backbone():
 
-def densenet121(num_classes, loss='softmax', pretrained=True, **kwargs):
     model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
         num_init_features=64,
         growth_rate=32,
         block_config=(6, 12, 24, 16),
         fc_dims=None,
         dropout_p=None,
-        **kwargs
     )
-    if pretrained:
-        init_pretrained_weights(model, model_urls['densenet121'])
+    init_pretrained_weights(model, model_urls['densenet121'])
     return model
 
 
-def densenet169(num_classes, loss='softmax', pretrained=True, **kwargs):
+def densent161_backbone():
+
     model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 32, 32),
-        fc_dims=None,
-        dropout_p=None,
-        **kwargs
-    )
-    if pretrained:
-        init_pretrained_weights(model, model_urls['densenet169'])
-    return model
-
-
-def densenet201(num_classes, loss='softmax', pretrained=True, **kwargs):
-    model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 48, 32),
-        fc_dims=None,
-        dropout_p=None,
-        **kwargs
-    )
-    if pretrained:
-        init_pretrained_weights(model, model_urls['densenet201'])
-    return model
-
-
-def densenet161(num_classes, loss='softmax', pretrained=True, **kwargs):
-    model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
         num_init_features=96,
         growth_rate=48,
         block_config=(6, 12, 36, 24),
         fc_dims=None,
         dropout_p=None,
-        **kwargs
     )
-    if pretrained:
-        init_pretrained_weights(model, model_urls['densenet161'])
+    init_pretrained_weights(model, model_urls['densenet121'])
     return model
 
+def _copy_dense_layer(denseblock, start, end):
 
-def densenet121_fc512(num_classes, loss='softmax', pretrained=True, **kwargs):
-    model = DenseNet(
-        num_classes=num_classes,
-        loss=loss,
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 24, 16),
-        fc_dims=[512],
-        dropout_p=None,
-        **kwargs
-    )
-    if pretrained:
-        init_pretrained_weights(model, model_urls['densenet121'])
-    return model
+    return [
+        deepcopy(getattr(denseblock, 'denselayer%s' % i))
+        for i in range(start, end)
+    ]
 
 
-def make_function_abd(name, config, base_class=DenseNet, url=model_urls['densenet121'], last_stride=2):
+class DenseNetCommonBranch(nn.Module):
 
-    def _func(num_classes, loss, pretrained='imagenet', **kwargs):
-        print(config)
-        backbone = base_class(num_classes, fc_dims=config['fc_dims'])
-        init_pretrained_weights(backbone, url)
-        return DensenetABD(
-            num_classes=num_classes,
-            backbone=backbone,
-            **config,
-            **kwargs
-        )
+    def __init__(self, owner, backbone, args):
 
-    _func.config = config
+        super().__init__()
+        type_ = owner.type_
 
-    name_function_mapping[name] = _func
-    globals()[name] = _func
+        self.backbone1 = nn.Sequential(*backbone.features[:6])
+        self.shallow_cam = ShallowCAM(args, 128)
 
-
-from collections import OrderedDict
-
-configurations = OrderedDict([
-    (
-        'fc_dims',
-        [
-            (None, '_nofc'),
-            ([256], '_fc256'),
-            ([512], '_fc512'),
-            ([1024], '_fc1024'),
-        ],
-    ),
-    (
-        'fd_config',
-        [
-            (
-                {
-                    'parts': parts,
-                    'use_conv_head': use_conv_head
-                },
-                f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
+        if type_ == 'd4':
+            self.backbone2 = nn.Sequential(*backbone.features[6:-2])
+        elif type_ == 't3_d4':
+            self.backbone2 = nn.Sequential(*backbone.features[6:-3])
+        elif type_ == 'd3_t3_d4':
+            denseblock_3 = backbone.features[-4]
+            total_layers = len(denseblock_3._modules)
+            self.backbone2 = nn.Sequential(
+                *backbone.features[6:-4],
+                *_copy_dense_layer(denseblock_3, 1, total_layers // 6)
             )
-            for parts, parts_name in [
-                [('ab', 'c'), 'ab_c'],
-                [('ab',), 'ab'],
-                [('a',), 'a'],
-                [(), 'none'],
-                [('abc',), 'abc']
-            ]
-            for use_conv_head in (True, False)
-        ],
-    ),
-    (
-        'attention_config',
-        [
-            (
-                {
-                    'parts': parts,
-                    'use_conv_head': use_conv_head
-                },
-                f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
+
+    def backbone_modules(self):
+
+        return [self.backbone1, self.backbone2]
+
+    def forward(self, x):
+
+        x = self.backbone1(x)
+        intermediate = x = self.shallow_cam(x)
+        x = self.backbone2(x)
+
+        return x, intermediate
+
+class DenseNetDeepBranch(nn.Module):
+
+    def __init__(self, owner, backbone, args):
+
+        super().__init__()
+        type_ = owner.type_
+
+        if type_ == 'd4':
+            backbone = nn.Sequential(*backbone.features[-2:])
+        elif type_ == 't3_d4':
+            backbone = nn.Sequential(*backbone.features[-3:])
+        elif type_ == 'd3_t3_d4':
+            denseblock_3 = backbone.features[-4]
+            total_layers = len(denseblock_3._modules)
+            backbone = nn.Sequential(
+                *_copy_dense_layer(denseblock_3, total_layers // 6 + 1, total_layers),
+                *backbone.features[-3:]
             )
-            for parts, parts_name in [
-                [('cam', 'pam'), 'cam_pam'],
-                [('cam',), 'cam'],
-                [('pam',), 'pam'],
-                [(), 'none'],
-            ]
-            for use_conv_head in (True, False)
-        ]
-    )
-])
 
-import itertools
+        self.backbone = deepcopy(backbone)
+        self.out_dim = 2048
 
-fragments = list(itertools.product(*configurations.values()))
-keys = list(configurations.keys())
+    def backbone_modules(self):
 
-name_function_mapping = {}
+        return [self.backbone]
 
-for fragment in fragments:
+    def forward(self, x):
+        return self.backbone(x)
 
-    name = 'densenet121'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
 
-    make_function_abd(name, config)
+class MultiBranchDenseNet(branches.MultiBranchNetwork):
 
-for fragment in fragments:
+    def __init__(self, backbone, args, num_classes, _type, **kwargs):
+        super().__init__(backbone, args, num_classes, **kwargs)
+        self._type = _type
 
-    name = 'densenet121_ls1'
-    config = {}
-    for key, (sub_config, name_frag) in zip(keys, fragment):
-        name += name_frag
-        config.update({key: sub_config})
+    def _get_common_branch(self, backbone, args):
 
-    make_function_abd(name, config, last_stride=1)
+        return DenseNetCommonBranch(self, backbone, args)
+
+    def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
+
+        return DenseNetDeepBranch(self, backbone, args)
+
+
+def _make_densenet(backbone_name, type_):
+
+    def _initializer(num_classes, args, **kw):
+        backbone = globals()[backbone_name + '_backbone']()
+        return MultiBranchDenseNet(backbone, args, num_classes, type_)
+
+    return _initializer
+
+
+model_mapping = {}
+
+for backbone_name in ['densenet121', 'densenet161']:
+
+    for type_ in ['d4', 't3_d4', 'd3_t3_d4']:
+
+        name = backbone_name + '_' + type_
+
+        model_mapping[name] = globals()[name] = _make_densenet(backbone_name, type_)
+
+model_mapping['densenet121'] = densenet121 = globals()['densenet121_d4']
+model_mapping['densenet161'] = densenet161 = globals()['densenet161_d4']

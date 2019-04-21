@@ -176,6 +176,10 @@ def argument_parser():
     parser.add_argument('--np-dim', type=int, default=1024)
     parser.add_argument('--np-np', type=int, default=2)
 
+    parser.add_argument('--dan-dim', type=int, default=1024)
+    parser.add_argument('--dan-dan', nargs='+', type=str, default=[])
+    parser.add_argument('--dan-dan-no-head', action='store_true')
+
     parser.add_argument('--use-of', action='store_true')
     parser.add_argument('--of-beta', type=float, default=1e-6)
     parser.add_argument('--of-start-epoch', type=int, default=23)

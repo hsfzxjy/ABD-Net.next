@@ -135,7 +135,10 @@ class GlobalBranch(nn.Module):
         self.num_classes = owner.num_classes
 
         self._init_fc_layer()
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        if args['global_max_pooling']:
+            self.avgpool = nn.AdaptiveMaxPool2d(1)
+        else:
+            self.avgpool = nn.AdaptiveAvgPool2d(1)
         self._init_classifier()
 
     def backbone_modules(self):
@@ -202,7 +205,10 @@ class NPBranch(nn.Module):
             subbranch_num += 1
 
         self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(subbranch_num)])
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        if args['np_max_pooling']:
+            self.avgpool = nn.AdaptiveMaxPool2d(1)
+        else:
+            self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.classifiers = nn.ModuleList([self._init_classifier() for i in range(subbranch_num)])
 
     def backbone_modules(self):

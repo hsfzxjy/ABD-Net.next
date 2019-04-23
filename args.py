@@ -175,6 +175,7 @@ def argument_parser():
 
     parser.add_argument('--np-dim', type=int, default=1024)
     parser.add_argument('--np-np', type=int, default=2)
+    parser.add_argument('--np-with-global', action='store_true')
 
     parser.add_argument('--dan-dim', type=int, default=1024)
     parser.add_argument('--dan-dan', nargs='+', type=str, default=[])

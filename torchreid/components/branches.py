@@ -190,11 +190,14 @@ class NPBranch(nn.Module):
         self.output_dim = args['np_dim']
         self.args = args
         self.num_classes = owner.num_classes
-        self.part_num = args['np_np']
+        self.with_global = args['np_with_global']
+        self.part_num = subbranch_num = args['np_np']
+        if self.with_global:
+            subbranch_num += 1
 
-        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(self.part_num)])
+        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(self.subbranch_num)])
         self.avgpool = nn.AdaptiveAvgPool2d(1)
-        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(self.part_num)])
+        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(self.subbranch_num)])
 
     def backbone_modules(self):
 
@@ -236,6 +239,16 @@ class NPBranch(nn.Module):
 
         for p in range(self.part_num):
             x_sliced = self.avgpool(x[:, :, p * margin:(p + 1) * margin, :])
+            x_sliced = x_sliced.view(x_sliced.size(0), -1)
+
+            x_sliced = self.fcs[p](x_sliced)
+            triplet.append(x_sliced)
+            predict.append(x_sliced)
+            x_sliced = self.classifiers[p](x_sliced)
+            xent.append(x_sliced)
+
+        if self.with_global:
+            x_sliced = x
             x_sliced = x_sliced.view(x_sliced.size(0), -1)
 
             x_sliced = self.fcs[p](x_sliced)

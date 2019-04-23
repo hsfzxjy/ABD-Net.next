@@ -53,9 +53,13 @@ class MultiBranchNetwork(nn.Module):
                     )
                 )
 
-            if 'np' == branch_name:
+            if branch_name.startswith('np'):
                 middle_subbranch = self._get_middle_subbranch_for(backbone, args, NPBranch)
-                np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim)
+                try:
+                    part_num = int(branch_name[2:])
+                except (TypeError, ValueError):
+                    part_num = None
+                np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim, part_num=part_num)
                 branch_list.append(
                     Sequential(
                         middle_subbranch,
@@ -181,7 +185,7 @@ class GlobalBranch(nn.Module):
 
 class NPBranch(nn.Module):
 
-    def __init__(self, owner, backbone, args, input_dim):
+    def __init__(self, owner, backbone, args, input_dim, part_num=None):
         super().__init__()
 
         self.owner = weakref.ref(owner)
@@ -191,7 +195,9 @@ class NPBranch(nn.Module):
         self.args = args
         self.num_classes = owner.num_classes
         self.with_global = args['np_with_global']
-        self.part_num = subbranch_num = args['np_np']
+        if part_num is None:
+            part_num = args['np_np']
+        self.part_num = subbranch_num = part_num
         if self.with_global:
             subbranch_num += 1
 

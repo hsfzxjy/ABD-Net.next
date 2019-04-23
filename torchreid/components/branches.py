@@ -201,9 +201,9 @@ class NPBranch(nn.Module):
         if self.with_global:
             subbranch_num += 1
 
-        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(self.subbranch_num)])
+        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(subbranch_num)])
         self.avgpool = nn.AdaptiveAvgPool2d(1)
-        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(self.subbranch_num)])
+        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(subbranch_num)])
 
     def backbone_modules(self):
 

@@ -254,13 +254,13 @@ class NPBranch(nn.Module):
             xent.append(x_sliced)
 
         if self.with_global:
-            x_sliced = x
+            x_sliced = self.avgpool(x)
             x_sliced = x_sliced.view(x_sliced.size(0), -1)
 
-            x_sliced = self.fcs[p](x_sliced)
+            x_sliced = self.fcs[-1](x_sliced)
             triplet.append(x_sliced)
             predict.append(x_sliced)
-            x_sliced = self.classifiers[p](x_sliced)
+            x_sliced = self.classifiers[-1](x_sliced)
             xent.append(x_sliced)
 
         return predict, xent, triplet, {}

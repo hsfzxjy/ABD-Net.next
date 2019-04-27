@@ -70,7 +70,7 @@ class OFPenalty(nn.Module):
 
         _, y, _, feature_dict = inputs
 
-        logger.debug(f'{self.penalty_position}')
+        logger.debug(str(self.penalty_position))
 
         existed_positions = frozenset(feature_dict.keys())
         missing = self.penalty_position - existed_positions

@@ -246,7 +246,7 @@ class NPBranch(nn.Module):
         triplet, xent, predict = [], [], []
 
         assert x.size(2) % self.part_num == 0,\
-            f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
+            "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
         margin = x.size(2) // self.part_num
 
         for p in range(self.part_num):
@@ -369,7 +369,7 @@ class ABDBranch(nn.Module):
         x = self.reduction(x)
 
         assert x.size(2) % self.part_num == 0,\
-            f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
+            "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
 
         margin = x.size(2) // self.part_num
         for p in range(self.part_num):

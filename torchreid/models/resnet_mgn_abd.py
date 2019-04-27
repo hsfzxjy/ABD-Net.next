@@ -166,7 +166,6 @@ class ResNetBackbone(nn.Module):
         return nn.Sequential(*layers)
 
 
-
 class ResNetABDMGN(nn.Module):
     """
     Residual network
@@ -201,9 +200,9 @@ class ResNetABDMGN(nn.Module):
         self.layer3 = backbone.layer3[0]
 
         res_p_conv5 = nn.Sequential(
-                   Bottleneck(1024, 512, downsample=nn.Sequential(nn.Conv2d(1024, 2048, 1, bias=False), nn.BatchNorm2d(2048))),
-                   Bottleneck(2048, 512),
-                   Bottleneck(2048, 512))
+            Bottleneck(1024, 512, downsample=nn.Sequential(nn.Conv2d(1024, 2048, 1, bias=False), nn.BatchNorm2d(2048))),
+            Bottleneck(2048, 512),
+            Bottleneck(2048, 512))
         res_p_conv5.load_state_dict(backbone.layer4.state_dict())
 
         self.layer4_1 = nn.Sequential(
@@ -266,7 +265,6 @@ class ResNetABDMGN(nn.Module):
         self._init_fc(self.fc_id_256_2_1)
         self._init_fc(self.fc_id_256_2_2)
 
-
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
@@ -320,7 +318,7 @@ class ResNetABDMGN(nn.Module):
 
         for i in range(1, part_num + 1):
             c = nn.Linear(1024, num_classes)
-            setattr(self, f'classifier_p{i}', c)
+            setattr(self, 'classifier_p{}'.format(i), c)
             self._init_params(c)
 
         # self._init_params(self.fc)
@@ -538,7 +536,7 @@ class ResNetABDMGN(nn.Module):
             v = v.view(v.size(0), -1)
             triplet_features.append(v)
             predict_features.append(v)
-            v = getattr(self, f'classifier_p{p}')(v)
+            v = getattr(self, 'classifier_p{}'.format(p))(v)
             xent_features.append(v)
 
         if not self.training:
@@ -629,7 +627,7 @@ configurations = OrderedDict([
                     'parts': parts,
                     'use_conv_head': use_conv_head
                 },
-                f'_fd_{parts_name}_{"head" if use_conv_head else "nohead"}'
+                '_fd_{}_{}'.format(parts_name, "head" if use_conv_head else "nohead")
             )
             for parts, parts_name in [
                 [('ab', 'c'), 'ab_c'],
@@ -649,7 +647,7 @@ configurations = OrderedDict([
                     'parts': parts,
                     'use_conv_head': use_conv_head
                 },
-                f'_dan_{parts_name}_{"head" if use_conv_head else "nohead"}'
+                '_dan_{}_{}'.format(parts_name, "head" if use_conv_head else "nohead")
             )
             for parts, parts_name in [
                 [('cam', 'pam'), 'cam_pam'],
@@ -673,7 +671,7 @@ name_function_mapping = {}
 
 for fragment in fragments:
 
-    name = f'resnet50_mgn'
+    name = 'resnet50_mgn'
     config = {}
     for key, (sub_config, name_frag) in zip(keys, fragment):
         name += name_frag

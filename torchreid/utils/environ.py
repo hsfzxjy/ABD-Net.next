@@ -11,4 +11,4 @@ def get_env_or_raise(checker, *names):
         else:
             return value
 
-    raise RuntimeError(f'No suitable envvar found in names {names}')
+    raise RuntimeError('No suitable envvar found in names {}'.format(names))

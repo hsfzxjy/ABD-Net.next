@@ -660,7 +660,7 @@ configurations = OrderedDict([
     )
 ])
 
-configurations: 'Dict[str, List[Tuple[config, name_frag]]]'
+# configurations: 'Dict[str, List[Tuple[config, name_frag]]]'
 
 import itertools
 

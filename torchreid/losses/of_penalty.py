@@ -30,7 +30,7 @@ class OFPenalty(nn.Module):
 
         for _ in range(1):
             x = torch.bmm(A, x)
-        x: 'B x N x 1'
+        # x: 'B x N x 1'
         numerator = torch.bmm(
             torch.bmm(A, x).view(B, 1, N),
             x

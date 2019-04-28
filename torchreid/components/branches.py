@@ -377,7 +377,7 @@ class ABDBranch(nn.Module):
 
             if self.use_dan:
                 to_sum = []
-                module_name: str
+                # module_name: str
                 for module_name in self.dan_module_names:
                     x_out = getattr(self, module_name)(x_sliced)
                     to_sum.append(x_out)
@@ -478,7 +478,7 @@ class DANBranch(nn.Module):
         x = F.relu(x)
 
         feats = []
-        module_name: str
+        # module_name: str
         for module_name in self.dan_module_names:
             x_out = getattr(self, module_name)(x)
             feats.append(x_out)

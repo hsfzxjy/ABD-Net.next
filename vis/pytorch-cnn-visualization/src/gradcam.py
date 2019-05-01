@@ -27,7 +27,7 @@ class CamExtractor():
     def save_feature(self, module, inputs, outputs):
 
         self.conv_output = outputs
-        print(type(self.conv_output), self.conv_output.size())
+        # print(type(self.conv_output), self.conv_output.size())
         print('feature')
 
     def forward_pass_on_convolutions(self, x):

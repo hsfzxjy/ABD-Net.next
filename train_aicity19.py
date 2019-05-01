@@ -331,7 +331,7 @@ def validation(model, loader, use_gpu):
         for index, features in sorted(features_dict.items()):
 
             features = torch.cat(features, 0)
-            print('Feature', index, 'ACC:', accuracy(features, target))
+            print('Feature', index, 'ACC:', accuracy(features, target)[0].item())
 
 def test(model, queryloader_old_cam, queryloader_new_cam, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 

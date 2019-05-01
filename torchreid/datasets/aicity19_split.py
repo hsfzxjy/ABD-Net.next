@@ -72,7 +72,7 @@ class AICity19Split(BaseImageDataset):
         if relabel:
             dct = {v: k for k, v in enumerate(sorted(ids))}
             for item in dataset:
-                dataset[1] = dct[dataset[1]]
+                item[1] = dct[item[1]]
 
         return dataset
 

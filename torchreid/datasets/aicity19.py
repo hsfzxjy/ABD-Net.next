@@ -20,7 +20,7 @@ class AICity19(BaseImageDataset):
 
         self._check_before_run()
 
-        train = self._process_dir(self.train_dir, 'train_track.txt')
+        train = self.get_train()  # _process_dir(self.train_dir, 'train_track.txt')
         gallery = self._process_dir(self.gallery_dir, 'test_track.txt')
 
         # FAKE! Since official query set has no labels.
@@ -48,6 +48,26 @@ class AICity19(BaseImageDataset):
             raise RuntimeError("'{}' is not available".format(self.query_dir))
         if not osp.exists(self.gallery_dir):
             raise RuntimeError("'{}' is not available".format(self.gallery_dir))
+
+    def get_train(self):
+
+        from lxml import etree
+        with open(osp.join(self.dataset_dir, 'train_label.xml'), 'rb') as f:
+            root = etree.parse(f).getroot()
+
+        ids = set()
+
+        dataset = []
+        for item in root.iter('Item'):
+            fn, id, cid = map(item.get, 'imageName vehicleID cameraID'.split())
+            dataset.append([osp.join(self.train_dir, fn), id, cid])
+            ids.add(id)
+
+        mapping = {v: k for k, v in enumerate(sorted(ids))}
+        for item in dataset:
+            item[1] = mapping[item[1]]
+
+        return dataset
 
     def get_query(self, gallery):
 

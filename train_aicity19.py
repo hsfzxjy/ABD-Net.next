@@ -176,8 +176,6 @@ def main():
 
             for name in args.target_names:
                 print("Evaluating {} ...".format(name))
-                queryloader = testloader_dict[name]['query'], testloader_dict[name]['query_flip']
-                galleryloader = testloader_dict[name]['gallery'], testloader_dict[name]['gallery_flip']
                 rank1 = test(model, testloader_dict[name]['new_vid_old_cid_query'], testloader_dict[name]['new_vid_new_cid_query'], testloader_dict[name]['train_gallery'], use_gpu)
                 ranklogger.write(name, epoch + 1, rank1)
 

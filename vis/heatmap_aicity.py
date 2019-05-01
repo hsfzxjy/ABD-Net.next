@@ -35,6 +35,7 @@ class args:
     abd_dim = 1024
     global_dim = 1024
     dropout = 0.5
+    global_max_pooling = False
     compatibility = False
     split_id = 0
     cuhk03_labeled = False

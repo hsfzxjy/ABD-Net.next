@@ -76,6 +76,7 @@ class AICity19Split(BaseImageDataset):
                 dct = self.relabel_mapping
             else:
                 self.relabel_mapping = dct = {v: k for k, v in enumerate(sorted(ids))}
+            print(dct)
             for item in dataset:
                 item[1] = dct[item[1]]
 

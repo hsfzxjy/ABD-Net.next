@@ -325,6 +325,8 @@ def validation(model, loader, use_gpu):
             pids_list.append(pids)
 
         target = torch.cat(pids_list, 0)
+        if use_gpu:
+            target = target.cuda()
 
         for index, features in sorted(features_dict.items()):
 

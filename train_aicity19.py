@@ -149,16 +149,13 @@ def main():
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))
         optimizer.load_state_dict(initial_optim_state)
-        os.environ['sa'] = oldenv
-
-    max_r1 = 0
 
     for epoch in range(args.start_epoch, args.max_epoch):
         start_train_time = time.time()
         print(epoch)
         print(criterion)
 
-        train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False)
+        # train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False)
         train_time += round(time.time() - start_train_time)
 
         if use_gpu:

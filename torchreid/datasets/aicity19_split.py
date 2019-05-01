@@ -21,9 +21,10 @@ class AICity19Split(BaseImageDataset):
 
         self._check_before_run()
 
+        self.relabel_mapping = None
+
         self.train = train = self._process_dir(self.train_dir, '1.txt', relabel=True)
-        self.new_vid_old_cid_val = new_vid_old_cid_val = self._process_dir(self.train_dir, '3.txt')
-        self.new_vid_new_cid_val = new_vid_new_cid_val = self._process_dir(self.train_dir, '3.txt')
+        self.new_vid_new_cid_val = new_vid_new_cid_val = self.new_vid_old_cid_val = new_vid_old_cid_val = self._process_dir(self.train_dir, '3.txt', relabel=True)
         self.new_vid_old_cid_query = new_vid_old_cid_query = self._process_dir(self.train_dir, '2.txt')
         self.new_vid_new_cid_query = new_vid_new_cid_query = self._process_dir(self.train_dir, '4.txt')
         self.train_gallery = train_gallery = new_vid_old_cid_query + new_vid_new_cid_query + new_vid_new_cid_val  # self._process_dir(self.train_dir, 'test_new_person_gallery')
@@ -70,7 +71,11 @@ class AICity19Split(BaseImageDataset):
                 ids.add(id)
 
         if relabel:
-            dct = {v: k for k, v in enumerate(sorted(ids))}
+
+            if self.relabel_mapping is not None:
+                dct = self.relabel_mapping
+            else:
+                self.relabel_mapping = dct = {v: k for k, v in enumerate(sorted(ids))}
             for item in dataset:
                 item[1] = dct[item[1]]
 

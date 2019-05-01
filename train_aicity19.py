@@ -137,8 +137,6 @@ def main():
     print("==> Start training")
 
     if args.fixbase_epoch > 0:
-        oldenv = os.environ.get('sa', '')
-        os.environ['sa'] = ''
         print("Train {} for {} epochs while keeping other layers frozen".format(args.open_layers, args.fixbase_epoch))
         initial_optim_state = optimizer.state_dict()
 
@@ -172,18 +170,17 @@ def main():
         scheduler.step()
 
         if (epoch + 1) > args.start_eval and args.eval_freq > 0 and (epoch + 1) % args.eval_freq == 0 or (epoch + 1) == args.max_epoch:
-            print("==> Test")
-
-            for name in args.target_names:
-                print("Evaluating {} ...".format(name))
-                rank1 = test(model, testloader_dict[name]['new_vid_old_cid_query'], testloader_dict[name]['new_vid_new_cid_query'], testloader_dict[name]['train_gallery'], use_gpu)
-                ranklogger.write(name, epoch + 1, rank1)
-
             print("==> Validation")
             print('===> New VID Old CID')
             validation(model, testloader_dict[name]['new_vid_old_cid_val'], use_gpu)
             print('===> New VID New CID')
             validation(model, testloader_dict[name]['new_vid_new_cid_val'], use_gpu)
+
+            print("==> Test")
+            for name in args.target_names:
+                print("Evaluating {} ...".format(name))
+                rank1 = test(model, testloader_dict[name]['new_vid_old_cid_query'], testloader_dict[name]['new_vid_new_cid_query'], testloader_dict[name]['train_gallery'], use_gpu)
+                ranklogger.write(name, epoch + 1, rank1)
 
             if use_gpu:
                 state_dict = model.module.state_dict()

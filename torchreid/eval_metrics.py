@@ -24,19 +24,19 @@ def eval_cuhk03(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
     """
     num_repeats = 10
     num_q, num_g = distmat.shape
-    
+
     if num_g < max_rank:
         max_rank = num_g
         print("Note: number of gallery samples is quite small, got {}".format(num_g))
-    
+
     indices = np.argsort(distmat, axis=1)
     matches = (g_pids[indices] == q_pids[:, np.newaxis]).astype(np.int32)
 
     # compute cmc curve for each query
     all_cmc = []
     all_AP = []
-    num_valid_q = 0. # number of valid query
-    
+    num_valid_q = 0.  # number of valid query
+
     for q_idx in range(num_q):
         # get query pid and camid
         q_pid = q_pids[q_idx]
@@ -48,7 +48,7 @@ def eval_cuhk03(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
         keep = np.invert(remove)
 
         # compute cmc curve
-        raw_cmc = matches[q_idx][keep] # binary vector, positions with value 1 are correct matches
+        raw_cmc = matches[q_idx][keep]  # binary vector, positions with value 1 are correct matches
         if not np.any(raw_cmc):
             # this condition is true when query identity does not appear in gallery
             continue
@@ -72,10 +72,10 @@ def eval_cuhk03(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
             # compute AP
             num_rel = masked_raw_cmc.sum()
             tmp_cmc = masked_raw_cmc.cumsum()
-            tmp_cmc = [x / (i+1.) for i, x in enumerate(tmp_cmc)]
+            tmp_cmc = [x / (i + 1.) for i, x in enumerate(tmp_cmc)]
             tmp_cmc = np.asarray(tmp_cmc) * masked_raw_cmc
             AP += tmp_cmc.sum() / num_rel
-        
+
         cmc /= num_repeats
         AP /= num_repeats
         all_cmc.append(cmc)
@@ -96,19 +96,19 @@ def eval_market1501(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
     Key: for each query identity, its gallery images from the same camera view are discarded.
     """
     num_q, num_g = distmat.shape
-    
+
     if num_g < max_rank:
         max_rank = num_g
         print("Note: number of gallery samples is quite small, got {}".format(num_g))
-    
+
     indices = np.argsort(distmat, axis=1)
     matches = (g_pids[indices] == q_pids[:, np.newaxis]).astype(np.int32)
 
     # compute cmc curve for each query
     all_cmc = []
     all_AP = []
-    num_valid_q = 0. # number of valid query
-    
+    num_valid_q = 0.  # number of valid query
+
     for q_idx in range(num_q):
         # get query pid and camid
         q_pid = q_pids[q_idx]
@@ -120,7 +120,7 @@ def eval_market1501(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
         keep = np.invert(remove)
 
         # compute cmc curve
-        raw_cmc = matches[q_idx][keep] # binary vector, positions with value 1 are correct matches
+        raw_cmc = matches[q_idx][keep]  # binary vector, positions with value 1 are correct matches
         if not np.any(raw_cmc):
             # this condition is true when query identity does not appear in gallery
             continue
@@ -135,7 +135,7 @@ def eval_market1501(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
         # reference: https://en.wikipedia.org/wiki/Evaluation_measures_(information_retrieval)#Average_precision
         num_rel = raw_cmc.sum()
         tmp_cmc = raw_cmc.cumsum()
-        tmp_cmc = [x / (i+1.) for i, x in enumerate(tmp_cmc)]
+        tmp_cmc = [x / (i + 1.) for i, x in enumerate(tmp_cmc)]
         tmp_cmc = np.asarray(tmp_cmc) * raw_cmc
         AP = tmp_cmc.sum() / num_rel
         all_AP.append(AP)
@@ -161,3 +161,18 @@ def evaluate(distmat, q_pids, g_pids, q_camids, g_camids, max_rank=50, use_metri
         return evaluate_cy(distmat, q_pids, g_pids, q_camids, g_camids, max_rank, use_metric_cuhk03)
     else:
         return evaluate_py(distmat, q_pids, g_pids, q_camids, g_camids, max_rank, use_metric_cuhk03)
+
+def inference(distmat, g_paths, max_rank=100):
+    num_q, num_g = distmat.shape
+    if num_g < max_rank:
+        max_rank = num_g
+        print("Note: number of gallery samples is quite small, got {}".format(num_g))
+    paths_array = np.array(g_paths)
+    indices = np.argsort(distmat, axis=1)
+    paths = np.zeros((num_q, max_rank))
+    for q_idx in range(num_q):
+        sorted_path = paths_array[indices[q_idx, :]][:max_rank]
+        sorted_path = [s.split('/')[-1].split('.')[0] for s in sorted_path]
+        sorted_path = list(map(int, sorted_path))
+        paths[q_idx, :] = sorted_path
+    return paths

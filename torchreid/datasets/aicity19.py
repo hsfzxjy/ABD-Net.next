@@ -21,7 +21,8 @@ class AICity19(BaseImageDataset):
         self._check_before_run()
 
         train = self.get_train()  # _process_dir(self.train_dir, 'train_track.txt')
-        gallery = self._process_dir(self.gallery_dir, 'test_track.txt')
+        gallery = self._process_dir(self.gallery_dir, 'name_test.txt')
+        query = self._process_dir(self.query_dir, 'name_query.txt')
 
         # FAKE! Since official query set has no labels.
         query = self.get_query(gallery)
@@ -81,12 +82,9 @@ class AICity19(BaseImageDataset):
 
     def _process_dir(self, dir_path, id_file, relabel=False):
 
-        with open(osp.join(self.dataset_dir, id_file), 'r') as f:
-            dct = dict(enumerate(map(str.split, f.readlines())))
-
         dataset = []
-        for index_, fn_list in dct.items():
-            for cid, fn in enumerate(fn_list):
-                dataset.append((osp.join(dir_path, fn), index_, cid))
+        with open(osp.join(self.dataset_dir, id_file), 'r') as f:
+            for line in f:
+                dataset.append(osp.join(dir_path, line.strip()), 0, 0)
 
         return dataset

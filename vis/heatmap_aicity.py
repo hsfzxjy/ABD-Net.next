@@ -114,7 +114,7 @@ if __name__ == '__main__':
     #     for x in f.readline().strip().split():
     #         tests += [f'data/aicity19/image_test/{x.zfill(6)}.jpg']
 
-    for i, (fns, imgs, pids, _) in enumerate(train_loader):
+    for i, (imgs, pids, _, fns) in enumerate(train_loader):
 
         if i != options.num:
             continue

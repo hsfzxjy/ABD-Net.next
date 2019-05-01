@@ -253,7 +253,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             loss += penalty
 
         for acc_meter, xent_feat in zip(acc, outputs[1]):
-            acc_meter.update(accuracy(xent_feat, pids.cuda())[0])
+            acc_meter.update(accuracy(xent_feat, pids.cuda())[0].item())
 
         optimizer.zero_grad()
         loss.backward()

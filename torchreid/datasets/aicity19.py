@@ -84,7 +84,7 @@ class AICity19(BaseImageDataset):
 
         dataset = []
         with open(osp.join(self.dataset_dir, id_file), 'r') as f:
-            for line in f:
-                dataset.append((osp.join(dir_path, line.strip()), 0, 0))
+            for cid, line in enumerate(f):
+                dataset.append((osp.join(dir_path, line.strip()), 0, cid))
 
         return dataset

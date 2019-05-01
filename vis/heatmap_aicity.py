@@ -32,6 +32,9 @@ class args:
     root = 'data'
     dataset = 'aicity19'
     shallow_cam = False
+    abd_dim = 1024
+    global_dim = 1024
+    dropout = 0.5
     compatibility = False
     split_id = 0
     cuhk03_labeled = False

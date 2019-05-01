@@ -31,7 +31,8 @@ class args:
     abd_np = 2
     root = 'data'
     dataset = 'aicity19'
-    shallow_cam = True
+    shallow_cam = False
+    compatibility = False
     split_id = 0
     cuhk03_labeled = False
     cuhk03_classic_split = False

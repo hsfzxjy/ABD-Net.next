@@ -72,11 +72,10 @@ class AICity19Split(BaseImageDataset):
 
         if relabel:
 
-            if self.relabel_mapping is not None:
+            if False and self.relabel_mapping is not None:
                 dct = self.relabel_mapping
             else:
                 self.relabel_mapping = dct = {v: k for k, v in enumerate(sorted(ids))}
-            print(dct)
             for item in dataset:
                 item[1] = dct[item[1]]
 

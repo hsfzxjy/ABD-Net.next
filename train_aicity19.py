@@ -218,7 +218,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
     losses = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
-    acc = [AverageMeter() for _ in range(3)]
+    acc = None  # [AverageMeter() for _ in range(3)]
 
     model.train()
 
@@ -252,6 +252,9 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
 
             penalty = of_penalty(outputs)
             loss += penalty
+
+        if acc is None:
+            acc = [AverageMeter() for _ in len(outputs[1])]
 
         for acc_meter, xent_feat in zip(acc, outputs[1]):
             acc_meter.update(accuracy(xent_feat, pids.cuda())[0].item())

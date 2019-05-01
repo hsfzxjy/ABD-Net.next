@@ -367,6 +367,7 @@ class ABDBranch(nn.Module):
         fmap = defaultdict(list)
 
         x = self.reduction(x)
+        x.register_hook(lambda grad: (print(grad), grad)[-1])
 
         assert x.size(2) % self.part_num == 0,\
             "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
@@ -381,7 +382,6 @@ class ABDBranch(nn.Module):
                 # module_name: str
                 for module_name in self.dan_module_names:
                     x_out = getattr(self, module_name)(x_sliced)
-                    x_out.register_hook(lambda grad: (print(grad), grad)[-1])
 
                     to_sum.append(x_out)
                     fmap[module_name.partition('_')[0]].append(x_out)

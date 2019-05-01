@@ -25,7 +25,7 @@ class AICity19(BaseImageDataset):
         query = self._process_dir(self.query_dir, 'name_query.txt')
 
         # FAKE! Since official query set has no labels.
-        query = self.get_query(gallery)
+        # query = self.get_query(gallery)
 
         if verbose:
             print("=> AICity19 loaded")

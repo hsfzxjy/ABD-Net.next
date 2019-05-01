@@ -130,12 +130,12 @@ if __name__ == '__main__':
         model = gradcam = cam = None
 
         for attrgetter, basename in [
-            (lambda m: m.branches[1][1].sum_conv, 'sum_conv'),
+            (lambda m: m.branches[0][1].sum_conv, 'sum_conv'),
             # ('dummy_fd', 'shallow'),
             # ('fc', 'fc'),
-            (lambda m: m.branches[1][1].cam_module, 'cam_module'),
-            (lambda m: m.branches[1][1].pam_module, 'pam_module'),
-            (lambda m: m.branches[1][1].reduction, 'reduction'),
+            (lambda m: m.branches[0][1].cam_module, 'cam_module'),
+            (lambda m: m.branches[0][1].pam_module, 'pam_module'),
+            (lambda m: m.branches[0][1].reduction, 'reduction'),
             # ('conv1', 'conv1'),
             # ('relu', 'relu'),
         ]:

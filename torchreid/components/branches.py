@@ -372,6 +372,7 @@ class ABDBranch(nn.Module):
             "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
 
         margin = x.size(2) // self.part_num
+
         for p in range(self.part_num):
             x_sliced = x[:, :, margin * p:margin * (p + 1), :]
 
@@ -380,6 +381,8 @@ class ABDBranch(nn.Module):
                 # module_name: str
                 for module_name in self.dan_module_names:
                     x_out = getattr(self, module_name)(x_sliced)
+                    x_out.register_hook(lambda grad: (print(grad), grad)[-1])
+
                     to_sum.append(x_out)
                     fmap[module_name.partition('_')[0]].append(x_out)
 

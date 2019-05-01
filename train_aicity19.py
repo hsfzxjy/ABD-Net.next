@@ -389,7 +389,7 @@ def test(model, queryloader_old_cam, queryloader_new_cam, galleryloader, use_gpu
         print("Extracted features for query set, obtained {}-by-{} matrix".format(qqf.size(0), qqf.size(1)))
 
         gf, g_pids, g_camids, g_paths = [], [], [], []
-        enumerator = enumerate(galleryloader[0])
+        enumerator = enumerate(galleryloader)
 
         for batch_idx, package in enumerator:
             # print('fuck')

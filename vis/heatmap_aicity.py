@@ -114,7 +114,7 @@ if __name__ == '__main__':
     #     for x in f.readline().strip().split():
     #         tests += [f'data/aicity19/image_test/{x.zfill(6)}.jpg']
 
-    for i, (fns, imgs, _, _) in enumerate(train_loader):
+    for i, (fns, imgs, pids, _) in enumerate(train_loader):
 
         if i != options.num:
             continue
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
         model = gradcam = cam = None
 
-        for attrname, basename in [
+        for attrgetter, basename in [
             (lambda m: m.branches[1][1].sum_conv, 'sum_conv'),
             # ('dummy_fd', 'shallow'),
             # ('fc', 'fc'),
@@ -149,7 +149,7 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
             model = get_model()
             print(1)
-            gradcam = GradCam(model, getattr(model, attrname))
+            gradcam = GradCam(model, attrgetter(model))
             print(2)
             cam = gradcam.generate_cam(input_img, pids[:2])
 

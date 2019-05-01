@@ -21,12 +21,12 @@ class AICity19Split(BaseImageDataset):
 
         self._check_before_run()
 
-        self.train = train = self._process_dir(self.train_dir, 'train_with_cam_1.txt', relabel=True)
-        self.new_vid_old_cid_val = new_vid_old_cid_val = self._process_dir(self.train_dir, 'val_new_person_old_cam.txt')
-        self.new_vid_new_cid_val = new_vid_new_cid_val = self._process_dir(self.train_dir, 'val_new_person_new_cam.txt')
-        self.new_vid_old_cid_query = new_vid_old_cid_query = self._process_dir(self.train_dir, 'test_new_person_old_cam.txt')
-        self.new_vid_new_cid_query = new_vid_new_cid_query = self._process_dir(self.train_dir, 'test_new_person_new_cam.txt')
-        self.train_gallery = train_gallery = self._process_dir(self.train_dir, 'train_id_with_cam.txt')
+        self.train = train = self._process_dir(self.train_dir, '1.txt', relabel=True)
+        self.new_vid_old_cid_val = new_vid_old_cid_val = self._process_dir(self.train_dir, '3.txt')
+        self.new_vid_new_cid_val = new_vid_new_cid_val = self._process_dir(self.train_dir, '3.txt')
+        self.new_vid_old_cid_query = new_vid_old_cid_query = self._process_dir(self.train_dir, '2.txt')
+        self.new_vid_new_cid_query = new_vid_new_cid_query = self._process_dir(self.train_dir, '4.txt')
+        self.train_gallery = train_gallery = new_vid_old_cid_query + new_vid_new_cid_query + new_vid_new_cid_val  # self._process_dir(self.train_dir, 'test_new_person_gallery')
 
         if verbose:
             print("=> AICity19 loaded")
@@ -75,5 +75,3 @@ class AICity19Split(BaseImageDataset):
                 item[1] = dct[item[1]]
 
         return dataset
-
-

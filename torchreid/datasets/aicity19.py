@@ -61,7 +61,7 @@ class AICity19(BaseImageDataset):
         for item in root.iter('Item'):
             fn, id, cid = map(item.get, 'imageName vehicleID cameraID'.split())
             id = int(id)
-            cid = int(cid)
+            cid = int(cid[1:])
             dataset.append([osp.join(self.train_dir, fn), id, cid])
             ids.add(id)
 

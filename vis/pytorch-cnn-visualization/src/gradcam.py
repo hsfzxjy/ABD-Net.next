@@ -88,7 +88,7 @@ class GradCam():
             one_hot_output = torch.FloatTensor(2, model_output.size()[-1]).zero_().cuda()
             one_hot_output[0][target_class[0]] = 1
             one_hot_output[1][target_class[1]] = 1
-        print(one_hot_output)
+        # print(one_hot_output)
         # Zero grads
         self.model.zero_grad()
         # self.model.features.zero_grad()

@@ -443,7 +443,7 @@ def test(model, queryloader_old_cam, queryloader_new_cam, galleryloader, use_gpu
     distmat = distmat.numpy()
 
     print("Computing CMC and mAP")
-    cmc, mAP = evaluate(distmat, q_pids, g_pids, q_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)
+    cmc, mAP = evaluate(distmat, qq_pids, g_pids, qq_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)
 
     print("Results ----------")
     print("mAP: {:.2%}".format(mAP))

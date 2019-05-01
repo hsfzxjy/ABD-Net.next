@@ -50,9 +50,9 @@ use_gpu = True
 transform_test = T.Compose([
     T.Resize((args.height, args.width)),
     T.ToTensor(),
-    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], height=224, width=224, train_sampler='RandomIdentitySampler'),
+    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], ),
 ])
-dm = data_manager.ImageDataManager(use_gpu, ['aicity19'], ['aicity19'], 'data')
+dm = data_manager.ImageDataManager(use_gpu, ['aicity19'], ['aicity19'], 'data', height=224, width=224, train_sampler='RandomIdentitySampler')
 train_loader, testloader_dict = dm.return_dataloaders()
 # testloader = DataLoader(
 #     ImageDataset(dataset.train, transform=transform_test),

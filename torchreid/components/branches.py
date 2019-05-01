@@ -367,7 +367,6 @@ class ABDBranch(nn.Module):
         fmap = defaultdict(list)
 
         x = self.reduction(x)
-        x.register_hook(lambda grad: (print(grad), grad)[-1])
 
         assert x.size(2) % self.part_num == 0,\
             "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)

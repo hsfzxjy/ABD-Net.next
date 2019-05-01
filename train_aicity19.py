@@ -217,6 +217,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
     losses = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
+    acc = [AverageMeter() for _ in range(3)]
 
     model.train()
 
@@ -251,6 +252,9 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             penalty = of_penalty(outputs)
             loss += penalty
 
+        for acc_meter, xent_feat in zip(acc, outputs[1]):
+            acc_meter.update(accuracy(xent_feat, pids.cuda())[0])
+
         optimizer.zero_grad()
         loss.backward()
 
@@ -264,9 +268,9 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.4f} ({data_time.avg:.4f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\tAcc {acc}'.format(
                       epoch + 1, batch_idx + 1, len(trainloader), batch_time=batch_time,
-                      data_time=data_time, loss=losses))
+                      data_time=data_time, loss=losses, acc=' '.join('{:.4f}'.format(x.avg) for x in acc)))
 
         end = time.time()
 

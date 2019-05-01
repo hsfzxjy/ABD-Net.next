@@ -308,27 +308,30 @@ def validation(model, loader, use_gpu):
 
     from collections import defaultdict
 
+    model.eval()
+
     features_dict = defaultdict(list)
     pids_list = []
 
-    for imgs, pids, _, _ in loader:
+    with torch.no_grad():
+        for imgs, pids, _, _ in loader:
 
-        if use_gpu:
-            imgs = imgs.cuda()
+            if use_gpu:
+                imgs = imgs.cuda()
 
-        features_tuple = model(imgs)[1]
+            features_tuple = model(imgs)[1]
 
-        for index, features in enumerate(features_tuple):
-            features_dict[index].append(features)
+            for index, features in enumerate(features_tuple):
+                features_dict[index].append(features)
 
-        pids_list.append(pids)
+            pids_list.append(pids)
 
-    target = torch.cat(pids_list, 0)
+        target = torch.cat(pids_list, 0)
 
-    for index, features in sorted(features_dict.items()):
+        for index, features in sorted(features_dict.items()):
 
-        features = torch.cat(features, 0)
-        print('Feature', index, 'ACC:', accuracy(features, target))
+            features = torch.cat(features, 0)
+            print('Feature', index, 'ACC:', accuracy(features, target))
 
 def test(model, queryloader_old_cam, queryloader_new_cam, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 

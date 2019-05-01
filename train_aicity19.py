@@ -14,7 +14,7 @@ import torch.backends.cudnn as cudnn
 from torch.optim import lr_scheduler
 
 from args import argument_parser, image_dataset_kwargs, optimizer_kwargs
-from torchreid.datasets.aicity19_split import AICity19ImageDataManager
+from torchreid.data_manager_aicity19 import AICity19ImageDataManager
 from torchreid import models
 from torchreid.utils.iotools import save_checkpoint, check_isfile
 from torchreid.utils.avgmeter import AverageMeter

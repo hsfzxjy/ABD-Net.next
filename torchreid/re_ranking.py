@@ -25,6 +25,7 @@ Returns:
 
 
 import numpy as np
+import torch
 
 def calc_distmat(f1, f2):
 

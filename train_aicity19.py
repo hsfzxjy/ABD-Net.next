@@ -174,7 +174,7 @@ def main():
 
             for name in args.target_names:
                 print("==> Validation")
-                for name, valset_loader in testloader_dict[name]['valsets']:
+                for name, valset_loader in testloader_dict[name]['valsets'].items():
                     print("===>", name)
                     validation(model, valset_loader, use_gpu)
 

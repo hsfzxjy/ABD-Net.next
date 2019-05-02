@@ -58,6 +58,8 @@ class AICity19Split(BaseImageDataset):
             print(*self.get_imagedata_info(self.train_gallery), sep='\t')
 
         self.num_train_pids, self.num_train_imgs, self.num_train_cams = self.get_imagedata_info(self.train)
+        print(set(x[1] for x in train))
+        print(set(x[1] for x in val))
         self.num_train_pids = num_classes
 
     def _check_before_run(self):

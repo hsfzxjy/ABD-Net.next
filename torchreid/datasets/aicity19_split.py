@@ -23,7 +23,7 @@ class AICity19Split(BaseImageDataset):
 
         self.relabel_mapping = None
 
-        train = self._process_dir(self.train_dir, '1.train.txt')
+        self.train = train = self._process_dir(self.train_dir, '1.train.txt')
         val = self._process_dir(self.train_dir, '1.val.txt')
         (train, val), num_classes = self._relabel(train, val)
 

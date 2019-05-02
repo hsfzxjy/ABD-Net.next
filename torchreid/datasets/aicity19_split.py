@@ -26,6 +26,7 @@ class AICity19Split(BaseImageDataset):
         train = self._process_dir(self.train_dir, '1.train.txt')
         val = self._process_dir(self.train_dir, '1.val.txt')
         (train, val), num_classes = self._relabel(train, val)
+        train, val = self._exclude_junk(train, val)
         self.train = train
 
         self.valsets = {
@@ -60,6 +61,11 @@ class AICity19Split(BaseImageDataset):
 
         self.num_train_pids, self.num_train_imgs, self.num_train_cams = self.get_imagedata_info(self.train)
         self.num_train_pids = num_classes
+
+    def _exclude_junk(self, train, val):
+
+        train_ids = set(x[1] for x in train)
+        return train, [x for x in val if x[1] in train_ids]
 
     def _check_before_run(self):
         """Check if all files are available before going deeper"""

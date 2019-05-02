@@ -79,7 +79,7 @@ def open_specified_layers(model, open_layers):
     for name, module in model.named_children():
         # if name in open_layers:
         if name in open_layers or 'classifier' in name or 'fc' in name or 'reduction' in name or \
-                'cam_module' in name or 'pam_module' in name or 'sum_conv' in name or 'before_module' in name:
+                'cam_module' in name and name != '_cam_module' or 'pam_module' in name or 'sum_conv' in name or 'before_module' in name:
             print('open', name)
             module.train()
             for p in module.parameters():

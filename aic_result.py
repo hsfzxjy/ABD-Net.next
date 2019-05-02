@@ -363,11 +363,11 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
     print("==> BatchTime(s)/BatchSize(img): {:.3f}/{}".format(batch_time.avg, args.test_batch_size))
 
-    m, n = qf.size(0), gf.size(0)
-    distmat = torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n) + \
-        torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
-    distmat.addmm_(1, -2, qf, gf.t())
-    distmat = distmat.numpy()
+    from torchreid.re_ranking import calc_distmat, re_ranking
+    if os.environ.get('rrk'):
+        distmat = re_ranking(qf, gf)
+    else:
+        distmat = calc_distmat(qf, gf)
 
     if os.environ.get('distmat'):
         import scipy.io as io

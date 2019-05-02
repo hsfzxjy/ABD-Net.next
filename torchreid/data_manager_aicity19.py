@@ -128,29 +128,23 @@ class AICity19ImageDataManager(BaseDataManager):
                 cuhk03_classic_split=self.cuhk03_classic_split
             )
 
-            self.testloader_dict[name]['new_vid_old_cid_query'] = DataLoader(
-                ImageDataset(dataset.new_vid_old_cid_query, transform=transform_test),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+            self.testloader_dict[name]['valsets'] = {}
+            for key, valset in dataset.valsets.items():
 
-            self.testloader_dict[name]['new_vid_old_cid_val'] = DataLoader(
-                ImageDataset(dataset.new_vid_old_cid_val, transform=transform_test),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+                self.testloader_dict[name]['valsets'][key] = DataLoader(
+                    ImageDataset(valset, transform=transform_test),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
 
-            self.testloader_dict[name]['new_vid_new_cid_query'] = DataLoader(
-                ImageDataset(dataset.new_vid_new_cid_query, transform=transform_test),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+            self.testloader_dict[name]['queries'] = {}
+            for key, query in dataset.queries.items():
 
-            self.testloader_dict[name]['new_vid_new_cid_val'] = DataLoader(
-                ImageDataset(dataset.new_vid_new_cid_val, transform=transform_test),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+                self.testloader_dict[name]['queries'][key] = DataLoader(
+                    ImageDataset(query, transform=transform_test),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
 
             self.testloader_dict[name]['train_gallery'] = DataLoader(
                 ImageDataset(dataset.train_gallery, transform=transform_test),

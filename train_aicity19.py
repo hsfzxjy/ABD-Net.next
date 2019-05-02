@@ -174,30 +174,19 @@ def main():
 
             for name in args.target_names:
                 print("==> Validation")
-                print('===> New VID Old CID')
-                validation(model, testloader_dict[name]['new_vid_old_cid_val'], use_gpu)
-                print('===> New VID New CID')
-                validation(model, testloader_dict[name]['new_vid_new_cid_val'], use_gpu)
+                for name, valset_loader in testloader_dict[name]['valsets']:
+                    print("===>", name)
+                    validation(model, valset_loader, use_gpu)
 
                 print("==> Test")
                 print("Evaluating {} ...".format(name))
-                rank1 = test(model, testloader_dict[name]['new_vid_old_cid_query'], testloader_dict[name]['new_vid_new_cid_query'], testloader_dict[name]['train_gallery'], use_gpu)
+                rank1 = test(model, testloader_dict[name]['queries'], testloader_dict[name]['train_gallery'], use_gpu)
                 ranklogger.write(name, epoch + 1, rank1)
 
             if use_gpu:
                 state_dict = model.module.state_dict()
             else:
                 state_dict = model.state_dict()
-
-            # if max_r1 < rank1:
-            #     print('Save!', max_r1, rank1)
-            #     save_checkpoint({
-            #         'state_dict': state_dict,
-            #         'rank1': rank1,
-            #         'epoch': epoch,
-            #     }, False, osp.join(args.save_dir, 'checkpoint_best.pth.tar'))
-
-            #     max_r1 = rank1
 
     elapsed = round(time.time() - start_time)
     elapsed = str(datetime.timedelta(seconds=elapsed))
@@ -341,129 +330,76 @@ def validation(model, loader, use_gpu):
             features = torch.cat(features, 0)
             print('Feature', index, 'ACC:', accuracy(features, target)[0].item())
 
-def test(model, queryloader_old_cam, queryloader_new_cam, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
+def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 
     batch_time = AverageMeter()
 
     model.eval()
 
-    with torch.no_grad():
-        qf, q_pids, q_camids, q_paths = [], [], [], []
+    def eval_set(name, loader):
 
-        enumerator = enumerate(queryloader_old_cam)
+        with torch.no_grad():
+            qf, q_pids, q_camids, q_paths = [], [], [], []
 
-        for batch_idx, package in enumerator:
-            end = time.time()
+            enumerator = enumerate(loader)
 
-            (imgs, pids, camids, paths) = package
-            if use_gpu:
-                imgs = imgs.cuda()
+            for batch_idx, package in enumerator:
+                end = time.time()
 
-            features = model(imgs)[0]
+                (imgs, pids, camids, paths) = package
+                if use_gpu:
+                    imgs = imgs.cuda()
 
-            batch_time.update(time.time() - end)
+                features = model(imgs)[0]
 
-            features = features.data.cpu()
-            qf.append(features)
-            q_pids.extend(pids)
-            q_camids.extend(camids)
-            q_paths.extend(paths)
-        qf = torch.cat(qf, 0)
-        q_pids = np.asarray(q_pids)
-        q_camids = np.asarray(q_camids)
+                batch_time.update(time.time() - end)
 
-        print("Extracted features for query set, obtained {}-by-{} matrix".format(qf.size(0), qf.size(1)))
+                features = features.data.cpu()
+                qf.append(features)
+                q_pids.extend(pids)
+                q_camids.extend(camids)
+                q_paths.extend(paths)
+            qf = torch.cat(qf, 0)
+            q_pids = np.asarray(q_pids)
+            q_camids = np.asarray(q_camids)
 
-        qqf, qq_pids, qq_camids, qq_paths = [], [], [], []
-        enumerator = enumerate(queryloader_new_cam)
+            print("Extracted features for {} set, obtained {}-by-{} matrix".format(name, qf.size(0), qf.size(1)))
 
-        for batch_idx, package in enumerator:
-            end = time.time()
+            return qf, q_pids, q_camids
 
-            (imgs, pids, camids, paths) = package
-            if use_gpu:
-                imgs = imgs.cuda()
+    gallery_result = eval_set('gallery', galleryloader)
+    query_results = {}
+    for name, queryloader in queryloader_dict.items():
+        query_results[name] = eval_set(name, queryloader)
 
-            features = model(imgs)[0]
+    def eval_result(gr, qr):
 
-            batch_time.update(time.time() - end)
+        gf, g_pids, g_camids = gr
+        qf, q_pids, q_camids = qr
 
-            features = features.data.cpu()
-            qqf.append(features)
-            qq_pids.extend(pids)
-            qq_camids.extend(camids)
-            qq_paths.extend(paths)
-        qqf = torch.cat(qqf, 0)
-        qq_pids = np.asarray(qq_pids)
-        qq_camids = np.asarray(qq_camids)
+        m, n = qf.size(0), gf.size(0)
+        distmat = torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n) + \
+            torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
+        distmat.addmm_(1, -2, qf, gf.t())
+        distmat = distmat.numpy()
 
-        print("Extracted features for query set, obtained {}-by-{} matrix".format(qqf.size(0), qqf.size(1)))
+        print("Computing CMC and mAP")
+        cmc, mAP = evaluate(distmat, q_pids, g_pids, q_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)
 
-        gf, g_pids, g_camids, g_paths = [], [], [], []
-        enumerator = enumerate(galleryloader)
+        print("Results ----------")
+        print("mAP: {:.2%}".format(mAP))
+        print("CMC curve")
+        for r in ranks:
+            print("Rank-{:<3}: {:.2%}".format(r, cmc[r - 1]))
+        print("------------------")
 
-        for batch_idx, package in enumerator:
-            # print('fuck')
-            end = time.time()
+        return cmc[0]
 
-            (imgs, pids, camids, _) = package
-            if use_gpu:
-                imgs = imgs.cuda()
+    for name, qr in query_results.item():
+        print("===>", name, "Result")
+        eval_result(gallery_result, qr)
 
-            features = model(imgs)[0]
-
-            batch_time.update(time.time() - end)
-
-            features = features.data.cpu()
-            gf.append(features)
-            g_pids.extend(pids)
-            g_camids.extend(camids)
-            g_paths.extend(paths)
-        gf = torch.cat(gf, 0)
-        g_pids = np.asarray(g_pids)
-        g_camids = np.asarray(g_camids)
-
-        print("Extracted features for gallery set, obtained {}-by-{} matrix".format(gf.size(0), gf.size(1)))
-
-    print("==> BatchTime(s)/BatchSize(img): {:.3f}/{}".format(batch_time.avg, args.test_batch_size))
-
-    print("==> New VID Old CID Result")
-
-    m, n = qf.size(0), gf.size(0)
-    distmat = torch.pow(qf, 2).sum(dim=1, keepdim=True).expand(m, n) + \
-        torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
-    distmat.addmm_(1, -2, qf, gf.t())
-    distmat = distmat.numpy()
-
-    print("Computing CMC and mAP")
-    cmc, mAP = evaluate(distmat, q_pids, g_pids, q_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)
-
-    print("Results ----------")
-    print("mAP: {:.2%}".format(mAP))
-    print("CMC curve")
-    for r in ranks:
-        print("Rank-{:<3}: {:.2%}".format(r, cmc[r - 1]))
-    print("------------------")
-
-    print("==> New VID New CID Result")
-
-    m, n = qqf.size(0), gf.size(0)
-    distmat = torch.pow(qqf, 2).sum(dim=1, keepdim=True).expand(m, n) + \
-        torch.pow(gf, 2).sum(dim=1, keepdim=True).expand(n, m).t()
-    distmat.addmm_(1, -2, qqf, gf.t())
-    distmat = distmat.numpy()
-
-    print("Computing CMC and mAP")
-    cmc, mAP = evaluate(distmat, qq_pids, g_pids, qq_camids, g_camids, use_metric_cuhk03=args.use_metric_cuhk03)
-
-    print("Results ----------")
-    print("mAP: {:.2%}".format(mAP))
-    print("CMC curve")
-    for r in ranks:
-        print("Rank-{:<3}: {:.2%}".format(r, cmc[r - 1]))
-    print("------------------")
-
-    return cmc[0]
+    return
 
 
 if __name__ == '__main__':

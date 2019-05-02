@@ -374,7 +374,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
         io.savemat(os.environ.get('distmat'), {'distmat': distmat, 'qp': q_paths, 'gp': g_paths})
 
     infer = inference(distmat, g_paths)
-    np.savetxt('result.txt', infer, delimiter=' ', fmt="%.0f")
+    np.savetxt(os.environ.get('result_file', 'result.txt'), infer, delimiter=' ', fmt="%.0f")
     return
 
     print("Computing CMC and mAP")

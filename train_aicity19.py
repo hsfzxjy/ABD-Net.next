@@ -395,7 +395,7 @@ def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 
         return cmc[0]
 
-    for name, qr in query_results.item():
+    for name, qr in query_results.items():
         print("===>", name, "Result")
         eval_result(gallery_result, qr)
 

@@ -57,6 +57,21 @@ class RandomErasing(object):
 
         return img
 
+class CenterCrop(object):
+
+    def __init__(self, height, width, interpolation=Image.BILINEAR):
+        assert height == width, '`CenterCrop` should output a square.'
+        self.output_size = height
+
+        self.interpolation = interpolation
+
+    def __call__(self, image):
+
+        from torchvision.transforms.functional import center_crop
+
+        w, h = image.size
+        image = center_crop(image, min(w, h))
+        return image.resize((self.output_size, self.output_size), self.interpolation)
 
 class Random2DTranslation(object):
     """
@@ -133,6 +148,8 @@ def build_training_transforms(height, width, data_augment):
     transforms = []
     if 'crop' in data_augment:
         transforms.append(Random2DTranslation(height, width))
+    elif 'center-crop' in data_augment:
+        transforms.append(CenterCrop(height, width))
     else:
         transforms.append(Resize((height, width)))
 
@@ -170,7 +187,10 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
     if is_train:
         transforms = build_training_transforms(height, width, data_augment)
     else:
-        transforms += [Resize((height, width))]
+        if 'center-crop' in data_augment:
+            transforms += [CenterCrop(height, width)]
+        else:
+            transforms += [Resize((height, width))]
 
         if kwargs.get('flip', False):
             transforms += [Lambda(lambda img: TF.hflip(img))]

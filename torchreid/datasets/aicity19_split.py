@@ -57,7 +57,7 @@ class AICity19Split(BaseImageDataset):
             print("==> Gallery Set Stats")
             print(*self.get_imagedata_info(self.train_gallery), sep='\t')
 
-        self.num_train_pids, self.num_train_imgs, self.num_train_cams = self.get_imagedata_info(self.train + val)
+        self.num_train_pids, self.num_train_imgs, self.num_train_cams = self.get_imagedata_info(self.train)
         self.num_train_pids = num_classes
 
     def _check_before_run(self):

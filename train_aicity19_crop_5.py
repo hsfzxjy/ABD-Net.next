@@ -355,7 +355,7 @@ def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 
                 (imgs, pids, camids, paths) = package
 
-                if imgs.dim() == 5:
+                if len(imgs) == 5:
                     features = sum(get_dim_4_feature(model, img_batch) for img_batch in imgs) / imgs.size(0)
                 else:
                     features = get_dim_4_feature(model, imgs)

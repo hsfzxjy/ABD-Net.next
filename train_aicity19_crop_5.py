@@ -360,8 +360,6 @@ def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
                 else:
                     features = get_dim_4_feature(model, imgs)
 
-                features = model(imgs)[0]
-
                 batch_time.update(time.time() - end)
 
                 features = features.data.cpu()

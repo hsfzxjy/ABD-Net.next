@@ -165,7 +165,7 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
             print('!!! Using RandomIdentitySampler !!!')
             self.trainloader = DataLoader(
                 CropNImageTrainDataset(self.train, crop_n, build_transform_train),
-                sampler=RandomIdentitySampler(self.train, self.train_batch_size, self.num_instances),
+                sampler=RandomIdentitySampler(self.train * crop_n, self.train_batch_size, self.num_instances),
                 batch_size=self.train_batch_size, shuffle=False, num_workers=self.workers,
                 pin_memory=self.pin_memory, drop_last=True
             )

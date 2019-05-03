@@ -25,7 +25,7 @@ from torchreid.dataset_loader import ImageDataset
 class args:
     height = 224
     width = 224
-    arch = 'resnet50_abd_old'
+    arch = 'resnet50'
     branches = ['global', 'abd']
     abd_dan = ['cam', 'pam']
     abd_np = 2

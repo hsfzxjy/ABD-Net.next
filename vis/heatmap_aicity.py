@@ -144,7 +144,7 @@ if __name__ == '__main__':
         model = gradcam = cam = None
 
         for attrname, times, basename in [
-            ('conv3', 0, 'conv3'),
+            ('layer3', 0, 'layer3'),
             ('sum_conv1', 0, 'sum_conv0'),
             # ('sum_conv1', 1, 'sum_conv1'),
             # ('dummy_fd', 'shallow'),

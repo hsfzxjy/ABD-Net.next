@@ -317,7 +317,7 @@ class ResNetOld(nn.Module):
         # Begin Feature Distilation
         if fd_config is None:
             fd_config = {'parts': (), 'use_conv_head': False}
-        from .tricks.feature_distilation import FeatureDistilationTrick
+        from torchreid.components.feature_distilation import FeatureDistilationTrick
         self.feature_distilation = FeatureDistilationTrick(
             fd_config['parts'],
             channels={'a': list(range(256)), 'b': [], 'c': []},
@@ -361,7 +361,7 @@ class ResNetOld(nn.Module):
 
         # Begin Dropout Module
         if dropout_optimizer is None:
-            from .tricks.dropout import SimpleDropoutOptimizer
+            from torchreid.components.dropout import SimpleDropoutOptimizer
             dropout_optimizer = SimpleDropoutOptimizer(dropout_p)
         # End Dropout Module
 
@@ -399,7 +399,7 @@ class ResNetOld(nn.Module):
 
     def get_attention_module(self):
 
-        from .tricks.attention import DANetHead, CAM_Module, PAM_Module
+        from torchreid.components.attention import DANetHead, CAM_Module, PAM_Module
 
         in_channels = self.dim
         out_channels = self.dim

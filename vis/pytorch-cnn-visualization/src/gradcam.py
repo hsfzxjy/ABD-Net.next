@@ -23,16 +23,16 @@ class CamExtractor():
         self.curtimes = 0
 
     def save_gradient(self, module, grad_in, grad):
-        if self.curtimes == self.times:
-            self.gradients = grad[0]
+        # if self.curtimes == self.times:
+        self.gradients = grad[0]
         print('gradient')
-        self.curtimes += 1
+        # self.curtimes += 1
 
     def save_feature(self, module, inputs, outputs):
 
-        if self.curtimes == self.times:
-            self.conv_output = outputs
-        self.curtimes += 1
+        # if self.curtimes == self.times:
+        self.conv_output = outputs
+        # self.curtimes += 1
         # print(type(self.conv_output), self.conv_output.size())
         print('feature')
 

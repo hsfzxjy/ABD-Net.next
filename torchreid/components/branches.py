@@ -77,6 +77,17 @@ class MultiBranchNetwork(nn.Module):
                     )
                 )
 
+            if 'ram'  == branch_name:
+                middle_subbranch = self._get_middle_subbranch_for(backbone, args, RAMBranch)
+                dan_branch = RAMBranch(self, backbone, args, middle_subbranch.out_dim)
+                branch_list.append(
+                    Sequential(
+                        middle_subbranch,
+                        dan_branch
+                    )
+                )
+
+
         assert len(branch_list) != 0, 'Should specify at least one branch.'
         return branch_list
 
@@ -267,6 +278,74 @@ class NPBranch(nn.Module):
             triplet.append(x_sliced)
             predict.append(x_sliced)
             x_sliced = self.classifiers[-1](x_sliced)
+            xent.append(x_sliced)
+
+        return predict, xent, triplet, {}
+
+
+class RAMBranch(nn.Module):
+
+    def __init__(self, owner, backbone, args, input_dim):
+        super().__init__()
+
+        self.owner = weakref.ref(owner)
+
+        self.input_dim = input_dim
+        self.output_dim = args['ram_dim']
+        self.args = args
+        self.num_classes = owner.num_classes
+
+        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(subbranch_num)])
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(subbranch_num)])
+
+    def backbone_modules(self):
+
+        return []
+
+    def _init_classifier(self):
+
+        classifier = nn.Linear(self.output_dim, self.num_classes)
+        init_params(classifier)
+
+        return classifier
+
+    def _init_fc_layer(self):
+
+        dropout_p = self.args['dropout']
+
+        if dropout_p is not None:
+            dropout_layer = [nn.Dropout(p=dropout_p)]
+        else:
+            dropout_layer = []
+
+        fc = nn.Sequential(
+            nn.Linear(self.input_dim, self.output_dim),
+            nn.BatchNorm1d(self.output_dim),
+            nn.ReLU(inplace=True),
+            *dropout_layer
+        )
+        init_params(fc)
+
+        return fc
+
+    def forward(self, x):
+
+        triplet, xent, predict = [], [], []
+
+        assert x.size(2) % 4 == 0,\
+            "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), 4)
+        margin = x.size(2) // 4
+
+        for p in range(3):
+            print(p * margin, (p + 2) * margin)
+            x_sliced = self.avgpool(x[:, :, p * margin:(p + 2) * margin, :])
+            x_sliced = x_sliced.view(x_sliced.size(0), -1)
+
+            x_sliced = self.fcs[p](x_sliced)
+            triplet.append(x_sliced)
+            predict.append(x_sliced)
+            x_sliced = self.classifiers[p](x_sliced)
             xent.append(x_sliced)
 
         return predict, xent, triplet, {}

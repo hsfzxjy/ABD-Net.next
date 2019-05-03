@@ -118,9 +118,16 @@ if __name__ == '__main__':
 
         # if i != options.num:
         #     continue
+        #
+    for _, (imgs, pids, _, fns) in enumerate(train_loader):
+
+        fn = fns[0]
+        pid = pids[0].item()
+        break
+
     for _ in range(1):
 
-        orig_img = read_image(options.fn)
+        orig_img = read_image(fn)
         input_img = transform_test(orig_img)
         input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
         # input_img = imgs[:2].cuda()
@@ -147,7 +154,7 @@ if __name__ == '__main__':
         ]:
             # if attrname not in options.layer.split(','):
             #     continue
-            prefix = f'{options.prefix}/{options.fn}/{basename}/output'
+            prefix = f'{options.prefix}/{fn}/{basename}/output'
             print('Making', prefix)
             del model
             del cam
@@ -155,6 +162,6 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
             model = get_model()
             gradcam = GradCam(model, getattr(model, attrname), times)
-            cam = gradcam.generate_cam(input_img)
+            cam = gradcam.generate_cam(input_img, [pid, pid])
 
-            save_class_activation_on_image(cv2.imread(options.fn), cam, prefix)
+            save_class_activation_on_image(cv2.imread(fn), cam, prefix)

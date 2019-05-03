@@ -165,7 +165,7 @@ if __name__ == '__main__':
             del cam
             del gradcam
             input_img = transform_test(orig_img)
-            input_img = input_img.view(1, *input_img.size())
+            input_img = input_img.view(1, *input_img.size()).cuda()
             print(input_img.size())
             # input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
             torch.cuda.empty_cache()

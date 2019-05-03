@@ -73,6 +73,36 @@ class CenterCrop(object):
         image = center_crop(image, min(w, h))
         return image.resize((self.output_size, self.output_size), self.interpolation)
 
+class CenterCropN(object):
+
+    def __init__(self, output_size, n, index, interpolation=Image.BILINEAR):
+
+        self.output_size = output_size
+        self.n = n
+        self.index = index
+        self.interpolation = interpolation
+
+    def __call__(self, image):
+
+        from torchvision.transforms.functional import crop
+
+        w, h = image.size
+
+        print(w, h)
+        if w < h:
+            padding = int(round((h - w) / (self.n - 1)))
+            top = int(round((h - w) / 2.)) + self.index * padding
+            left = 0
+        else:
+            padding = int(round((w - h) / (self.n - 1)))
+            left = int(round((w - h) / 2.)) + self.index * padding
+            top = 0
+
+        image = crop(image, top, left, min(w, h), min(w, h))
+
+        return image.resize((self.output_size, self.output_size), self.interpolation)
+
+
 class Random2DTranslation(object):
     """
     With a probability, first increase image size to (1 + 1/8), and then perform random crop.
@@ -166,7 +196,7 @@ def build_training_transforms(height, width, data_augment):
     return transforms
 
 
-def build_transforms(height, width, is_train, data_augment, **kwargs):
+def _build_transforms(height, width, is_train, data_augment, **kwargs):
     """Build transforms
 
     Args:
@@ -175,7 +205,6 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
     - is_train (bool): train or test phase.
     - data_augment (str)
     """
-
     # use imagenet mean and std as default
     imagenet_mean = [0.485, 0.456, 0.406]
     imagenet_std = [0.229, 0.224, 0.225]
@@ -196,6 +225,24 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
 
         transforms += [ToTensor()]
         transforms += [normalize]
+
+    return transforms
+
+
+def build_transforms(height, width, is_train, data_augment, **kwargs):
+
+    transforms = Compose(_build_transforms(height, width, is_train, data_augment, **kwargs))
+    if is_train:
+        print('Using transform:', transforms)
+
+    return transforms
+
+def build_transforms_crop_n(height, width, is_train, data_augment, **kwargs):
+
+    transforms = _build_transforms(height, width, is_train, data_augment, **kwargs)
+    n, index = kwargs['crop_n']
+    assert n % 2 == 1 and abs(index) <= n // 2 and height == width
+    transforms[0] = CenterCropN(height, n, index)
 
     transforms = Compose(transforms)
     if is_train:

@@ -135,10 +135,10 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
 
         # Build train and test transform functions
         def build_transform_train(n, index):
-            return build_transforms_crop_n(self.height, self.width, n, index, is_train=True, data_augment=data_augment)
+            return build_transforms_crop_n(self.height, self.width, is_train=True, data_augment=data_augment, crop_n=(n, index))
 
         def build_transform_test(n, index):
-            return build_transforms_crop_n(self.height, self.width, n, index, is_train=False, data_augment=data_augment)
+            return build_transforms_crop_n(self.height, self.width, is_train=False, data_augment=data_augment, crop_n=(n, index))
 
         # transform_test_flip = build_transforms(self.height, self.width, is_train=False, data_augment=data_augment, flip=True)
 

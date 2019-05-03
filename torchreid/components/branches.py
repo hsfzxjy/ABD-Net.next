@@ -77,7 +77,7 @@ class MultiBranchNetwork(nn.Module):
                     )
                 )
 
-            if 'ram'  == branch_name:
+            if 'ram' == branch_name:
                 middle_subbranch = self._get_middle_subbranch_for(backbone, args, RAMBranch)
                 dan_branch = RAMBranch(self, backbone, args, middle_subbranch.out_dim)
                 branch_list.append(
@@ -86,7 +86,6 @@ class MultiBranchNetwork(nn.Module):
                         dan_branch
                     )
                 )
-
 
         assert len(branch_list) != 0, 'Should specify at least one branch.'
         return branch_list
@@ -294,6 +293,8 @@ class RAMBranch(nn.Module):
         self.output_dim = args['ram_dim']
         self.args = args
         self.num_classes = owner.num_classes
+
+        subbranch_num = 3
 
         self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(subbranch_num)])
         self.avgpool = nn.AdaptiveAvgPool2d(1)

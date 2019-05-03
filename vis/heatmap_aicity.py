@@ -161,6 +161,8 @@ if __name__ == '__main__':
             del model
             del cam
             del gradcam
+            input_img = transform_test(orig_img)
+            input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
             torch.cuda.empty_cache()
             model = get_model()
             gradcam = GradCam(model, getattr(model, attrname), times)

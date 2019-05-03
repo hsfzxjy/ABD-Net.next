@@ -19,7 +19,7 @@ from .hacnn import *
 from .pcb import *
 from .mlfn import *
 
-from . import resnet_best
+# from . import resnet_best
 from . import resnet_mgn_abd
 # from .densenet_DAN import *
 # from .densenet_DAN_cat import *
@@ -36,7 +36,7 @@ __model_factory = {
     'resnet50_mgn_like': resnet.resnet50_mgn_like,
     # **resnet.name_function_mapping,
     **resnet_mgn_abd.name_function_mapping,
-    'resnet50_best': resnet_best.resnet50_best,
+    # 'resnet50_best': resnet_best.resnet50_best,
     # image classification models
     # 'resnet50': resnet50,
     # 'resnet50_fc512': resnet50_fc512,

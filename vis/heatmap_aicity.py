@@ -147,7 +147,7 @@ if __name__ == '__main__':
         ]:
             # if attrname not in options.layer.split(','):
             #     continue
-            prefix = f'{options.prefix}/{fn}/{basename}/output'
+            prefix = f'{options.prefix}/{options.fn}/{basename}/output'
             print('Making', prefix)
             del model
             del cam
@@ -157,4 +157,4 @@ if __name__ == '__main__':
             gradcam = GradCam(model, getattr(model, attrname), times)
             cam = gradcam.generate_cam(input_img)
 
-            save_class_activation_on_image(cv2.imread(fn), cam, prefix)
+            save_class_activation_on_image(cv2.imread(options.fn), cam, prefix)

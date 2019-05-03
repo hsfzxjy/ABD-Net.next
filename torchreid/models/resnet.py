@@ -377,7 +377,7 @@ class ResNetOld(nn.Module):
         self._init_params(self.pam_module1)
         self._init_params(self.sum_conv1)
 
-    def backbone_convs(self):
+    def backbone_modules(self):
 
         convs = [
             self.conv1,

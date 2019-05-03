@@ -25,7 +25,7 @@ from torchreid.dataset_loader import ImageDataset
 class args:
     height = 224
     width = 224
-    arch = 'resnet50'
+    arch = 'resnet50_abd_old'
     branches = ['global', 'abd']
     abd_dan = ['cam', 'pam']
     abd_np = 2
@@ -41,7 +41,7 @@ class args:
     split_id = 0
     cuhk03_labeled = False
     cuhk03_classic_split = False
-    load_weights = 'aicity_log/ABD_1_1/checkpoint_ep56.pth.tar'
+    load_weights = '0503_aicity_log/ABD_old_1_1_center_crop_re/checkpoint_ep52.pth.tar'
 
 
 use_gpu = True
@@ -98,10 +98,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('prefix')
     # parser.add_argument('arch')
+    parser.add_argument('fn')
     parser.add_argument('ckpt')
-    parser.add_argument('layer')
     # parser.add_argument('result')
-    parser.add_argument('num', default=101, type=int)
+    # parser.add_argument('num', default=101, type=int)
     options = parser.parse_args()
     if options.ckpt:
         args.load_weights = options.ckpt
@@ -114,14 +114,16 @@ if __name__ == '__main__':
     #     for x in f.readline().strip().split():
     #         tests += [f'data/aicity19/image_test/{x.zfill(6)}.jpg']
 
-    for i, (imgs, pids, _, fns) in enumerate(train_loader):
+    # for i, (imgs, pids, _, fns) in enumerate(train_loader):
 
-        if i != options.num:
-            continue
+        # if i != options.num:
+        #     continue
+    for _ in range(1):
 
-        # input_img = transform_test(read_image(fn))
-        # input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
-        input_img = imgs[:2].cuda()
+        orig_img = read_image(options.fn)
+        input_img = transform_test(orig_img)
+        input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
+        # input_img = imgs[:2].cuda()
 
         from gradcam import GradCam
         from misc_functions import save_class_activation_on_image
@@ -129,28 +131,30 @@ if __name__ == '__main__':
 
         model = gradcam = cam = None
 
-        for attrgetter, basename in [
-            (lambda m: m.branches[0], 'sum_conv'),
+        for attrname, times, basename in [
+            ('sum_conv1', 0, 'sum_conv0'),
+            ('sum_conv1', 1, 'sum_conv1'),
             # ('dummy_fd', 'shallow'),
             # ('fc', 'fc'),
-            (lambda m: m.branches[0][1].cam_module, 'cam_module'),
-            (lambda m: m.branches[0][1].pam_module, 'pam_module'),
-            (lambda m: m.branches[0][1].reduction, 'reduction'),
+            ('cam_module1', 0, 'cam_module0'),
+            ('cam_module1', 1, 'cam_module1'),
+            ('pam_module1', 0, 'pam_module0'),
+            ('pam_module1', 1, 'pam_module1'),
+            ('reduction_tr', 0, 'reduction'),
+
             # ('conv1', 'conv1'),
             # ('relu', 'relu'),
         ]:
             # if attrname not in options.layer.split(','):
             #     continue
-            prefix = f'{options.prefix}/{fns[0]}/{basename}/output'
+            prefix = f'{options.prefix}/{fn}/{basename}/output'
             print('Making', prefix)
             del model
             del cam
             del gradcam
             torch.cuda.empty_cache()
             model = get_model()
-            print(1)
-            gradcam = GradCam(model, attrgetter(model))
-            print(2)
-            cam = gradcam.generate_cam(input_img, pids[:2])
+            gradcam = GradCam(model, getattr(model, attrname), times)
+            cam = gradcam.generate_cam(input_img)
 
-            save_class_activation_on_image(cv2.imread(f'data/aicity19/image_train/{fns[0]}'), cam, prefix)
+            save_class_activation_on_image(cv2.imread(fn), cam, prefix)

@@ -15,18 +15,24 @@ class CamExtractor():
         Extracts cam features from the model
     """
 
-    def __init__(self, model, target_layer):
+    def __init__(self, model, target_layer, times):
         self.model = model
         self.target_layer = target_layer
         self.gradients = None
+        self.times = times
+        self.curtimes = 0
 
     def save_gradient(self, module, grad_in, grad):
-        self.gradients = grad[0]
+        if self.curtimes == self.times:
+            self.gradients = grad[0]
         print('gradient')
+        self.curtimes += 1
 
     def save_feature(self, module, inputs, outputs):
 
-        self.conv_output = outputs
+        if self.curtimes == self.times:
+            self.conv_output = outputs
+        self.curtimes += 1
         # print(type(self.conv_output), self.conv_output.size())
         print('feature')
 
@@ -68,11 +74,12 @@ class GradCam():
         Produces class activation map
     """
 
-    def __init__(self, model, target_layer):
+    def __init__(self, model, target_layer, times):
         self.model = model
+        self.times = times
         # self.model.eval()
         # Define extractor
-        self.extractor = CamExtractor(self.model, target_layer)
+        self.extractor = CamExtractor(self.model, target_layer, times)
 
     def generate_cam(self, input_image, target_class=None):
         # Full forward pass
@@ -94,6 +101,7 @@ class GradCam():
         # self.model.features.zero_grad()
         # self.model.classifier.zero_grad()
         # Backward pass with specified target
+        self.extractor.curtimes = 0
         model_output.backward(gradient=one_hot_output)
         # Get hooked gradients
         with torch.no_grad():

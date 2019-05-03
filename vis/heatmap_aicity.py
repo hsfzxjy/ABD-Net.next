@@ -68,6 +68,7 @@ def get_model():
         checkpoint = torch.load(args.load_weights)
         pretrain_dict = checkpoint['state_dict']
         model_dict = model.state_dict()
+        print('Missing', set(model_dict) - set(pretrain_dict))
         pretrain_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
         model_dict.update(pretrain_dict)
         model.load_state_dict(model_dict)
@@ -119,7 +120,7 @@ if __name__ == '__main__':
         # if i != options.num:
         #     continue
         #
-    fn  = options.fn
+    fn = options.fn
     pids = None
     # for _, (imgs, pids, _, fns) in enumerate(train_loader):
 

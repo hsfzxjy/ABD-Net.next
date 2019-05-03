@@ -66,7 +66,7 @@ def save_class_activation_on_image(org_img, activation_map, prefix):
     path_to_file = os.path.join(prefix + '_Cam_Grayscale.jpg')
     cv2.imwrite(path_to_file, activation_map)
     # Heatmap of activation map
-    activation_heatmap = cv2.applyColorMap(activation_map, cv2.COLORMAP_HSV)
+    activation_heatmap = cv2.applyColorMap(activation_map, cv2.COLORMAP_JET)
     path_to_file = os.path.join(prefix + '_Cam_Heatmap.jpg')
     cv2.imwrite(path_to_file, activation_heatmap)
     # Heatmap on picture

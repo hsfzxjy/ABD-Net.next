@@ -88,7 +88,6 @@ class CenterCropN(object):
 
         w, h = image.size
 
-        print(w, h)
         if w < h:
             padding = int(round((h - w) / (self.n - 1)))
             top = int(round((h - w) / 2.)) + self.index * padding
@@ -241,7 +240,6 @@ def build_transforms_crop_n(height, width, is_train, data_augment, **kwargs):
 
     transforms = _build_transforms(height, width, is_train, data_augment, **kwargs)
     n, index = kwargs['crop_n']
-    print(n, index)
     assert n % 2 == 1 and abs(index) <= n // 2 and height == width
     transforms[0] = CenterCropN(height, n, index)
 

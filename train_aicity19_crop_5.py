@@ -338,6 +338,9 @@ def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 
     def get_dim_4_feature(model, img_batch):
 
+        if use_gpu:
+            img_batch = img_batch.cuda()
+
         return model(img_batch)[0]
 
     def eval_set(name, loader):
@@ -351,8 +354,6 @@ def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
                 end = time.time()
 
                 (imgs, pids, camids, paths) = package
-                if use_gpu:
-                    imgs = imgs.cuda()
 
                 if imgs.dim() == 5:
                     features = sum(get_dim_4_feature(model, img_batch) for img_batch in imgs) / imgs.size(0)

@@ -119,11 +119,13 @@ if __name__ == '__main__':
         # if i != options.num:
         #     continue
         #
-    for _, (imgs, pids, _, fns) in enumerate(train_loader):
+    fn  = options.fn
+    pids = None
+    # for _, (imgs, pids, _, fns) in enumerate(train_loader):
 
-        fn = fns[0]
-        pid = pids[0].item()
-        break
+    #     fn = fns[0]
+    #     pid = pids[0].item()
+    #     break
 
     for _ in range(1):
 
@@ -162,6 +164,6 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
             model = get_model()
             gradcam = GradCam(model, getattr(model, attrname), times)
-            cam = gradcam.generate_cam(input_img, [pid, pid])
+            cam = gradcam.generate_cam(input_img, pids)
 
             save_class_activation_on_image(cv2.imread(fn), cam, prefix)

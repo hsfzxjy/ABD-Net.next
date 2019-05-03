@@ -93,6 +93,8 @@ def flatten(f):
         yield f
 
 
+torch.random.initial_seed(0)
+
 if __name__ == '__main__':
 
     import argparse

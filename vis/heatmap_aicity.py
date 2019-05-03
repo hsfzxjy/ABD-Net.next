@@ -25,7 +25,7 @@ from torchreid.dataset_loader import ImageDataset
 class args:
     height = 224
     width = 224
-    arch = 'resnet50'
+    arch = 'resnet50_abd_old'
     branches = ['global', 'abd']
     abd_dan = ['cam', 'pam']
     abd_np = 2
@@ -144,6 +144,7 @@ if __name__ == '__main__':
         model = gradcam = cam = None
 
         for attrname, times, basename in [
+            ('conv3', 0, 'conv3'),
             ('sum_conv1', 0, 'sum_conv0'),
             # ('sum_conv1', 1, 'sum_conv1'),
             # ('dummy_fd', 'shallow'),

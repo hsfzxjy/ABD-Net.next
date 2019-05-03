@@ -133,13 +133,13 @@ if __name__ == '__main__':
 
         for attrname, times, basename in [
             ('sum_conv1', 0, 'sum_conv0'),
-            ('sum_conv1', 1, 'sum_conv1'),
+            # ('sum_conv1', 1, 'sum_conv1'),
             # ('dummy_fd', 'shallow'),
             # ('fc', 'fc'),
             ('cam_module1', 0, 'cam_module0'),
-            ('cam_module1', 1, 'cam_module1'),
+            # ('cam_module1', 1, 'cam_module1'),
             ('pam_module1', 0, 'pam_module0'),
-            ('pam_module1', 1, 'pam_module1'),
+            # ('pam_module1', 1, 'pam_module1'),
             ('reduction_tr', 0, 'reduction'),
 
             # ('conv1', 'conv1'),

@@ -339,7 +339,6 @@ class RAMBranch(nn.Module):
         margin = x.size(2) // 4
 
         for p in range(3):
-            print(p * margin, (p + 2) * margin)
             x_sliced = self.avgpool(x[:, :, p * margin:(p + 2) * margin, :])
             x_sliced = x_sliced.view(x_sliced.size(0), -1)
 

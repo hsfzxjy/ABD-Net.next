@@ -85,6 +85,7 @@ class GradCam():
         # Full forward pass
         # conv_output is the output of convolutions at specified layer
         # model_output is the final output of the model (1, 1000)
+        self.model.eval()
         conv_output, model_output = self.extractor.forward_pass(input_image)
         if target_class is None:
             with torch.no_grad():

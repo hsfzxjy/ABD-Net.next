@@ -93,7 +93,7 @@ def flatten(f):
         yield f
 
 
-torch.random.initial_seed(0)
+torch.random.manual_seed(0)
 
 if __name__ == '__main__':
 

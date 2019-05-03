@@ -314,43 +314,6 @@ class ResNetOld(nn.Module):
         dim = fc_dims[0]
         self.dim = dim
 
-        # Begin Feature Distilation
-        if fd_config is None:
-            fd_config = {'parts': (), 'use_conv_head': False}
-        from torchreid.components.feature_distilation import FeatureDistilationTrick
-        self.feature_distilation = FeatureDistilationTrick(
-            fd_config['parts'],
-            channels={'a': list(range(256)), 'b': [], 'c': []},
-            use_conv_head=fd_config['use_conv_head']
-        )
-        self._init_params(self.feature_distilation)
-
-        class DummyFD(nn.Module):
-
-            def __init__(self, fd_getter):
-
-                super().__init__()
-                self.fd_getter = fd_getter
-
-            def forward(self, x):
-
-                B, C, H, W = x.shape
-
-                for cs, cam in self.fd_getter().cam_modules:
-                    # try:
-                    #     c_tensor = torch.tensor(cs).cuda()
-                    # except RuntimeError:
-                    c_tensor = torch.tensor(cs).cuda()
-
-                    new_x = x[:, c_tensor]
-                    new_x = cam(new_x)
-                    x[:, c_tensor] = new_x
-
-                return x
-
-        self.dummy_fd = DummyFD(lambda: self.feature_distilation)
-        # End Feature Distilation
-
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
 
         num_features = 2048
@@ -489,7 +452,6 @@ class ResNetOld(nn.Module):
         x = self.maxpool(x)
         x = self.layer1(x)
 
-        x = self.dummy_fd(x)
         layer5 = x
         x = self.layer2(x)
         x = self.layer3(x)

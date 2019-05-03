@@ -17,7 +17,7 @@ class CropNImageTrainDataset(ImageDataset):
         self.transforms = {}
         self.n = n
 
-        for i in range(-n // 2, n // 2 + 1):
+        for i in range(-(n // 2), n // 2 + 1):
 
             self.transforms[i] = build_transform(n, i)
 
@@ -42,7 +42,7 @@ class CropNImageTestDataset(ImageDataset):
         self.transforms = {}
         self.n = n
 
-        for i in range(-n // 2, n // 2 + 1):
+        for i in range(-(n // 2), n // 2 + 1):
 
             self.transforms[i] = build_transform(n, i)
 

@@ -103,6 +103,7 @@ if __name__ == '__main__':
     # parser.add_argument('arch')
     parser.add_argument('fn')
     parser.add_argument('ckpt')
+    parser.add_argument('pid')
     # parser.add_argument('result')
     # parser.add_argument('num', default=101, type=int)
     options = parser.parse_args()
@@ -122,13 +123,13 @@ if __name__ == '__main__':
         # if i != options.num:
         #     continue
         #
-    # fn = options.fn
-    # pids = None
-    for _, (imgs, pids, _, fns) in enumerate(train_loader):
+    fn = options.fn
+    pids = [options.pid]
+    # for _, (imgs, pids, _, fns) in enumerate(train_loader):
 
-        fn = fns[0]
-        pid = [pids[0].item()]
-        break
+    #     fn = fns[0]
+    #     pid = [pids[0].item()]
+    #     break
 
     for _ in range(1):
 

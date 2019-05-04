@@ -103,7 +103,7 @@ if __name__ == '__main__':
     # parser.add_argument('arch')
     parser.add_argument('fn')
     parser.add_argument('ckpt')
-    parser.add_argument('pid')
+    parser.add_argument('pid', type=int)
     # parser.add_argument('result')
     # parser.add_argument('num', default=101, type=int)
     options = parser.parse_args()
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
         orig_img = read_image(fn)
         input_img = transform_test(orig_img)
-        input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
+        # input_img = torch.stack([input_img, deepcopy(input_img)]).cuda()
         # input_img = imgs[:2].cuda()
 
         from gradcam import GradCam

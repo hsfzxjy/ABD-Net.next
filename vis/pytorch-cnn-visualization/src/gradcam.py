@@ -94,6 +94,7 @@ class GradCam():
         # Target for backprop
         with torch.no_grad():
             one_hot_output = torch.FloatTensor(1, model_output.size()[-1]).zero_().cuda()
+            print(one_hot_output.size())
             one_hot_output[0][target_class[0]] = 1
             # one_hot_output[1][target_class[1]] = 1
         # print(one_hot_output)

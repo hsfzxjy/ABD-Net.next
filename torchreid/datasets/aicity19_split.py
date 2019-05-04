@@ -39,6 +39,9 @@ class AICity19Split(BaseImageDataset):
             '4': self._process_dir(self.train_dir, '4.txt')
         }
 
+        if os.environ.get('test_val'):
+            self.queries['val'] = self._process_dir(self.train_dir, '1.val.txt')
+
         self.train_gallery = sum(self.queries.values(), [])
 
         if verbose:

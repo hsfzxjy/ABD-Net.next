@@ -21,16 +21,17 @@ class VGG(nn.Module):
         super(VGG, self).__init__()
         self.features = features
         self.loss = loss
-        self.fc = nn.Sequential(
-            nn.Linear(512 * out_size * out_size, 4096),
-            nn.ReLU(True),
-            nn.Dropout(p=0.5),
-            nn.Linear(4096, 1024),
-            nn.ReLU(True),
-            nn.Dropout(p=0.5),
-        )
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        # self.fc = nn.Sequential(
+        #     nn.Linear(512 * out_size * out_size, 4096),
+        #     nn.ReLU(True),
+        #     nn.Dropout(p=0.5),
+        #     nn.Linear(4096, 1024),
+        #     nn.ReLU(True),
+        #     nn.Dropout(p=0.5),
+        # )
         self.classifier = nn.Sequential(
-            nn.Linear(1024, num_classes)
+            nn.Linear(512, num_classes)
         )
 
         self._initialize_weights(self.fc)
@@ -45,8 +46,9 @@ class VGG(nn.Module):
         xent_features = []
 
         x = self.features(x)
+        x = self.avgpool(x)
         v = x.view(x.size(0), -1)
-        v = self.fc(v)
+        v = x  # self.fc(v)
         triplet_features.append(v)
         predict_features.append(v)
         y = self.classifier(v)

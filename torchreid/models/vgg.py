@@ -46,10 +46,10 @@ class VGG(nn.Module):
         xent_features = []
 
         x = self.features(x)
-        print(x.size())
         x = self.avgpool(x)
         v = x.view(x.size(0), -1)
         v = x  # self.fc(v)
+        print(v.size())
         triplet_features.append(v)
         predict_features.append(v)
         y = self.classifier(v)

@@ -109,14 +109,14 @@ class RandomCenterCrop(object):
         self.output_size = output_size
         self.interpolation = interpolation
 
-    def __call__(self, image, random=True):
+    def __call__(self, image, rnd=True):
 
         from torchvision.transforms.functional import crop
 
         w, h = image.size
 
         padding = abs(h - w) * 5 / 6
-        offset = random.uniform(-padding, padding) if random else 0.
+        offset = random.uniform(-padding, padding) if rnd else 0.
         if w < h:
             top = int(round((h - w) / 2. + offset))
             left = 0

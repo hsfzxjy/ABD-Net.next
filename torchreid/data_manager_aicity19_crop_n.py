@@ -202,7 +202,7 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
                 img = read_image(img_path)
                 img = random_center_crop(img, rnd=crop_id > 0)
                 img_path = osp.join(dest_dir, '%s_%s' % (img_path, crop_n))
-                img.save(img_path, 'JPG')
+                img.save(img_path, 'JPEG')
                 f.write(' '.join(map(str, [img_path, vid, cid])) + '\n')
 
             f.close()

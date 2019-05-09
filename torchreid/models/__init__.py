@@ -17,6 +17,7 @@ from .squeezenet import *
 from .mudeep import *
 from .hacnn import *
 from .pcb import *
+from .vgg import *
 from .mlfn import *
 
 # from . import resnet_best
@@ -35,6 +36,8 @@ __model_factory = {
     'resnet50_abd_old': resnet.resnet50_abd_old,
     'resnet50_mgn_like': resnet.resnet50_mgn_like,
     # **resnet.name_function_mapping,
+    'vgg19': vgg19,
+    'vgg16': vgg16,
     **resnet_mgn_abd.name_function_mapping,
     # 'resnet50_best': resnet_best.resnet50_best,
     # image classification models

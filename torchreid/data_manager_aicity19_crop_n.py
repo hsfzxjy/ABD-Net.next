@@ -21,7 +21,7 @@ class CropNImageTrainDataset(ImageDataset):
 
     def __len__(self):
 
-        return self.n * len(self.dataset)
+        return len(self.dataset)
 
     def __getitem__(self, index):
 
@@ -63,6 +63,33 @@ class CropNImageTestDataset(ImageDataset):
             imgs.append(transform(img))
 
         return imgs, pid, camid, img_path
+
+
+class CropNImageValDataset(ImageDataset):
+
+    def __init__(self, dataset, n, build_transform):
+
+        self.dataset = dataset
+        self.transforms = {}
+        self.n = n
+        self.m = n + 1
+
+        for i in range(-(n // 2), n // 2 + 1):
+
+            self.transforms[i] = build_transform(n, self.m, i)
+
+    def __len__(self):
+
+        return len(self.dataset) * self.n
+
+    def __getitem__(self, index):
+
+        img_path, pid, camid = self.dataset[index // self.n]
+
+        img = read_image(img_path)
+        img = self.transforms[(index % self.n) - (self.n // 2)](img)
+
+        return img, pid, camid, img_path
 
 
 class BaseDataManager(object):

@@ -21,44 +21,57 @@ class VGG(nn.Module):
         super(VGG, self).__init__()
         self.features = features
         self.loss = loss
-        self.classifier = nn.Sequential(
+        self.fc = nn.Sequential(
             nn.Linear(512 * out_size * out_size, 4096),
             nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
+            nn.Dropout(p=0.5),
+            nn.Linear(4096, 1024),
             nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, num_classes)
+            nn.Dropout(p=0.5),
         )
+        self.classifier = nn.Sequential(
+            nn.Linear(1024, num_classes)
+        )
+
+        self._initialize_weights(self.fc)
+        self._initialize_weights(self.classifier)
+
     def backbone_modules(self):
         return [self.features]
 
     def forward(self, x):
-        x = self.features(x)
-        v = x.view(x.size(0), -1)
-        y = self.classifier(v)
         triplet_features = []
         predict_features = []
         xent_features = []
+
+        x = self.features(x)
+        v = x.view(x.size(0), -1)
+        v = self.fc(v)
         triplet_features.append(v)
         predict_features.append(v)
+        y = self.classifier(v)
         xent_features.append(y)
         return torch.cat(predict_features, 1), tuple(xent_features), tuple(triplet_features), {}
-        # return x
 
-    def _initialize_weights(self):
-        for m in self.modules():
+    def _initialize_weights(self, x):
+        if x is None:
+            return
+
+        for m in x.modules():
             if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
-                    m.bias.data.zero_()
+                    nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                nn.init.normal_(m.weight, 1, 0.02)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm1d):
+                nn.init.normal_(m.weight, 1, 0.02)
+                nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                m.weight.data.normal_(0, 0.01)
-                m.bias.data.zero_()
+                nn.init.normal_(m.weight, 0, 0.01)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
 
 
 def init_pretrained_weights(model, model_url):

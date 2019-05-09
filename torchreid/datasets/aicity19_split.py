@@ -86,7 +86,7 @@ class AICity19Split(BaseImageDataset):
             if img_count > 100:
                 crop_num = 1
             else:
-                crop_num = 150 // img_count
+                crop_num = 200 // img_count
 
             for i in range(crop_num):
                 new_train.append(('%s:%s' % (fn, i), id, cid))

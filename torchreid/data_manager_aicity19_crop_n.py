@@ -30,7 +30,7 @@ class CropNImageTrainDataset(ImageDataset):
         crop_id = int(crop_id)
 
         img = read_image(img_path)
-        img = self.random_center_crop(img, random=crop_id > 0)
+        img = self.random_center_crop(img, rnd=crop_id > 0)
         img = self.transforms(img)
 
         return img, pid, camid, img_path

@@ -46,6 +46,7 @@ class VGG(nn.Module):
         xent_features = []
 
         x = self.features(x)
+        print(x.size())
         x = self.avgpool(x)
         v = x.view(x.size(0), -1)
         v = x  # self.fc(v)

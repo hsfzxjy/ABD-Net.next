@@ -4,6 +4,7 @@ import re
 import sys
 import os.path as osp
 
+
 from .bases import BaseImageDataset
 
 
@@ -27,7 +28,9 @@ class AICity19Split(BaseImageDataset):
         val = self._process_dir(self.train_dir, '1.val.txt')
         (train, val), num_classes = self._relabel(train, val)
         train, val = self._exclude_junk(train, val)
-        self.train = self._enlarge_train_set(train)
+
+        if os.environ.get('enlarge'):
+            self.train = self._enlarge_train_set(train)
 
         self.valsets = {
             '1': val

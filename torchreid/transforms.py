@@ -115,8 +115,9 @@ class RandomCenterCrop(object):
 
         w, h = image.size
 
-        padding = abs(h - w) * 5 / 6
+        padding = abs(h - w) * 5 / 6 / 2
         offset = random.uniform(-padding, padding) if rnd else 0.
+        print(offset)
         if w < h:
             top = int(round((h - w) / 2. + offset))
             left = 0

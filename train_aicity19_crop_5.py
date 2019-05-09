@@ -356,7 +356,7 @@ def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
                 (imgs, pids, camids, paths) = package
 
                 if len(imgs) == 5:
-                    features = sum(get_dim_4_feature(model, img_batch) for img_batch in imgs) / len(imgs)
+                    features = torch.cat([get_dim_4_feature(model, img_batch) for img_batch in imgs], 1)
                 else:
                     features = get_dim_4_feature(model, imgs)
 

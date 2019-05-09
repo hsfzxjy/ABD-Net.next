@@ -198,10 +198,11 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
             for img_path, vid, cid in self.train:
                 img_path, crop_id = img_path.split(':')
                 crop_id = int(crop_id)
+                basename = osp.basename(img_path)
 
                 img = read_image(img_path)
                 img = random_center_crop(img, rnd=crop_id > 0)
-                img_path = osp.join(dest_dir, '%s_%s' % (img_path, crop_n))
+                img_path = osp.join(dest_dir, '%s_%s' % (crop_n, basename))
                 img.save(img_path, 'JPEG')
                 f.write(' '.join(map(str, [img_path, vid, cid])) + '\n')
 

@@ -195,7 +195,8 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
             dest_dir = 'data/aicity19/enlarged_train/'
             os.makedirs(dest_dir, exist_ok=True)
             f = open('data/aicity19/enlarged_train.txt', 'w')
-            for img_path, vid, cid in self.train:
+            for index, (img_path, vid, cid) in enumerate(self.train):
+                print(index)
                 img_path, crop_id = img_path.split(':')
                 crop_id = int(crop_id)
                 basename = osp.basename(img_path)

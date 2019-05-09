@@ -31,6 +31,8 @@ class AICity19Split(BaseImageDataset):
 
         if os.environ.get('enlarge'):
             self.train = self._enlarge_train_set(train)
+        else:
+            self.train = train
 
         self.valsets = {
             '1': val
@@ -87,7 +89,7 @@ class AICity19Split(BaseImageDataset):
                 crop_num = 120 // img_count
 
             for i in range(crop_num):
-                new_train.append('%s:%s' % (fn, i), id, cid)
+                new_train.append(('%s:%s' % (fn, i), id, cid))
 
         return new_train
 

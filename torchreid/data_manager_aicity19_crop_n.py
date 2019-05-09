@@ -219,7 +219,7 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
             for key, valset in dataset.valsets.items():
 
                 self.testloader_dict[name]['valsets'][key] = DataLoader(
-                    CropNImageTrainDataset(valset, crop_n, build_transform_test),
+                    CropNImageValDataset(valset, crop_n, build_transform_test),
                     batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
                     pin_memory=self.pin_memory, drop_last=False
                 )

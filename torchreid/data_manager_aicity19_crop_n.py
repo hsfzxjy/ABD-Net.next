@@ -194,7 +194,7 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
         if os.environ.get('dump_dataset'):
             dest_dir = 'data/aicity19/enlarged_train/'
             os.makedirs(dest_dir, exist_ok=True)
-            f = open('data/aicity19/enlarged_train.txt')
+            f = open('data/aicity19/enlarged_train.txt', 'w')
             for img_path, vid, cid in self.train:
                 img_path, crop_id = img_path.split(':')
                 crop_id = int(crop_id)
@@ -203,7 +203,7 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
                 img = self.random_center_crop(img, rnd=crop_id > 0)
                 img_path = osp.join(dest_dir, '%s_%s' % (img_path, crop_n))
                 img.save(img_path, 'JPG')
-                f.write(' '.join(map(str, [img_path, vid, cid])))
+                f.write(' '.join(map(str, [img_path, vid, cid])) + '\n')
 
             f.close()
             import sys

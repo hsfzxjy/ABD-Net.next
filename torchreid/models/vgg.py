@@ -3,7 +3,7 @@ import torch
 import math
 import torch.nn.functional as F  # noqa
 import torch.utils.model_zoo as model_zoo
-__all__ = ['vgg16', 'vgg19', 'vgg16_bn', 'vgg19_bn']
+__all__ = ['vgg16', 'vgg16_128', 'vgg19', 'vgg16_bn', 'vgg19_bn']
 model_urls = {
     'vgg11': 'https://download.pytorch.org/models/vgg11-bbd30ac9.pth',
     'vgg13': 'https://download.pytorch.org/models/vgg13-c768596a.pth',
@@ -17,12 +17,12 @@ model_urls = {
 
 class VGG(nn.Module):
 
-    def __init__(self, num_classes, features, init_weights=True, loss={"xent"}, **kwargs):
+    def __init__(self, num_classes, features, init_weights=True, loss={"xent"}, out_size=7, **kwargs):
         super(VGG, self).__init__()
         self.features = features
         self.loss = loss
         self.classifier = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
+            nn.Linear(512 * out_size * out_size, 4096),
             nn.ReLU(True),
             nn.Dropout(),
             nn.Linear(4096, 4096),
@@ -100,6 +100,12 @@ cfg = {
 
 def vgg16(num_classes, **kwargs):
     model = VGG(num_classes, make_layers(cfg['D']), **kwargs)
+    model = init_pretrained_weights(model, model_urls['vgg16'])
+    return model
+
+def vgg16_128(num_classes, **kwargs):
+
+    model = VGG(num_classes, make_layers(cfg['D']), out_size=4, **kwargs)
     model = init_pretrained_weights(model, model_urls['vgg16'])
     return model
 

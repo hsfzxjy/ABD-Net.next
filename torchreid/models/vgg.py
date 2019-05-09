@@ -34,7 +34,7 @@ class VGG(nn.Module):
             nn.Linear(512, num_classes)
         )
 
-        self._initialize_weights(self.fc)
+        # self._initialize_weights(self.fc)
         self._initialize_weights(self.classifier)
 
     def backbone_modules(self):

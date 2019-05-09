@@ -75,10 +75,11 @@ class CenterCrop(object):
 
 class CenterCropN(object):
 
-    def __init__(self, output_size, n, index, interpolation=Image.BILINEAR):
+    def __init__(self, output_size, n, m, index, interpolation=Image.BILINEAR):
 
         self.output_size = output_size
         self.n = n
+        self.m = m
         self.index = index
         self.interpolation = interpolation
 
@@ -89,12 +90,38 @@ class CenterCropN(object):
         w, h = image.size
 
         if w < h:
-            padding = int(round((h - w) / (self.n - 1)))
+            padding = int(round((h - w) / self.m))
             top = int(round((h - w) / 2.)) + self.index * padding
             left = 0
         else:
-            padding = int(round((w - h) / (self.n - 1)))
+            padding = int(round((w - h) / self.m))
             left = int(round((w - h) / 2.)) + self.index * padding
+            top = 0
+
+        image = crop(image, top, left, min(w, h), min(w, h))
+
+        return image.resize((self.output_size, self.output_size), self.interpolation)
+
+class RandomCenterCrop(object):
+
+    def __init__(self, output_size, interpolation=Image.BILINEAR):
+
+        self.output_size = output_size
+        self.interpolation = interpolation
+
+    def __call__(self, image, random=True):
+
+        from torchvision.transforms.functional import crop
+
+        w, h = image.size
+
+        padding = abs(h - w) * 5 / 6
+        offset = random.uniform(-padding, padding) if random else 0.
+        if w < h:
+            top = int(round((h - w) / 2. + offset))
+            left = 0
+        else:
+            left = int(round((w - h) / 2. + offset))
             top = 0
 
         image = crop(image, top, left, min(w, h), min(w, h))
@@ -135,35 +162,6 @@ class Random2DTranslation(object):
         croped_img = resized_img.crop((x1, y1, x1 + self.width, y1 + self.height))
         return croped_img
 
-
-# def build_transforms(height, width, is_train, **kwargs):
-#     """Build transforms
-
-#     Args:
-#     - height (int): target image height.
-#     - width (int): target image width.
-#     - is_train (bool): train or test phase.
-#     """
-
-#     # use imagenet mean and std as default
-#     imagenet_mean = [0.485, 0.456, 0.406]
-#     imagenet_std = [0.229, 0.224, 0.225]
-#     normalize = Normalize(mean=imagenet_mean, std=imagenet_std)
-
-#     transforms = []
-
-#     if is_train:
-#         transforms += [Random2DTranslation(height, width)]
-#         transforms += [RandomHorizontalFlip()]
-#     else:
-#         transforms += [Resize((height, width))]
-
-#     transforms += [ToTensor()]
-#     transforms += [normalize]
-
-#     transforms = Compose(transforms)
-
-#     return transforms
 
 def build_training_transforms(height, width, data_augment):
 
@@ -236,12 +234,26 @@ def build_transforms(height, width, is_train, data_augment, **kwargs):
 
     return transforms
 
+def build_transforms_random_crop_n(height, width, is_train, data_augment, **kwargs):
+
+    transforms = _build_transforms(height, width, is_train, data_augment, **kwargs)
+    # n, m, index = kwargs['crop_n']
+    # assert n % 2 == 1 and abs(index) <= n // 2 and height == width
+    transforms = transforms[1:]
+    # transforms[0] = CenterCropN(height, n, m, index)
+
+    transforms = Compose(transforms)
+    if is_train:
+        print('Using transform:', transforms)
+
+    return RandomCenterCrop(height), transforms
+
 def build_transforms_crop_n(height, width, is_train, data_augment, **kwargs):
 
     transforms = _build_transforms(height, width, is_train, data_augment, **kwargs)
-    n, index = kwargs['crop_n']
+    n, m, index = kwargs['crop_n']
     assert n % 2 == 1 and abs(index) <= n // 2 and height == width
-    transforms[0] = CenterCropN(height, n, index)
+    transforms[0] = CenterCropN(height, n, m, index)
 
     transforms = Compose(transforms)
     if is_train:

@@ -11,15 +11,13 @@ from .samplers import RandomIdentitySampler
 
 class CropNImageTrainDataset(ImageDataset):
 
-    def __init__(self, dataset, n, build_transform):
+    def __init__(self, dataset, n, transforms_tuple):
 
         self.dataset = dataset
         self.transforms = {}
         self.n = n
-
-        for i in range(-(n // 2), n // 2 + 1):
-
-            self.transforms[i] = build_transform(n, i)
+        self.m = n + 1
+        self.random_center_crop, self.transforms = transforms_tuple
 
     def __len__(self):
 
@@ -27,10 +25,13 @@ class CropNImageTrainDataset(ImageDataset):
 
     def __getitem__(self, index):
 
-        img_path, pid, camid = self.dataset[index // self.n]
+        img_path, pid, camid = self.dataset[index]
+        img_path, crop_id = img_path.split(':')
+        crop_id = int(crop_id)
 
         img = read_image(img_path)
-        img = self.transforms[index % self.n - self.n // 2](img)
+        img = self.random_center_crop(img, random=crop_id > 0)
+        img = self.transforms(img)
 
         return img, pid, camid, img_path
 
@@ -41,10 +42,11 @@ class CropNImageTestDataset(ImageDataset):
         self.dataset = dataset
         self.transforms = {}
         self.n = n
+        self.m = n + 1
 
         for i in range(-(n // 2), n // 2 + 1):
 
-            self.transforms[i] = build_transform(n, i)
+            self.transforms[i] = build_transform(n, self.m, i)
 
     def __len__(self):
 
@@ -111,9 +113,8 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
                  ):
         super().__init__()
 
-        from torchreid.dataset_loader import ImageDataset
         from torchreid.datasets import init_imgreid_dataset
-        from torchreid.transforms import build_transforms_crop_n
+        from torchreid.transforms import build_transforms_crop_n, build_transforms_random_crop_n
         from torch.utils.data import DataLoader
         from torchreid.samplers import RandomIdentitySampler
 
@@ -134,10 +135,10 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
         self.pin_memory = True if self.use_gpu else False
 
         # Build train and test transform functions
-        def build_transform_train(n, index):
-            return build_transforms_crop_n(self.height, self.width, is_train=True, data_augment=data_augment, crop_n=(n, index))
+        random_center_crop, transform_train = build_transforms_random_crop_n(self.height, self.width, is_train=True, data_augment=data_augment)
 
         def build_transform_test(n, index):
+
             return build_transforms_crop_n(self.height, self.width, is_train=False, data_augment=data_augment, crop_n=(n, index))
 
         # transform_test_flip = build_transforms(self.height, self.width, is_train=False, data_augment=data_augment, flip=True)
@@ -164,15 +165,15 @@ class AICity19ImageDataManagerCropN(BaseDataManager):
         if self.train_sampler == 'RandomIdentitySampler':
             print('!!! Using RandomIdentitySampler !!!')
             self.trainloader = DataLoader(
-                CropNImageTrainDataset(self.train, crop_n, build_transform_train),
-                sampler=RandomIdentitySampler(self.train * crop_n, self.train_batch_size, self.num_instances),
+                CropNImageTrainDataset(self.train, crop_n, (random_center_crop, transform_train)),
+                sampler=RandomIdentitySampler(self.train, self.train_batch_size, self.num_instances),
                 batch_size=self.train_batch_size, shuffle=False, num_workers=self.workers,
                 pin_memory=self.pin_memory, drop_last=True
             )
 
         else:
             self.trainloader = DataLoader(
-                CropNImageTrainDataset(self.train, crop_n, build_transform_train),
+                CropNImageTrainDataset(self.train, crop_n, (random_center_crop, transform_train)),
                 batch_size=self.train_batch_size, shuffle=True, num_workers=self.workers,
                 pin_memory=self.pin_memory, drop_last=True
             )

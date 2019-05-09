@@ -27,7 +27,7 @@ class AICity19Split(BaseImageDataset):
         val = self._process_dir(self.train_dir, '1.val.txt')
         (train, val), num_classes = self._relabel(train, val)
         train, val = self._exclude_junk(train, val)
-        self.train = train
+        self.train = self._enlarge_train_set(train)
 
         self.valsets = {
             '1': val
@@ -70,6 +70,24 @@ class AICity19Split(BaseImageDataset):
         train_ids = set(x[1] for x in train)
         return train, [x for x in val if x[1] in train_ids]
 
+    def _enlarge_train_set(self, train):
+
+        from collections import Counter
+        counter = Counter(x[1] for x in train)
+
+        new_train = []
+        for fn, id, cid in train:
+            img_count = counter[id]
+            if img_count > 100:
+                crop_num = 1
+            else:
+                crop_num = 120 // img_count
+
+            for i in range(crop_num):
+                new_train.append('%s:%s' % (fn, i), id, cid)
+
+        return new_train
+
     def _check_before_run(self):
         """Check if all files are available before going deeper"""
         if not osp.exists(self.dataset_dir):
@@ -111,14 +129,5 @@ class AICity19Split(BaseImageDataset):
                 cid = int(cid)
                 dataset.append([fn, id, cid])
                 ids.add(id)
-
-        # if relabel:
-
-        #     if False and self.relabel_mapping is not None:
-        #         dct = self.relabel_mapping
-        #     else:
-        #         self.relabel_mapping = dct = {v: k for k, v in enumerate(sorted(ids))}
-        #     for item in dataset:
-        #         item[1] = dct[item[1]]
 
         return dataset

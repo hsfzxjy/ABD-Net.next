@@ -371,7 +371,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
 
     if os.environ.get('distmat'):
         import scipy.io as io
-        io.savemat(os.environ.get('distmat'), {'distmat': distmat, 'qp': q_paths, 'gp': g_paths})
+        io.savemat(os.environ.get('distmat'), {'qf': qf, 'gf': gf, 'distmat': distmat, 'qp': q_paths, 'gp': g_paths})
 
     infer = inference(distmat, g_paths)
     np.savetxt(os.environ.get('result_file', 'result.txt'), infer, delimiter=' ', fmt="%.0f")

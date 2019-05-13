@@ -53,16 +53,16 @@ class VeRi(BaseImageDataset):
         ids = set()
         fns = defaultdict(list)
         for file in files:
-            id = int(re.findall(r'/(\d{4})_', file)[0])
+            id, cid = map(int, re.findall(r'/(\d{4})_c(\d{3})', file)[0])
             ids.add(id)
-            fns[id].append(file)
+            fns[id].append((file, cid))
 
         mapping = {v: i for i, v in enumerate(sorted(ids))}
 
         dataset = []
         for k, fs in fns.items():
-            for i, f in enumerate(fs):
-                dataset.append((f, mapping[k], i))
+            for (f, cid) in fs:
+                dataset.append((f, mapping[k], cid))
 
         return dataset
 

@@ -34,6 +34,7 @@ __model_factory = {
     **densenet.model_mapping,
     'resnet50': resnet.resnet50,
     'resnet50_abd_old': resnet.resnet50_abd_old,
+    'resnet50_abd_np2': resnet.resnet50_abd_np2,
     'resnet50_mgn_like': resnet.resnet50_mgn_like,
     # **resnet.name_function_mapping,
     'vgg19': vgg19,

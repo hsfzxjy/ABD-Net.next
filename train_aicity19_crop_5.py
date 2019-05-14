@@ -98,6 +98,7 @@ def main():
         pretrain_dict = checkpoint['state_dict']
         model_dict = model.state_dict()
         pretrain_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
+        print(set(model_dict) - set(pretrain_dict))
         model_dict.update(pretrain_dict)
         model.load_state_dict(model_dict)
         print("Loaded pretrained weights from '{}'".format(args.load_weights))

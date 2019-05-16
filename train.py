@@ -35,6 +35,38 @@ args = parser.parse_args()
 
 os.environ['TORCH_HOME'] = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.torch'))
 
+def accuracy(output, target, topk=(1,)):
+    """Computes the accuracy over the k top predictions for
+    the specified values of k.
+    Args:
+        output (torch.Tensor): prediction matrix with shape (batch_size, num_classes).
+        target (torch.LongTensor): ground truth labels with shape (batch_size).
+        topk (tuple, optional): accuracy at top-k will be computed. For example,
+            topk=(1, 5) means accuracy at top-1 and top-5 will be computed.
+    Returns:
+        list: accuracy at top-k.
+    Examples::
+        >>> from torchreid import metrics
+        >>> metrics.accuracy(output, target)
+    """
+    maxk = max(topk)
+    batch_size = target.size(0)
+
+    if isinstance(output, (tuple, list)):
+        output = output[0]
+
+    _, pred = output.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in topk:
+        correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+        acc = correct_k.mul_(100.0 / batch_size)
+        res.append(acc)
+
+    return res
+
 
 def get_criterion(num_classes: int, use_gpu: bool, args):
 
@@ -218,6 +250,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
     losses = AverageMeter()
     batch_time = AverageMeter()
     data_time = AverageMeter()
+    acc = None  # [AverageMeter() for _ in range(3)]
 
     model.train()
 
@@ -252,6 +285,12 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             penalty = of_penalty(outputs)
             loss += penalty
 
+        if acc is None:
+            acc = [AverageMeter() for _ in range(len(outputs[1]))]
+
+        for acc_meter, xent_feat in zip(acc, outputs[1]):
+            acc_meter.update(accuracy(xent_feat, pids.cuda())[0].item())
+
         optimizer.zero_grad()
         loss.backward()
 
@@ -265,9 +304,9 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.4f} ({data_time.avg:.4f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t{acc}'.format(
                       epoch + 1, batch_idx + 1, len(trainloader), batch_time=batch_time,
-                      data_time=data_time, loss=losses))
+                      data_time=data_time, loss=losses, acc=' '.join('{:.4f}'.format(x.avg) for x in acc)))
 
         end = time.time()
 

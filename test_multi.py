@@ -194,8 +194,9 @@ def test(model, loaders, use_gpu, ranks=[1, 5, 10, 20], return_distmat=True):
             return qf, q_pids, q_camids
 
     results = {}
-    for name, (qd, gd) in loaders.items():
-        results[name] = (eval_set('{name} query'.format(name), qd), eval_set('{name} gallery'.format(name), gd))
+    print(loaders)
+    for name, dct in loaders.items():
+        results[name] = (eval_set('{name} query'.format(name), dct['query']), eval_set('{name} gallery'.format(name), dct['gallery']))
 
     def eval_result(gr, qr):
 

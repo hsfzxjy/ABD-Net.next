@@ -23,6 +23,7 @@ from .valset import ValSet
 from .aicity19 import AICity19
 from .aicity19_split import AICity19Split
 from .veri import VeRi
+from .vehicleid import VehicleID
 
 __imgreid_factory = {
     'market1501': Market1501,
@@ -30,6 +31,8 @@ __imgreid_factory = {
     'aicity19': AICity19,
     'aicity19_split': AICity19Split,
     'veri': VeRi,
+    **{'vehicleid_{num}'.format(num): (lambda *args, **kwargs: VehicleID(num, *args, **kwargs)) for num in range(800, 1600, 2400, 3200, 6000, 13164)},
+
     'cuhk03': CUHK03,
     'dukemtmcreid': DukeMTMCreID,
     'dukemtmcreid_d': DukeMTMCreID_D,

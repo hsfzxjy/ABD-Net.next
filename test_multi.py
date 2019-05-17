@@ -223,7 +223,7 @@ def test(model, loaders, use_gpu, ranks=[1, 5, 10, 20], return_distmat=True):
     metrics = []
     for name, (qr, gr) in results.items():
         metrics.append(eval_result(gr, qr))
-    metrics = np.average(np.array(metrics), axis=1)
+    metrics = np.average(np.array(metrics), axis=0)
     mAP, *cmc = metrics
 
     print('====> Average Result')

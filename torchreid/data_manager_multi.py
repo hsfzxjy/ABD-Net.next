@@ -122,8 +122,8 @@ class ImageDataManager(BaseDataManager):
                 cuhk03_classic_split=self.cuhk03_classic_split
             )
 
-            for sub_name, (query, gallery) in dataset.datasets.items():
-
+            for sub_name, dct in dataset.datasets.items():
+                (query, gallery) = dct['query'], dct['gallery']
                 self.testloader_dict[name][sub_name] = dict(
                     query=DataLoader(
                         ImageDataset(query, transform=transform_test),

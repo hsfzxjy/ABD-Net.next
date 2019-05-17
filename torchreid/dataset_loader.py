@@ -39,6 +39,7 @@ class ImageDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, index):
+        print(self.dataset[index])
         img_path, pid, camid = self.dataset[index]
         img = read_image(img_path)
 

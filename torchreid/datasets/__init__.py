@@ -33,7 +33,7 @@ __imgreid_factory = {
     'aicity19': AICity19,
     'aicity19_split': AICity19Split,
     'veri': VeRi,
-    **{'vehicleid_{num}'.format(num): partial(VehicleID, num) for num in (800, 1600, 2400, 3200, 6000, 13164)},
+    **{('vehicleid_{num}'.format(num)): partial(VehicleID, num) for num in (800, 1600, 2400, 3200, 6000, 13164)},
 
     'cuhk03': CUHK03,
     'dukemtmcreid': DukeMTMCreID,

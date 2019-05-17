@@ -156,7 +156,7 @@ def main():
                 )
         return
 
-def test(model, loaders, use_gpu, ranks=[1, 5, 10, 20]):
+def test(model, loaders, use_gpu, ranks=[1, 5, 10, 20], return_distmat=True):
 
     batch_time = AverageMeter()
 

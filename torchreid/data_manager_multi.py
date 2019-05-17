@@ -113,7 +113,7 @@ class ImageDataManager(BaseDataManager):
             )
 
         print("=> Initializing TEST (target) datasets")
-        self.testloader_dict = {name: {'query': None, 'gallery': None} for name in self.target_names}
+        self.testloader_dict = {name: {} for name in self.target_names}
         self.testdataset_dict = {name: {'query': None, 'gallery': None} for name in self.target_names}
 
         for name in self.target_names:

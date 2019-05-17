@@ -59,14 +59,14 @@ class VehicleID(BaseImageDataset):
                 name, vid = line.strip().split()
                 name = osp.join(self.image_dir, name + '.jpg')
                 vid = int(vid)
-                qs.append(name, vid, ids[vid])
+                qs.append((name, vid, ids[vid]))
                 ids[vid] += 1
 
             for line in gf:
                 name, vid = line.strip().split()
                 name = osp.join(self.image_dir, name + '.jpg')
                 vid = int(vid)
-                gs.append(name, vid, ids[vid])
+                gs.append((name, vid, ids[vid]))
                 ids[vid] += 1
 
         return qs, gs

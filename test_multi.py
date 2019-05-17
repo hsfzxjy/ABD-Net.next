@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 
 from args import argument_parser, image_dataset_kwargs
-from torchreid.data_manager import ImageDataManager
+from torchreid.data_manager_multi import ImageDataManager
 from torchreid import models
 from torchreid.utils.iotools import check_isfile
 from torchreid.utils.avgmeter import AverageMeter

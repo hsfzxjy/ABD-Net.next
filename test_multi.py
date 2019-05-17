@@ -95,7 +95,7 @@ def main():
         use_gpu = False
     log_name = 'log_test.txt' if args.evaluate else 'log_train.txt'
     if args.evaluate:
-        log_fn = '/dev/null'
+        log_fn = '/tmp/a'
     else:
         log_fn = osp.join(args.save_dir, log_name)
     sys.stderr = sys.stdout = Logger(log_fn)

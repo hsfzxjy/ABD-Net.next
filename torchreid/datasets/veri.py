@@ -68,6 +68,23 @@ class VeRi(BaseImageDataset):
 
     def _get_query_test(self):
 
+        if os.environ.get('use_info'):
+            q = []
+            with open(osp.join(self.dataset_dir, 'info/query_info.txt')) as f:
+                f.readline()
+                for line in f:
+                    img, pid, cid, _ = line.strip().split()
+                    q.append((osp.join(self.query_dir, img), int(pid), int(cid)))
+
+            g = []
+            with open(osp.join(self.dataset_dir, 'info/gallery_info.txt')) as f:
+                f.readline()
+                for line in f:
+                    img, pid, cid, _ = line.strip().split()
+                    g.append((osp.join(self.gallery_dir, img), int(pid), int(cid)))
+
+            return q, g
+
         q_files = set(osp.basename(x) for x in glob(osp.join(self.query_dir, '*')))
         t_files = glob(osp.join(self.gallery_dir, '*'))
 

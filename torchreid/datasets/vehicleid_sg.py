@@ -11,11 +11,10 @@ class VehicleID_SG(BaseImageDataset):
 
     dataset_dir = 'VehicleID_V1.0'
 
-    def __init__(self, num, root='data', verbose=True, **kwargs):
+    def __init__(self, root='data', verbose=True, **kwargs):
         super().__init__()
 
         self.dataset_dir = osp.join(root, self.dataset_dir)
-        self.num = num
         self.image_dir = osp.join(self.dataset_dir, 'image')
         self.test_info_dir = osp.join(self.dataset_dir, 'singleG')
 

@@ -20,7 +20,7 @@ class VehicleID_SG(BaseImageDataset):
 
         datasets = {}
         for num in [800, 1600, 2400, 3200, 6000, 13164]:
-            q, g = self._get_query_test(osp.join(self.test_info_dir, 'query_{}_singleG.txt'.format(num)), osp.join(self.test_info_dir, 'gallery_{}_singleG.txt'.format(num)))
+            q, g = self._get_query_test(osp.join(self.test_info_dir, 'query_info_{}_singleG.txt'.format(num)), osp.join(self.test_info_dir, 'gallery_info_{}_singleG.txt'.format(num)))
             datasets[num] = dict(query=q, gallery=g)
 
         train = []

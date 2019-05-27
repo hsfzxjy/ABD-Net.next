@@ -188,6 +188,7 @@ class GlobalBranch(nn.Module):
 
         triplet, xent, predict = [], [], []
 
+        global_feat = x
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
 
@@ -199,7 +200,7 @@ class GlobalBranch(nn.Module):
         x = self.classifier(x)
         xent.append(x)
 
-        return predict, xent, triplet, {}
+        return predict, xent, triplet, {'global': global_feat}
 
 class NPBranch(nn.Module):
 

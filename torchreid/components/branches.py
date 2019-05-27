@@ -200,7 +200,7 @@ class GlobalBranch(nn.Module):
         x = self.classifier(x)
         xent.append(x)
 
-        return predict, xent, triplet, {'global': global_feat}
+        return predict, xent, triplet, {'global': (global_feat,)}
 
 class NPBranch(nn.Module):
 

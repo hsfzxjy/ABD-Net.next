@@ -140,11 +140,14 @@ class GlobalBranch(nn.Module):
         self.owner = weakref.ref(owner)
 
         self.input_dim = input_dim
-        self.output_dim = args['global_dim']
+        self.output_dim = args['global_dim'] or 2048
         self.args = args
         self.num_classes = owner.num_classes
 
-        self._init_fc_layer()
+        if not args['global_dim']:
+            self.fc = None
+        else:
+            self._init_fc_layer()
         if args['global_max_pooling']:
             self.avgpool = nn.AdaptiveMaxPool2d(1)
         else:
@@ -188,7 +191,9 @@ class GlobalBranch(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
 
-        x = self.fc(x)
+        if self.fc is not None:
+            x = self.fc(x)
+
         triplet.append(x)
         predict.append(x)
         x = self.classifier(x)

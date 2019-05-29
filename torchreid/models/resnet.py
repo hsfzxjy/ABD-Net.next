@@ -761,12 +761,12 @@ class ResNetNp2(nn.Module):
 
         return torch.cat(predict_features, 1), tuple(xent_features), tuple(triplet_features), feature_dict
 
-def resnet50_backbone():
+def resnet50_backbone(args):
 
     network = ResNet(
         block=Bottleneck,
         layers=[3, 4, 6, 3],
-        last_stride=1,  # Always remove down-sampling
+        last_stride=args['resnet_last_stride'],  # Always remove down-sampling
     )
     init_pretrained_weights(network, model_urls['resnet50'])
 
@@ -775,12 +775,12 @@ def resnet50_backbone():
 
 def resnet50(num_classes, args, **kw):
 
-    backbone = resnet50_backbone()
+    backbone = resnet50_backbone(args)
     return MultiBranchResNet(backbone, args, num_classes)
 
 def resnet50_mgn_like(num_classes, args, **kw):
 
-    backbone = resnet50_backbone()
+    backbone = resnet50_backbone(args)
     return MultiBranchMGNLikeResNet(backbone, args, num_classes)
 
 def resnet50_abd_old(num_classes, args, **kw):

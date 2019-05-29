@@ -194,6 +194,7 @@ def argument_parser():
     parser.add_argument('--use-ow', action='store_true')
     parser.add_argument('--ow-beta', type=float, default=1e-3)
 
+    parser.add_argument('--resnet-last-stride', type=int, default=1)
     return parser
 
 

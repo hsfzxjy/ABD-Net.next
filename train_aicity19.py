@@ -332,6 +332,9 @@ def validation(model, loader, use_gpu):
 
 def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 
+    if not len(galleryloader):
+        return
+
     batch_time = AverageMeter()
 
     model.eval()

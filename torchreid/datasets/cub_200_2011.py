@@ -17,7 +17,7 @@ class CUB_200_2011(BaseImageDataset):
 
         self.dataset_dir = osp.join(root, self.dataset_dir)
 
-        self._check_before_run()
+        # self._check_before_run()
 
         self.relabel_mapping = None
 

@@ -326,12 +326,14 @@ def validation(model, loader, use_gpu):
         if use_gpu:
             target = target.cuda()
 
+        sum_ = 0.
         for index, features in sorted(features_dict.items()):
 
             features = torch.cat(features, 0)
+            sum_ = sum_ + features
             print('Feature', index, 'ACC:', accuracy(features, target)[0].item())
 
-        print('Sum Feature ACC:', accuracy(sum(features_dict.values()), target)[0].item())
+        print('Sum Feature ACC:', accuracy(sum_, target)[0].item())
 
 def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 

@@ -10,6 +10,7 @@ import numpy as np
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from torch.optim import lr_scheduler
 
@@ -317,7 +318,7 @@ def validation(model, loader, use_gpu):
             features_tuple = model(imgs)[1]
 
             for index, features in enumerate(features_tuple):
-                features_dict[index].append(features)
+                features_dict[index].append(F.softmax(features, dim=1))
 
             pids_list.append(pids)
 
@@ -329,6 +330,8 @@ def validation(model, loader, use_gpu):
 
             features = torch.cat(features, 0)
             print('Feature', index, 'ACC:', accuracy(features, target)[0].item())
+
+        print('Sum Feature ACC:', accuracy(sum(features), target)[0].item())
 
 def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 

@@ -24,6 +24,8 @@ class CUB_200_2011(BaseImageDataset):
         train = self._process_dir(self.dataset_dir, 'train.txt')
         val = self._process_dir(self.dataset_dir, 'val.txt')
 
+        self.train = train
+
         self.valsets = {
             'val': val
         }
@@ -50,8 +52,6 @@ class CUB_200_2011(BaseImageDataset):
                 print(*self.get_imagedata_info(query), sep='\t')
             print("==> Gallery Set Stats")
             print(*self.get_imagedata_info(self.train_gallery), sep='\t')
-
-        self.train = train
 
         self.num_train_pids, self.num_train_imgs, self.num_train_cams = self.get_imagedata_info(self.train)
         self.num_train_pids = 200

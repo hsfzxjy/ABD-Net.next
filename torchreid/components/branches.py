@@ -30,7 +30,7 @@ class MultiBranchNetwork(nn.Module):
 
         if self._a3m_type == 1:
 
-            self.a3m1_classifier = self._init_classifier(self.args['a3m1_mid_dim'])
+            self.a3m1_classifier = self._init_classifier(self.args['a3m1_in_dim'])
 
     def _init_classifier(self, dim):
 

@@ -113,7 +113,7 @@ class CUB_200_2011(BaseImageDataset):
         with open(osp.join(self.dataset_dir, id_file), 'r') as f:
 
             for line in f:
-                id, fn = line.strip().split()
+                fn, id = line.strip().split()
                 fn = osp.join(dir_path, fn)
                 id = int(id)
                 cid = 0

@@ -23,12 +23,12 @@ class MultiBranchNetwork(nn.Module):
 
     def _init_a3m(self):
 
-        self._a3m_type = self.args['a3m_type']
+        self.a3m_type = self.args['a3m_type']
 
-        if self._a3m_type is None:
+        if self.a3m_type is None:
             return
 
-        if self._a3m_type == 1:
+        if self.a3m_type == 1:
 
             self.a3m1_classifier = self._init_classifier(self.args['a3m1_in_dim'])
 

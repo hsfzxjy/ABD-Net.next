@@ -159,7 +159,7 @@ class MultiBranchNetwork(nn.Module):
         fmap_dict = {k: tuple(v) for k, v in fmap_dict.items()}
 
         if self.a3m_type == 1:
-            feat = torch.sum(triplet_features, (0,))
+            feat = sum(triplet_features)
             triplet_features.insert(0, feat)
             feat = self.a3m1_classifier(feat)
             xent_features.insert(0, feat)

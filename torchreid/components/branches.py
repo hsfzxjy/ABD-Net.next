@@ -17,6 +17,47 @@ class MultiBranchNetwork(nn.Module):
         self.common_branch = self._get_common_branch(backbone, args)
         self.branches = nn.ModuleList(self._get_branches(backbone, args))
 
+        self.args = args
+        self.num_classes = num_classes
+        self._init_a3m()
+
+    def _init_a3m(self):
+
+        self._a3m_type = self.args['a3m_type']
+
+        if self._a3m_type is None:
+            return
+
+        if self._a3m_type == 1:
+
+            self.a3m1_classifier = self._init_classifier(self.args['a3m1_mid_dim'])
+
+    def _init_classifier(self, dim):
+
+        classifier = nn.Linear(dim, self.num_classes)
+        init_params(classifier)
+
+        return classifier
+
+    def _init_fc_layer(self, input_dim, output_dim, use_dropout=False):
+
+        dropout_p = self.args['dropout']
+
+        if dropout_p is not None and use_dropout:
+            dropout_layer = [nn.Dropout(p=dropout_p)]
+        else:
+            dropout_layer = []
+
+        fc = nn.Sequential(
+            nn.Linear(input_dim, output_dim),
+            nn.BatchNorm1d(self.output_dim),
+            nn.ReLU(inplace=True),
+            *dropout_layer
+        )
+        init_params(fc)
+
+        return fc
+
     def _get_common_branch(self, backbone, args):
         return NotImplemented
 
@@ -116,6 +157,12 @@ class MultiBranchNetwork(nn.Module):
                 fmap_dict[name].extend(fmap_list)
 
         fmap_dict = {k: tuple(v) for k, v in fmap_dict.items()}
+
+        if self.a3m_type == 1:
+            feat = torch.sum(triplet_features, dim=1)
+            triplet_features.insert(0, feat)
+            feat = self.a3m1_classifier(feat)
+            xent_features.insert(0, feat)
 
         return torch.cat(predict_features, 1), tuple(xent_features),\
             tuple(triplet_features), fmap_dict

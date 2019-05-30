@@ -159,6 +159,9 @@ def argument_parser():
     parser.add_argument('--visualize-ranks', action='store_true',
                         help="visualize ranked results, only available in evaluation mode")
 
+    parser.add_argument('--a3m-type', type=int)
+    parser.add_argument('--a3m1-in-dim', type=int, default=1024)
+
     # ************************************************************
     # Branches Related
     # ************************************************************

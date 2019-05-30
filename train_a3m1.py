@@ -283,7 +283,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
             outputs[1],  # xent features
             outputs[2],  # triplet features
         ):
-            loss = loss + criterion(
+            loss = loss + alpha * criterion(
                 ((), (xent_feat,), (triplet_feat,), {}),  # Reconstruct `outputs`
                 pids
             )

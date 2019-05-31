@@ -77,7 +77,6 @@ def open_specified_layers(model, open_layers, strict=False):
     #     assert hasattr(model, layer), "'{}' is not an attribute of the model, please provide the correct name".format(layer)
 
     def fuzzy(name):
-        print(strict, name)
         if strict:
             return False
 

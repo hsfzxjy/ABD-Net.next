@@ -236,8 +236,15 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         outputs = model(imgs)
         loss = 0  # criterion(outputs, pids)
 
+        if len(outputs[1]) == 4:
+            weights = [4,1,1,2]
+        elif len(outputs[1]) == 3:
+            weights = [4,1,2]
+
+        weights = np.array(weights)/sum(weights)
+
         for alpha, xent_feat, triplet_feat in zip(
-            [4 / 8, 1 / 8, 1 / 8, 2 / 8],
+            weights,
             outputs[1],  # xent features
             outputs[2],  # triplet features
         ):

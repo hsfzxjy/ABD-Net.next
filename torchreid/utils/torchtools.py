@@ -61,7 +61,7 @@ def open_all_layers(model):
         p.requires_grad = True
 
 
-def open_specified_layers(model, open_layers):
+def open_specified_layers(model, open_layers, strict=False):
     """
     Open specified layers in model for training while keeping
     other layers frozen.
@@ -76,10 +76,17 @@ def open_specified_layers(model, open_layers):
     # for layer in open_layers:
     #     assert hasattr(model, layer), "'{}' is not an attribute of the model, please provide the correct name".format(layer)
 
+    def fuzzy(name):
+
+        if strict:
+            return False
+
+        return 'classifier' in name or 'fc' in name or 'reduction' in name or \
+            'cam_module' in name and name != '_cam_module' or 'pam_module' in name or 'sum_conv' in name or 'before_module' in name
+
     for name, module in model.named_children():
         # if name in open_layers:
-        if name in open_layers or 'classifier' in name or 'fc' in name or 'reduction' in name or \
-                'cam_module' in name and name != '_cam_module' or 'pam_module' in name or 'sum_conv' in name or 'before_module' in name:
+        if name in open_layers or fuzzy(name):
             print('open', name)
             module.train()
             for p in module.parameters():

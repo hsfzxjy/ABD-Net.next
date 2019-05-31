@@ -32,6 +32,11 @@ class MultiBranchNetwork(nn.Module):
 
             self.a3m1_classifier = self._init_classifier(self.args['a3m1_in_dim'])
 
+        if self.a3m_type == 3:
+
+            self.a3m3_fc = self._init_fc_layer(self.args['a3m3_in_dim'], self.args['a3m3_mid_dim'])
+            self.a3m3_classifier = self._init_classifier(self.args['a3m3_mid_dim'])
+
     def _init_classifier(self, dim):
 
         classifier = nn.Linear(dim, self.num_classes)
@@ -163,6 +168,13 @@ class MultiBranchNetwork(nn.Module):
             triplet_features.insert(0, feat)
             feat = self.a3m1_classifier(feat)
             xent_features.insert(0, feat)
+
+        if self.a3m_type == 3:
+            feat = torch.cat(triplet_features, 1)
+            feat = self.a3m3_fc(feat)
+            triplet_features = [feat]
+            feat = self.a3m3_classifier(feat)
+            xent_features = [feat]
 
         return torch.cat(predict_features, 1), tuple(xent_features),\
             tuple(triplet_features), fmap_dict

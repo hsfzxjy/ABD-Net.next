@@ -344,7 +344,7 @@ def validation(model, loader, use_gpu):
                 sum_ = sum_ + features
             print('Feature', index, 'ACC:', accuracy(features, target)[0].item())
 
-        print('Sum Feature ACC:', accuracy(sum_, target)[0].item())
+        # print('Sum Feature ACC:', accuracy(sum_, target)[0].item())
 
 def test(model, queryloader_dict, galleryloader, use_gpu, ranks=[1, 5, 10, 20]):
 

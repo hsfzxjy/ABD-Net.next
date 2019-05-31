@@ -212,7 +212,6 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
 
     model.train()
 
-    print('Fuck')
     open_specified_layers(model, ['a3m3_fc', 'a3m3_classifier'], strict=True)
 
     end = time.time()

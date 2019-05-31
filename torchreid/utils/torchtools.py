@@ -94,7 +94,7 @@ def open_specified_layers(model, open_layers, strict=False):
             module.eval()
             for p in module.parameters():
                 p.requires_grad = False
-            open_specified_layers(module, open_layers)
+            open_specified_layers(module, open_layers, strict=strict)
 
 
 def count_num_param(model):

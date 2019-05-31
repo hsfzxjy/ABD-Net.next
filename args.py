@@ -161,6 +161,8 @@ def argument_parser():
 
     parser.add_argument('--a3m-type', type=int)
     parser.add_argument('--a3m1-in-dim', type=int, default=1024)
+    parser.add_argument('--a3m3-in-dim', type=int, default=3072)
+    parser.add_argument('--a3m3-mid-dim', type=int, default=1024)
 
     # ************************************************************
     # Branches Related

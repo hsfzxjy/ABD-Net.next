@@ -213,7 +213,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
     model.train()
 
     if fixbase or args.fixbase:
-        open_specified_layers(model, ['a3m3_fc', 'a3m3_classifier'])
+        open_specified_layers(model, ['a3m3_fc', 'a3m3_classifier'], strict=True)
     else:
         open_all_layers(model)
 

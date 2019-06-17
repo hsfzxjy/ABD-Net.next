@@ -95,7 +95,7 @@ class OFPenalty(nn.Module):
             'SVDO': SVDO,
             'SO': SO,
             'SRIP': SRIP
-        }[args['of_type']]()
+        }[args['of_type']](self.beta)
 
     def apply_penalty(self, k, x):
 

@@ -90,7 +90,8 @@ class DSO(Functor):
 class SRIP(Functor):
 
     def __call__(self, key, x):
-
+        batches, channels, height, width = x.size()
+        x = x.view(batches, channels, -1)
         x = self.AAT_I(x)
         return self.beta * torch.sum(self.spectral_norm(x))
 

@@ -455,14 +455,15 @@ class ABDBranch(nn.Module):
 
     def _init_reduction_layer(self):
 
-        reduction = nn.Sequential(
-            nn.Conv2d(self.input_dim, self.output_dim, kernel_size=1, bias=False),
-            nn.BatchNorm2d(self.output_dim),
-            nn.ReLU(inplace=True)
-        )
-        init_params(reduction)
+        if not self.args['abd_no_reduction']:
+            reduction = nn.Sequential(
+                nn.Conv2d(self.input_dim, self.output_dim, kernel_size=1, bias=False),
+                nn.BatchNorm2d(self.output_dim),
+                nn.ReLU(inplace=True)
+            )
+            init_params(reduction)
 
-        self.reduction = reduction
+            self.reduction = reduction
 
     def _init_attention_modules(self):
 
@@ -514,7 +515,8 @@ class ABDBranch(nn.Module):
         predict, xent, triplet = [], [], []
         fmap = defaultdict(list)
 
-        x = self.reduction(x)
+        if hasattr(self, 'reduction'):
+            x = self.reduction(x)
 
         assert x.size(2) % self.part_num == 0,\
             "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)

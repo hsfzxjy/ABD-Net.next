@@ -178,6 +178,7 @@ def argument_parser():
     parser.add_argument('--abd-np', type=int, default=2)
     parser.add_argument('--abd-dan', nargs='+', type=str, default=[])
     parser.add_argument('--abd-dan-no-head', action='store_true')
+    parser.add_argument('--abd-no-reduction', action='store_true')
     parser.add_argument('--shallow-cam', action='store_true')
 
     parser.add_argument('--np-dim', type=int, default=1024)

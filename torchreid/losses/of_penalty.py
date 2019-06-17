@@ -71,8 +71,21 @@ class SO(Functor):
 
     def __call__(self, key, x):
 
-        x = self.AAT_I(x) ** 2
-        return self.beta * torch.sum(x)
+        batches, channels, height, width = x.size()
+        x = x.view(batches, channels, -1)
+        return self.beta * torch.sum(self.AAT_I(x) ** 2) ** 0.5
+
+class DSO(Functor):
+
+    def __call__(self, key, x):
+        batches, channels, height, width = x.size()
+        x = x.view(batches, channels, -1)
+        xT = x.permute(0, 2, 1)
+        return self.beta * (
+            torch.sum(self.AAT_I(x) ** 2) ** 0.5 +
+            torch.sum(self.AAT_I(xT) ** 2) ** 0.5
+        )
+
 
 class SRIP(Functor):
 
@@ -94,7 +107,8 @@ class OFPenalty(nn.Module):
         self.functor = {
             'SVDO': SVDO,
             'SO': SO,
-            'SRIP': SRIP
+            'SRIP': SRIP,
+            'DSO': DSO
         }[args['of_type']](self.beta)
 
     def apply_penalty(self, k, x):

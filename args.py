@@ -194,7 +194,8 @@ def argument_parser():
     parser.add_argument('--use-of', action='store_true')
     parser.add_argument('--of-beta', type=float, default=1e-6)
     parser.add_argument('--of-start-epoch', type=int, default=23)
-    parser.add_argument('--of-position', nargs='+', type=str, default=['before', 'after', 'cam', 'pam', 'intermediate'])
+    parser.add_argument('--of-type', type=str, choices=['SO', 'SRIP', 'SVDO'], default='SVDO')
+    parser.add_argument('--of-position', nargs='+', type=str, default=['before', 'after', 'cam', 'pam', 'intermediate', 'before_intermediate'])
 
     parser.add_argument('--use-ow', action='store_true')
     parser.add_argument('--ow-beta', type=float, default=1e-3)

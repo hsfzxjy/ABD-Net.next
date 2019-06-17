@@ -180,10 +180,11 @@ class ResNetCommonBranch(nn.Module):
     def forward(self, x):
 
         x = self.backbone1(x)
+        before_intermediate = x
         intermediate = x = self.shallow_cam(x)
         x = self.backbone2(x)
 
-        return x, intermediate
+        return x, {'intermediate': intermediate, 'before_intermediate': before_intermediate}
 
 class ResNetDeepBranch(nn.Module):
 

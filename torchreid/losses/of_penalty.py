@@ -6,24 +6,26 @@ import logging
 import torch
 import torch.nn as nn
 
-import os
-
-from .cross_entropy_loss import CrossEntropyLoss
 
 logger = logging.getLogger(__name__)
 
 
-class OFPenalty(nn.Module):
+class Functor:
 
-    _WARNED = False
+    def __init__(self, beta):
 
-    def __init__(self, args):
-        super().__init__()
+        self.beta = beta
 
-        self.penalty_position = frozenset(args['of_position'])
-        self.beta = args['of_beta']
+    def AAT_I(self, A):
 
-    def dominant_eigenvalue(self, A):
+        AAT = torch.bmm(A, A.permute(0, 2, 1))
+
+        B, N, _ = AAT.size()
+        I = torch.eye(N, device='cuda').expand(B, N, N)  # noqa
+
+        return AAT - I
+
+    def spectral_norm(self, A):
 
         B, N, _ = A.size()
         x = torch.randn(B, N, 1, device='cuda')
@@ -39,15 +41,61 @@ class OFPenalty(nn.Module):
 
         return numerator / denominator
 
+
+class SVDO(Functor):
+
     def get_singular_values(self, A):
 
         AAT = torch.bmm(A, A.permute(0, 2, 1))
         B, N, _ = AAT.size()
-        largest = self.dominant_eigenvalue(AAT)
+        largest = self.spectral_norm(AAT)
         I = torch.eye(N, device='cuda').expand(B, N, N)  # noqa
         I = I * largest.view(B, 1, 1).repeat(1, N, N)  # noqa
-        tmp = self.dominant_eigenvalue(AAT - I)
+        tmp = self.spectral_norm(AAT - I)
         return tmp + largest, largest
+
+    def __call__(self, key, x):
+
+        batches, channels, height, width = x.size()
+        W = x.view(batches, channels, -1)
+        smallest, largest = self.get_singular_values(W)
+        singular_penalty = (largest - smallest) * self.beta
+
+        if key == 'intermediate':
+            singular_penalty *= 0.01
+
+        return singular_penalty.sum() / (x.size(0) / 32.)  # Quirk: normalize to 32-batch case
+
+
+class SO(Functor):
+
+    def __call__(self, key, x):
+
+        x = self.AAT_I(x) ** 2
+        return self.beta * torch.sum(x)
+
+class SRIP(Functor):
+
+    def __call__(self, key, x):
+
+        x = self.AAT_I(x)
+        return self.beta * torch.sum(self.spectral_norm(x))
+
+
+class OFPenalty(nn.Module):
+
+    _WARNED = False
+
+    def __init__(self, args):
+        super().__init__()
+
+        self.penalty_position = frozenset(args['of_position'])
+        self.beta = args['of_beta']
+        self.functor = {
+            'SVDO': SVDO,
+            'SO': SO,
+            'SRIP': SRIP
+        }[args['of_type']]()
 
     def apply_penalty(self, k, x):
 
@@ -56,15 +104,7 @@ class OFPenalty(nn.Module):
                 return 0.
             return sum([self.apply_penalty(k, xx) for xx in x]) / len(x)
 
-        batches, channels, height, width = x.size()
-        W = x.view(batches, channels, -1)
-        smallest, largest = self.get_singular_values(W)
-        singular_penalty = (largest - smallest) * self.beta
-
-        if k == 'intermediate':
-            singular_penalty *= 0.01
-
-        return singular_penalty.sum() / (x.size(0) / 32.)  # Quirk: normalize to 32-batch case
+        return self.functor(k, x)
 
     def forward(self, inputs):
 

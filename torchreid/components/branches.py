@@ -148,7 +148,11 @@ class MultiBranchNetwork(nn.Module):
         x, *intermediate_fmaps = self.common_branch(x)
 
         fmap_dict = defaultdict(list)
-        fmap_dict['intermediate'].extend(intermediate_fmaps)
+        fmap_dict['intermediate'] = []
+
+        for fmap in intermediate_fmaps:
+            for name, lst in fmap.items():
+                fmap_dict[name].extend(lst)
 
         predict_features, xent_features, triplet_features = [], [], []
 

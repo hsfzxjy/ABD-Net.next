@@ -261,7 +261,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
         open_all_layers(model)
 
     end = time.time()
-    for batch_idx, (imgs, pids, _, _) in enumerate(trainloader):
+    for batch_idx, (imgs, pids, _, _, sur) in enumerate(trainloader):
 
         try:
             limited = float(os.environ.get('limited', None))
@@ -275,8 +275,9 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
 
         if use_gpu:
             imgs, pids = imgs.cuda(), pids.cuda()
+            sur = sur.cuda()
 
-        outputs = model(imgs)
+        outputs = model(imgs, sur)
         loss = criterion(outputs, pids)
         if not fixbase:
             reg = regularizer(model)
@@ -335,17 +336,19 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             end = time.time()
 
             if flip_eval:
-                (imgs0, pids, camids, paths), (imgs1, _, _, _) = package
+                (imgs0, pids, camids, paths, sur0), (imgs1, _, _, _, sur1) = package
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
-                features = (model(imgs0)[0] + model(imgs1)[0]) / 2.0
+                    sur0, sur1 = sur0.cuda(), sur1.cuda()
+                features = (model(imgs0, sur0)[0] + model(imgs1, sur1)[0]) / 2.0
                 # print(features.size())
             else:
-                (imgs, pids, camids, paths) = package
+                (imgs, pids, camids, _, sur) = package
                 if use_gpu:
                     imgs = imgs.cuda()
+                    sur = sur.cuda()
 
-                features = model(imgs)[0]
+                features = model(imgs, sur)[0]
 
             batch_time.update(time.time() - end)
 
@@ -371,17 +374,19 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
             end = time.time()
 
             if flip_eval:
-                (imgs0, pids, camids, paths), (imgs1, _, _, _) = package
+                (imgs0, pids, camids, paths, sur0), (imgs1, _, _, _, sur1) = package
                 if use_gpu:
                     imgs0, imgs1 = imgs0.cuda(), imgs1.cuda()
-                features = (model(imgs0)[0] + model(imgs1)[0]) / 2.0
+                    sur0, sur1 = sur0.cuda(), sur1.cuda()
+                features = (model(imgs0, sur0)[0] + model(imgs1, sur1)[0]) / 2.0
                 # print(features.size())
             else:
-                (imgs, pids, camids, _) = package
+                (imgs, pids, camids, _, sur) = package
                 if use_gpu:
                     imgs = imgs.cuda()
+                    sur = sur.cuda()
 
-                features = model(imgs)[0]
+                features = model(imgs, sur)[0]
 
             batch_time.update(time.time() - end)
 

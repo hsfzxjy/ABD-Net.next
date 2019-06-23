@@ -26,6 +26,7 @@ from .veri import VeRi
 from .vehicleid import VehicleID
 from .vehicleid_sg import VehicleID_SG
 from .cub_200_2011 import CUB_200_2011
+from .veri_sur import VeRiSur
 
 from functools import partial
 
@@ -35,6 +36,7 @@ __imgreid_factory = {
     'aicity19': AICity19,
     'aicity19_split': AICity19Split,
     'veri': VeRi,
+    'veri_sur': VeRiSur,
     'vehicle_sg': VehicleID_SG,
     'cub_200_2011': CUB_200_2011,
     **{('vehicleid_{}'.format(num)): partial(VehicleID, num) for num in (800, 1600, 2400, 3200, 6000, 13164)},

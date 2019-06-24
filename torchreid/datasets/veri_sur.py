@@ -116,7 +116,7 @@ class VeRiSur(BaseImageDataset):
         dataset = []
         for k, fs in fns.items():
             for (f, cid) in fs:
-                vec = poly_area(self.keypoint_train[osp.basename(f)])
+                vec = poly_area(self.train_keypoints[osp.basename(f)])
                 dataset.append((f, mapping[k], cid, vec))
 
         return dataset
@@ -129,7 +129,7 @@ class VeRiSur(BaseImageDataset):
                 f.readline()
                 for line in f:
                     img, pid, cid, _ = line.strip().split()
-                    vec = poly_area(self.keypoint_train[osp.basename(img)])
+                    vec = poly_area(self.test_keypoints[osp.basename(img)])
                     q.append((osp.join(self.query_dir, img), int(pid), int(cid), vec))
 
             g = []
@@ -137,7 +137,7 @@ class VeRiSur(BaseImageDataset):
                 f.readline()
                 for line in f:
                     img, pid, cid, _ = line.strip().split()
-                    vec = poly_area(self.keypoint_train[osp.basename(img)])
+                    vec = poly_area(self.test_keypoints[osp.basename(img)])
                     g.append((osp.join(self.gallery_dir, img), int(pid), int(cid), vec))
 
             return q, g

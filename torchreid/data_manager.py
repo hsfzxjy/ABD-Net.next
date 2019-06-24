@@ -88,10 +88,10 @@ class ImageDataManager(BaseDataManager):
                 cuhk03_classic_split=self.cuhk03_classic_split
             )
 
-            for img_path, pid, camid, *_ in dataset.train:
+            for img_path, pid, camid, *rest in dataset.train:
                 pid += self._num_train_pids
                 camid += self._num_train_cams
-                self.train.append((img_path, pid, camid))
+                self.train.append((img_path, pid, camid, *rest))
 
             self._num_train_pids += dataset.num_train_pids
             self._num_train_cams += dataset.num_train_cams

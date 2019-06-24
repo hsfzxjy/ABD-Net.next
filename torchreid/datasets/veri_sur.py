@@ -33,6 +33,7 @@ def calc_feat(vec):
     res = np.zeros(len(polys))
     for i, poly in enumerate(polys):
         points = np.array([dct[k] for k in poly])
+        print(points)
         if (points == -1).any():
             continue
         area = poly_area(points)

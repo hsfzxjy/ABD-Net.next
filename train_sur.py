@@ -262,7 +262,7 @@ def train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu,
 
     end = time.time()
     for batch_idx, (imgs, pids, _, _, sur) in enumerate(trainloader):
-        print(imgs.type, sur.type)
+        print(imgs.type(), sur.type())
         try:
             limited = float(os.environ.get('limited', None))
         except (ValueError, TypeError):

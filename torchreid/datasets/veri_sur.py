@@ -9,6 +9,7 @@ from collections import defaultdict
 from .bases import BaseImageDataset
 
 def poly_area(pts):
+    pts = np.array(pts)
     return -0.5 * (np.dot(pts[:, 0], np.roll(pts[:, 1], 1)) - np.dot(pts[:, 1], np.roll(pts[:, 0], 1)))
 
 
@@ -41,7 +42,7 @@ def calc_feat(vec):
     if n != 0:
         res = res / n
 
-    res
+    return res
 
 class VeRiSur(BaseImageDataset):
 
@@ -116,7 +117,8 @@ class VeRiSur(BaseImageDataset):
         dataset = []
         for k, fs in fns.items():
             for (f, cid) in fs:
-                vec = poly_area(self.train_keypoints[osp.basename(f)])
+                vec = calc_feat(self.train_keypoints[osp.basename(f)])
+                print(vec)
                 dataset.append((f, mapping[k], cid, vec))
 
         return dataset
@@ -129,7 +131,7 @@ class VeRiSur(BaseImageDataset):
                 f.readline()
                 for line in f:
                     img, pid, cid, _ = line.strip().split()
-                    vec = poly_area(self.test_keypoints[osp.basename(img)])
+                    vec = calc_feat(self.test_keypoints[osp.basename(img)])
                     q.append((osp.join(self.query_dir, img), int(pid), int(cid), vec))
 
             g = []
@@ -137,7 +139,7 @@ class VeRiSur(BaseImageDataset):
                 f.readline()
                 for line in f:
                     img, pid, cid, _ = line.strip().split()
-                    vec = poly_area(self.test_keypoints[osp.basename(img)])
+                    vec = calc_feat(self.test_keypoints[osp.basename(img)])
                     g.append((osp.join(self.gallery_dir, img), int(pid), int(cid), vec))
 
             return q, g

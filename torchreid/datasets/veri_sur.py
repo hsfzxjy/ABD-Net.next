@@ -35,7 +35,7 @@ def calc_feat(vec):
         points = np.array([dct[k] for k in poly])
         if (points == -1).any():
             continue
-        area = poly_area(points)
+        area = abs(poly_area(points))
         res[i] = area
 
     n = np.linalg.norm(res)
@@ -123,7 +123,6 @@ class VeRiSur(BaseImageDataset):
                 except KeyError:
                     missing += 1
                     continue
-                print(vec)
                 dataset.append((f, mapping[k], cid, vec))
 
         return dataset

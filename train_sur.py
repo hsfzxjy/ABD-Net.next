@@ -190,7 +190,8 @@ def main():
         print(epoch)
         print(criterion)
 
-        train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False)
+        if os.environ.get('no_train'):
+            train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False)
         train_time += round(time.time() - start_train_time)
 
         if use_gpu:

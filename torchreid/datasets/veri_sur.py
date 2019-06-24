@@ -130,41 +130,40 @@ class VeRiSur(BaseImageDataset):
 
     def _get_query_test(self):
 
-        if os.environ.get('use_info'):
-            q = []
-            with open(osp.join(self.dataset_dir, 'info/query_info.txt')) as f:
-                f.readline()
-                for line in f:
-                    img, pid, cid, _ = line.strip().split()
-                    vec = calc_feat(self.test_keypoints[osp.basename(img)])
-                    q.append((osp.join(self.query_dir, img), int(pid), int(cid), vec))
+        q = []
+        with open(osp.join(self.dataset_dir, 'info/query_info.txt')) as f:
+            f.readline()
+            for line in f:
+                img, pid, cid, _ = line.strip().split()
+                vec = calc_feat(self.test_keypoints[osp.basename(img)])
+                q.append((osp.join(self.query_dir, img), int(pid), int(cid), vec))
 
-            g = []
-            with open(osp.join(self.dataset_dir, 'info/gallery_info.txt')) as f:
-                f.readline()
-                for line in f:
-                    img, pid, cid, _ = line.strip().split()
-                    vec = calc_feat(self.test_keypoints[osp.basename(img)])
-                    g.append((osp.join(self.gallery_dir, img), int(pid), int(cid), vec))
+        g = []
+        with open(osp.join(self.dataset_dir, 'info/gallery_info.txt')) as f:
+            f.readline()
+            for line in f:
+                img, pid, cid, _ = line.strip().split()
+                vec = calc_feat(self.test_keypoints[osp.basename(img)])
+                g.append((osp.join(self.gallery_dir, img), int(pid), int(cid), vec))
 
-            return q, g
+        return q, g
 
-        q_files = set(osp.basename(x) for x in glob(osp.join(self.query_dir, '*')))
-        t_files = glob(osp.join(self.gallery_dir, '*'))
+        # q_files = set(osp.basename(x) for x in glob(osp.join(self.query_dir, '*')))
+        # t_files = glob(osp.join(self.gallery_dir, '*'))
 
-        q_dataset = []
-        t_dataset = []
+        # q_dataset = []
+        # t_dataset = []
 
-        id_mapping = defaultdict(int)
+        # id_mapping = defaultdict(int)
 
-        for f in t_files:
-            id, cid = map(int, re.findall(r'/(\d{4})_c(\d{3})', f)[0])
-            bn = osp.basename(f)
+        # for f in t_files:
+        #     id, cid = map(int, re.findall(r'/(\d{4})_c(\d{3})', f)[0])
+        #     bn = osp.basename(f)
 
-            if bn in q_files:
-                q_dataset.append((f, id, cid))
-            t_dataset.append((f, id, cid))
+        #     if bn in q_files:
+        #         q_dataset.append((f, id, cid))
+        #     t_dataset.append((f, id, cid))
 
-            id_mapping[id] += 1
+        #     id_mapping[id] += 1
 
-        return q_dataset, t_dataset
+        # return q_dataset, t_dataset

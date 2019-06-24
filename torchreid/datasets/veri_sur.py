@@ -30,7 +30,7 @@ def calc_feat(vec):
     dct = defaultdict()
     for i in range(20):
         dct[i + 1] = [vec[2 * i], vec[2 * i + 1]]
-    res = np.zeros(len(polys))
+    res = np.zeros(len(polys), dtype=np.float32)
     for i, poly in enumerate(polys):
         points = np.array([dct[k] for k in poly])
         if (points == -1).any():

@@ -159,7 +159,11 @@ class VeRiSur(BaseImageDataset):
         for f in t_files:
             id, cid = map(int, re.findall(r'/(\d{4})_c(\d{3})', f)[0])
             bn = osp.basename(f)
-            vec = calc_feat(self.test_keypoints[bn])
+
+            try:
+                vec = calc_feat(self.test_keypoints[bn])
+            except KeyError:
+                continue
 
             if bn in q_files:
                 q_dataset.append((f, id, cid, vec))

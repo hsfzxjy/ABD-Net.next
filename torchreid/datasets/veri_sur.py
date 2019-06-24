@@ -33,7 +33,6 @@ def calc_feat(vec):
     res = np.zeros(len(polys))
     for i, poly in enumerate(polys):
         points = np.array([dct[k] for k in poly])
-        print(points)
         if (points == -1).any():
             continue
         area = poly_area(points)
@@ -116,9 +115,14 @@ class VeRiSur(BaseImageDataset):
         mapping = {v: i for i, v in enumerate(sorted(ids))}
 
         dataset = []
+        missing = 0
         for k, fs in fns.items():
             for (f, cid) in fs:
-                vec = calc_feat(self.train_keypoints[osp.basename(f)])
+                try:
+                    vec = calc_feat(self.train_keypoints[osp.basename(f)])
+                except KeyError:
+                    missing += 1
+                    continue
                 print(vec)
                 dataset.append((f, mapping[k], cid, vec))
 

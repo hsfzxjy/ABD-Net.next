@@ -169,8 +169,6 @@ def main():
     print("==> Start training")
 
     if args.fixbase_epoch > 0:
-        oldenv = os.environ.get('sa', '')
-        os.environ['sa'] = ''
         print("Train {} for {} epochs while keeping other layers frozen".format(args.open_layers, args.fixbase_epoch))
         initial_optim_state = optimizer.state_dict()
 
@@ -181,7 +179,6 @@ def main():
 
         print("Done. All layers are open to train for {} epochs".format(args.max_epoch))
         optimizer.load_state_dict(initial_optim_state)
-        os.environ['sa'] = oldenv
 
     max_r1 = 0
 
@@ -190,7 +187,7 @@ def main():
         print(epoch)
         print(criterion)
 
-        if os.environ.get('no_train'):
+        if not os.environ.get('no_train'):
             train(epoch, model, criterion, regularizer, optimizer, trainloader, use_gpu, fixbase=False)
         train_time += round(time.time() - start_train_time)
 
@@ -343,7 +340,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
                 features = (model(imgs0, sur0)[0] + model(imgs1, sur1)[0]) / 2.0
                 # print(features.size())
             else:
-                (imgs, pids, camids, _, sur) = package
+                (imgs, pids, camids, paths, sur) = package
                 if use_gpu:
                     imgs = imgs.cuda()
                     sur = sur.cuda()
@@ -381,7 +378,7 @@ def test(model, queryloader, galleryloader, use_gpu, ranks=[1, 5, 10, 20], retur
                 features = (model(imgs0, sur0)[0] + model(imgs1, sur1)[0]) / 2.0
                 # print(features.size())
             else:
-                (imgs, pids, camids, _, sur) = package
+                (imgs, pids, camids, paths, sur) = package
                 if use_gpu:
                     imgs = imgs.cuda()
                     sur = sur.cuda()

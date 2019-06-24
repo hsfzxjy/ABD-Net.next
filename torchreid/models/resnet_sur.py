@@ -212,6 +212,9 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def backbone_modules(self):
+        return []
+
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
         """Constructs fully connected layer
 

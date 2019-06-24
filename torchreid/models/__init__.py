@@ -29,9 +29,12 @@ from . import resnet_mgn_abd
 # from .cltmp.densenet_cl import *
 
 from . import densenet, resnet
+from .resnet_sur import resnet50 as resnet50_nosur, resnet50_sur
 
 __model_factory = {
     **densenet.model_mapping,
+    'resnet50_sur': resnet50_sur,
+    'resnet50_nosur': resnet50_nosur,
     'resnet50': resnet.resnet50,
     'resnet50_abd_old': resnet.resnet50_abd_old,
     'resnet50_abd_np2': resnet.resnet50_abd_np2,

@@ -4,7 +4,7 @@ Code source: https://github.com/pytorch/vision
 from __future__ import absolute_import
 from __future__ import division
 
-__all__ = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnext50_32x4d',
+__all__ = ['resnet18', 'resnet34', 'resnet50', 'resnet50_sur', 'resnet101', 'resnet152', 'resnext50_32x4d',
            'resnext101_32x8d', 'resnet50_fc512']
 
 import torch
@@ -174,6 +174,7 @@ class ResNet(nn.Module):
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
         self.sur_fc = nn.Linear(kwargs['sur_dim'], self.feature_dim)
+        self.use_sur = kwargs.get('use_sur', False)
 
         self._init_params()
 
@@ -271,7 +272,8 @@ class ResNet(nn.Module):
         v = self.global_avgpool(f)
         sur = F.relu(self.sur_fc(sur))
         v = v.view(v.size(0), -1)
-        v = v + sur
+        if self.use_sur:
+            v = v + sur
 
         if self.fc is not None:
             v = self.fc(v)
@@ -345,6 +347,23 @@ def resnet50(num_classes, loss='softmax', pretrained=True, **kwargs):
         last_stride=2,
         fc_dims=None,
         dropout_p=None,
+        use_sur=False,
+        **kwargs
+    )
+    if pretrained:
+        init_pretrained_weights(model, model_urls['resnet50'])
+    return model
+
+def resnet50_sur(num_classes, loss='softmax', pretrained=True, **kwargs):
+    model = ResNet(
+        num_classes=num_classes,
+        loss=loss,
+        block=Bottleneck,
+        layers=[3, 4, 6, 3],
+        last_stride=2,
+        fc_dims=None,
+        dropout_p=None,
+        use_sur=True,
         **kwargs
     )
     if pretrained:

@@ -124,6 +124,7 @@ class VeRiSur(BaseImageDataset):
                     missing += 1
                     continue
                 dataset.append((f, mapping[k], cid, vec))
+        print('Train missing:', missing)
 
         return dataset
 

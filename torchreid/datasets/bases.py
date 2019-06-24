@@ -11,7 +11,7 @@ class BaseDataset(object):
 
     def get_imagedata_info(self, data):
         pids, cams = [], []
-        for _, pid, camid in data:
+        for _, pid, camid, *_ in data:
             pids += [pid]
             cams += [camid]
         pids = set(pids)
@@ -68,10 +68,10 @@ class BaseVideoDataset(BaseDataset):
     def print_dataset_statistics(self, train, query, gallery):
         num_train_pids, num_train_tracklets, num_train_cams, train_tracklet_info = \
             self.get_videodata_info(train, return_tracklet_info=True)
-        
+
         num_query_pids, num_query_tracklets, num_query_cams, query_tracklet_info = \
             self.get_videodata_info(query, return_tracklet_info=True)
-        
+
         num_gallery_pids, num_gallery_tracklets, num_gallery_cams, gallery_tracklet_info = \
             self.get_videodata_info(gallery, return_tracklet_info=True)
 

@@ -95,7 +95,7 @@ class VeRiSur(BaseImageDataset):
                 for line in f:
                     path, *nums = line.strip().split()
                     path = os.path.basename(path)
-                    dct[path] = nums
+                    dct[path] = [int(x) for x in nums]
 
             return dct
 

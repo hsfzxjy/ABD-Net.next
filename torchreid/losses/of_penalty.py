@@ -64,7 +64,8 @@ class SVDO(Functor):
         if key == 'intermediate':
             singular_penalty *= 0.01
 
-        return singular_penalty.sum() / (x.size(0) / 32.)  # Quirk: normalize to 32-batch case
+        # Quirk: normalize to 32-batch case
+        return singular_penalty.sum() / (x.size(0) / 32.)
 
 
 class SO(Functor):
@@ -74,6 +75,7 @@ class SO(Functor):
         batches, channels, height, width = x.size()
         x = x.view(batches, channels, -1)
         return self.beta * torch.sum(self.AAT_I(x) ** 2) ** 0.5
+
 
 class DSO(Functor):
 
@@ -114,7 +116,7 @@ class OFPenalty(nn.Module):
 
     def apply_penalty(self, k, x):
 
-        if isinstance(x, (tuple)):
+        if type(x) is tuple or type(x) is list:
             if not len(x):
                 return 0.
             return sum([self.apply_penalty(k, xx) for xx in x]) / len(x)
@@ -133,9 +135,11 @@ class OFPenalty(nn.Module):
             self._WARNED = True
 
             import warnings
-            warnings.warn('OF positions {!r} are missing. IGNORED.'.format(list(missing)))
+            warnings.warn(
+                'OF positions {!r} are missing. IGNORED.'.format(list(missing)))
 
-        singular_penalty = sum([self.apply_penalty(k, x) for k, x in feature_dict.items() if k in self.penalty_position])
+        singular_penalty = sum([self.apply_penalty(
+            k, x) for k, x in feature_dict.items() if k in self.penalty_position])
 
         logger.debug(str(singular_penalty))
         return singular_penalty

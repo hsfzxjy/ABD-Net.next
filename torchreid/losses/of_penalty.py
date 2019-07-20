@@ -55,7 +55,7 @@ class SVDO(Functor):
         return tmp + largest, largest
 
     def __call__(self, key, x):
-
+        print(key, x.size())
         batches, channels, height, width = x.size()
         W = x.view(batches, channels, -1)
         smallest, largest = self.get_singular_values(W)

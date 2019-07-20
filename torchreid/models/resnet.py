@@ -184,7 +184,7 @@ class ResNetCommonBranch(nn.Module):
         intermediate = x = self.shallow_cam(x)
         x = self.backbone2(x)
 
-        return x, {'intermediate': intermediate, 'before_intermediate': before_intermediate}
+        return x, {'intermediate': (intermediate,), 'before_intermediate': before_intermediate}
 
 class ResNetDeepBranch(nn.Module):
 

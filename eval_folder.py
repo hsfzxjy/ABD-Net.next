@@ -93,7 +93,7 @@ def test(model, queryloader, galleryloader, use_gpu):
             enumerator = enumerate(queryloader[0])
 
         for batch_idx, package in enumerator:
-
+            print('batch', batch_idx)
             if flip_eval:
                 (imgs0, pids, camids, paths), (imgs1, _, _, _) = package
                 if use_gpu:
@@ -125,7 +125,7 @@ def test(model, queryloader, galleryloader, use_gpu):
             enumerator = enumerate(galleryloader[0])
 
         for batch_idx, package in enumerator:
-            # print('fuck')
+            print('batch', batch_idx)
 
             if flip_eval:
                 (imgs0, pids, camids, paths), (imgs1, _, _, _) = package

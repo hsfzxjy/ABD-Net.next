@@ -47,10 +47,10 @@ parser.add_argument('-d', dest='dir')
 args = parser.parse_args()
 
 try:
-    checkpoint = torch.load(_args.weights)
+    checkpoint = torch.load(args.weights)
 except Exception as e:
     print(e)
-    checkpoint = torch.load(_args.weights, map_location={'cuda:0': 'cpu'})
+    checkpoint = torch.load(args.weights, map_location={'cuda:0': 'cpu'})
 
 pretrain_dict = checkpoint['state_dict']
 model_dict = model.state_dict()
@@ -60,7 +60,7 @@ pretrain_dict = {
 }
 model_dict.update(pretrain_dict)
 model.load_state_dict(model_dict)
-print("Loaded pretrained weights from '{}'".format(args.load_weights))
+print("Loaded pretrained weights from '{}'".format(args.weights))
 
 model = nn.DataParallel(model).cuda()
 

@@ -44,6 +44,7 @@ model = models.init_model(
 parser = argparse.ArgumentParser()
 parser.add_argument('-w', dest='weights')
 parser.add_argument('-d', dest='dir')
+parser.add_argument('-o', dest='output')
 args = parser.parse_args()
 
 try:
@@ -177,6 +178,7 @@ def test(model, queryloader, galleryloader, use_gpu):
     return result
 
 
-for qname, glist in sorted(list(test(model, [query], [gallery], True).items())):
-    print(qname, end='\t')
-    print(*glist, sep='\t', end='\n')
+with open(args.output, 'w') as f:
+    for qname, glist in sorted(list(test(model, [query], [gallery], True).items())):
+        print(qname, file=f, end='\t')
+        print(*glist, file=f, sep='\t', end='\n')

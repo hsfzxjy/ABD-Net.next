@@ -59,6 +59,7 @@ pretrain_dict = {
     if k in model_dict and model_dict[k].size() == v.size()
 }
 model_dict.update(pretrain_dict)
+print(set(model_dict)-set(pretrain_dict))
 model.load_state_dict(model_dict)
 print("Loaded pretrained weights from '{}'".format(args.weights))
 

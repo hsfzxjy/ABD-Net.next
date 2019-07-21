@@ -15,7 +15,7 @@ def load_data(directory, transform):
 
     return [
         (transform(read_image(name)), pid, 0, name)
-        for pid, name in enumerate(sorted(glob(directory + '*.jpg')))
+        for pid, name in enumerate(sorted(glob(directory + '/*.jpg')))
     ]
 
 

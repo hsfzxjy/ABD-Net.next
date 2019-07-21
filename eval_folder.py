@@ -160,6 +160,7 @@ def test(model, queryloader, galleryloader, use_gpu):
     from collections import defaultdict
     result = defaultdict(list)
     indices = np.argsort(distmat, axis=1)
+    print(len(q_paths), len(g_paths))
     for qidx in range(distmat.shape[0]):
         order = indices[qidx]
         cnt = 0

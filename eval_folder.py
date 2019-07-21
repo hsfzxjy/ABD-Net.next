@@ -67,11 +67,11 @@ model = nn.DataParallel(model).cuda()
 transform = build_transforms(384, 128, is_train=False, data_augment=[])
 query = DataLoader(
     load_data(args.dir, transform),
-    batch_size=100, shuffle=False, num_workers=4, pin_memory=True, drop_last=False
+    batch_size=5, shuffle=False, num_workers=4, pin_memory=True, drop_last=False
 )
 gallery = DataLoader(
     load_data(args.dir, transform),
-    batch_size=100, shuffle=False, num_workers=4, pin_memory=True, drop_last=False
+    batch_size=5, shuffle=False, num_workers=4, pin_memory=True, drop_last=False
 )
 
 

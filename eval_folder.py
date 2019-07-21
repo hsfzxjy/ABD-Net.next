@@ -31,6 +31,7 @@ class _args:
     abd_dan_no_head = False
     abd_no_reduction = False
     global_max_pooling = False
+    a3m_type = None
     shallow_cam = True
     resnet_last_stride = 1
 

@@ -30,6 +30,7 @@ class _args:
     compatibility = False
     abd_dan_no_head = False
     abd_no_reduction = False
+    global_max_pooling = False
     shallow_cam = True
     resnet_last_stride = 1
 

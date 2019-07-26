@@ -788,6 +788,10 @@ def resnet50_abd_old(num_classes, args, **kw):
 
     return ResNetOld(num_classes, 0.5)
 
+def resnet50_abd_old_baseline(num_classes, args, **kw):
+
+    return ResNetOld(num_classes, 0.5, attention_config={'parts': ()})
+
 def resnet50_abd_np2(num_classes, args, **kw):
 
     return ResNetNp2(num_classes, 0.5)

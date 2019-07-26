@@ -37,6 +37,7 @@ __model_factory = {
     'resnet50_nosur': resnet50_nosur,
     'resnet50': resnet.resnet50,
     'resnet50_abd_old': resnet.resnet50_abd_old,
+    'resnet50_abd_basel': resnet.resnet50_abd_old_baseline,
     'resnet50_abd_np2': resnet.resnet50_abd_np2,
     'resnet50_mgn_like': resnet.resnet50_mgn_like,
     # **resnet.name_function_mapping,

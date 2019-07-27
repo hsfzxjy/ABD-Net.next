@@ -134,7 +134,7 @@ def generate_CAM(outputs):
     print('hi')
     cam[12:, :] = generate_map(outputs, 2)
     print(cam)
-    cam = cv2.resize(cam, (128, 64))
+    cam = cv2.resize(cam.transpose(), (64, 128))
     return np.uint8(cam * 255)
     # return cam.transpose()
 

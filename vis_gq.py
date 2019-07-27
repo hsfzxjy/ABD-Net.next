@@ -93,7 +93,7 @@ dl = DataLoader(
 
 def get_feature(outputs, i, position):
 
-    return outputs[2][position][i].data.cpu().numpy(), outputs[3]['after'][position][i].data.cpu().numpy()
+    return outputs[2][position][i].data.cpu().numpy(), outputs[3]['after'][position - 1][i].data.cpu().numpy()
 
 def get_map(fq, fg, Fg):
 
@@ -124,6 +124,7 @@ def generate_CAM(outputs):
 
     cam = np.zeros((24, 8))
     cam[:12, :] = generate_map(outputs, 1)
+    print('hi')
     cam[12:, :] = generate_map(outputs, 2)
     cam = imresize(cam, (384, 128))
     

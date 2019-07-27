@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from torchreid.transforms import build_transforms
 from torchreid.dataset_loader import read_image
 import numpy as np
+import cv2
 
 
 def load_data(files, transform):
@@ -98,10 +99,8 @@ def get_map(fq, fg, Fg):
     result = np.zeros(Fg.shape[1:])
     fg_norm = norm(fg)
     print(fq.shape, Fg.shape)
-    for i in range(result.shape[0]):
-        for j in range(result.shape[1]):
-            result[i, j] = np.dot(fq, Fg[:,i,j])
-    
+    result = fq.reshape(1, fq.shape[0]) @ Fg.reshape(Fg.shape[0], -1)
+    result = result.reshape(Fg.shape[1:])    
     result = result / fg_norm
     max = np.max(result)
 
@@ -115,6 +114,34 @@ def generate_map(outputs):
     import matplotlib.pyplot as plt
     plt.imshow(get_map(fq, fg, Fg))
     plt.savefig('a.png')
+
+def save_class_activation_on_image(org_img, activation_map, prefix):
+    """
+        Saves cam activation map and activation map on the original image
+
+    Args:
+        org_img (PIL img): Original image
+        activation_map (numpy arr): activation map (grayscale) 0-255
+        file_name (str): File name of the exported image
+    """
+    dirname = os.path.dirname(prefix)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    # Grayscale activation map
+    path_to_file = os.path.join(prefix + '_Cam_Grayscale.jpg')
+    cv2.imwrite(path_to_file, activation_map)
+    # Heatmap of activation map
+    activation_heatmap = cv2.applyColorMap(activation_map, cv2.COLORMAP_JET)
+    path_to_file = os.path.join(prefix + '_Cam_Heatmap.jpg')
+    cv2.imwrite(path_to_file, activation_heatmap)
+    # Heatmap on picture
+    print(org_img.shape)
+    org_img = cv2.resize(org_img, (224, 224))
+    cv2.imwrite(prefix + '_Orig.jpg', org_img)
+    img_with_heatmap = .4 * np.float32(activation_heatmap) + .6 * np.float32(org_img)
+    img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
+    path_to_file = os.path.join(prefix + '_Cam_On_Image.jpg')
+    cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))
 
 generate_map(model(next(iter(dl))[0]))
 

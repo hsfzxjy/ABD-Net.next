@@ -57,7 +57,7 @@ parser.add_argument('-n', dest='name')
 args = parser.parse_args()
 
 model = models.init_model(
-    arch, num_classes=1,
+    args.arch, num_classes=1,
     use_gpu=True, args=vars(_args)
 )
 

@@ -112,7 +112,7 @@ def get_map(fq, fg, Fg):
     min = np.min(result)
     print(max)
     print('done')
-    return expit(result - max)
+    return (result - min) / (max - min)
 
 def generate_map(outputs, position):
     fq, Fq = get_feature(outputs, 0, position)

@@ -113,8 +113,8 @@ def get_map(fq, fg, Fg):
     print('done')
     x = (result - min) / (max - min)
     corners = [x[i,j] > 0.5 for i in (0, 11) for j in (0, 7)]
-    if sum(corners) < 2:
-        x = 1 - x
+    # if sum(corners) < 2:
+    #     x = 1 - x
     # if (x > 0.5).sum() < 12 * 8 / 2:
     #     x = 1 - x
     return x
@@ -133,8 +133,8 @@ def generate_CAM(outputs):
     cam[:12, :] = generate_map(outputs, 1)
     print('hi')
     cam[12:, :] = generate_map(outputs, 2)
-    cam = imresize(cam, (128, 64))
     print(cam)
+    cam = imresize(cam, (128, 64))
     return np.uint8(cam * 255)
     # return cam.transpose()
 

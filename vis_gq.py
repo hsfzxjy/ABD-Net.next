@@ -130,9 +130,9 @@ def generate_CAM(outputs):
     cam[:12, :] = generate_map(outputs, 1)
     print('hi')
     cam[12:, :] = generate_map(outputs, 2)
-    cam = imresize(cam, (384, 128))
+    cam = imresize(cam, (128, 64))
     
-    return cam.transpose()
+    # return cam.transpose()
 
 
 def save_class_activation_on_image(org_img, activation_map, prefix):
@@ -156,7 +156,7 @@ def save_class_activation_on_image(org_img, activation_map, prefix):
     cv2.imwrite(path_to_file, activation_heatmap)
     # Heatmap on picture
     print(org_img.shape)
-    org_img = cv2.resize(org_img, (384, 128))
+    # org_img = cv2.resize(org_img, (384, 128))
     cv2.imwrite(dirname + '/Gallery.jpg', org_img)
     img_with_heatmap = .4 * np.float32(activation_heatmap) + .6 * np.float32(org_img)
     img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
@@ -164,20 +164,24 @@ def save_class_activation_on_image(org_img, activation_map, prefix):
     cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))
 model.eval()
 
+fns = []
 with open(args.lst) as f:
-    for i, line in enumerate(f):
-        fns = line.strip().split()
-        dirname = f'hm/{i}/'
-        dl = DataLoader(
-            load_data(fns, transform),
-            batch_size=2, shuffle=False, num_workers=1, pin_memory=True, drop_last=False
-        )
-        outputs = model(next(iter(dl))[0])
-        cam = generate_CAM(outputs)
-        save_class_activation_on_image(
-            cv2.imread(fns[1]), cam, dirname + args.name
-        )
-        cv2.imwrite(dirname + '/Query.jpg', cv2.imresize(cv2.imread(fns[0]), (384, 128)))
+    fns.extend(line.strip().split())
+
+dl = DataLoader(
+    load_data(fns, transform),
+    batch_size=2, shuffle=False, num_workers=1, pin_memory=True, drop_last=False
+)
+
+
+for i, (imgs, _, _, fns) in dl:
+    dirname = f'hm/{i}/'
+    outputs = model(imgs)
+    cam = generate_CAM(outputs)
+    save_class_activation_on_image(
+        cv2.imread(fns[1]), cam, dirname + args.name
+    )
+    cv2.imwrite(dirname + '/Query.jpg', cv2.imread(fns[0]))
 
 
 generate_map(model(next(iter(dl))[0]))

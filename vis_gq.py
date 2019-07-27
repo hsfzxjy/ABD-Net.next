@@ -15,8 +15,8 @@ def load_data(files, transform):
     from glob import glob
 
     return [
-        (transform(read_image(name)), pid, 0, name)
-        for pid, name in enumerate(sorted(files))
+        (transform(read_image(name)), 0, 0, name)
+        for name in files
     ]
 
 def select_pair():

@@ -123,8 +123,8 @@ def generate_CAM(outputs):
     from scipy.misc import imresize
 
     cam = np.zeros((24, 8))
-    cam[:12, 8] = generate_map(outputs, 1)
-    cam[12:, 8] = generate_map(outputs, 2)
+    cam[:12, :] = generate_map(outputs, 1)
+    cam[12:, :] = generate_map(outputs, 2)
     cam = imresize(cam, (384, 128))
     
     return cam

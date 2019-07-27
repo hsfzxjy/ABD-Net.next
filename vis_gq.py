@@ -48,7 +48,7 @@ class _args:
 
 
 model = models.init_model(
-    'resnet50_abd_basel', num_classes=1,
+    'resnet50_abd_old', num_classes=1,
     use_gpu=True, args=vars(_args)
 )
 

@@ -107,12 +107,15 @@ def get_map(fq, fg, Fg):
     print(fq.shape, Fg.shape)
     result = fq.reshape(1, fq.shape[0]) @ Fg.reshape(Fg.shape[0], -1)
     result = result.reshape(Fg.shape[1:])    
-    result = - result 
+    # result = - result 
     max = np.max(result)
     min = np.min(result)
     print(max)
     print('done')
-    return (result - min) / (max - min)
+    x = (result - min) / (max - min)
+    if (x > 0.5).sum() < 12 * 8 / 2:
+        x = 1 - x
+    return x
 
 def generate_map(outputs, position):
     fq, Fq = get_feature(outputs, 0, position)

@@ -176,6 +176,7 @@ dl = DataLoader(
 
 for i, (imgs, _, _, fns) in enumerate(dl):
     dirname = f'hm/{i}/'
+    print(fns)
     outputs = model(imgs)
     cam = generate_CAM(outputs)
     save_class_activation_on_image(

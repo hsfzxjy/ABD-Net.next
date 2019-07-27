@@ -100,7 +100,7 @@ def get_map(fq, fg, Fg):
     print(fq.shape, Fg.shape)
     for i in range(result.shape[0]):
         for j in range(result.shape[1]):
-            result[i, j] = fq * Fg[:,i,j]
+            result[i, j] = np.dot(fq, Fg[:,i,j])
     
     result = result / fg_norm
     max = np.max(result)

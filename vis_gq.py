@@ -89,7 +89,7 @@ dl = DataLoader(
 
 def get_feature(outputs, i, position):
 
-    return outputs[2][position][i].data.numpy(), outputs[3]['after'][position][i].data.numpy()
+    return outputs[2][position][i].data.cpu().numpy(), outputs[3]['after'][position][i].data.cpu().numpy()
 
 def get_map(fq, fg, Fg):
 

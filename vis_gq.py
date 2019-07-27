@@ -107,8 +107,8 @@ def get_map(fq, fg, Fg):
     return 1 / (1 + np.exp(-(result - max)))
 
 def generate_map(outputs):
-    fq, Fq = get_feature(outputs, 0, 0)
-    fg, Fg = get_feature(outputs, 1, 0)
+    fq, Fq = get_feature(outputs, 0, 1)
+    fg, Fg = get_feature(outputs, 1, 1)
 
     import scipy.io as io
     import matplotlib.pyplot as plt

@@ -174,7 +174,7 @@ dl = DataLoader(
 )
 
 
-for i, (imgs, _, _, fns) in dl:
+for i, (imgs, _, _, fns) in enumerate(dl):
     dirname = f'hm/{i}/'
     outputs = model(imgs)
     cam = generate_CAM(outputs)

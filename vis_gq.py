@@ -118,10 +118,7 @@ def generate_map(outputs, position):
     fq, Fq = get_feature(outputs, 0, position)
     fg, Fg = get_feature(outputs, 1, position)
 
-    import scipy.io as io
-    import matplotlib.pyplot as plt
-    plt.imshow(get_map(fq, fg, Fg))
-    plt.savefig('a.png')
+    return get_map(fq, fg, Fg)
 
 def generate_CAM(outputs):
 

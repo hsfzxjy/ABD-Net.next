@@ -23,7 +23,7 @@ def select_pair():
     from glob import glob
     import re
 
-    query = choice(glob('data/market1501/query'))
+    query = choice(glob('data/market1501/query/*'))
     pid, cid = re.findall(r'([-\d]+)_c(\d)', query)[0]
     gallery = choice(glob(f'data/market1501/bounding_box_test/{pid}_c'))
 

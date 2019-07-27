@@ -166,7 +166,8 @@ model.eval()
 
 fns = []
 with open(args.lst) as f:
-    fns.extend(line.strip().split())
+    for line in f:
+        fns.extend(line.strip().split())
 
 dl = DataLoader(
     load_data(fns, transform),

@@ -103,7 +103,7 @@ def get_map(fq, fg, Fg):
     result = result.reshape(Fg.shape[1:])    
     result = result / fg_norm
     max = np.max(result)
-
+    print('done')
     return 1 / (1 + np.exp(-(result - max)))
 
 def generate_map(outputs):

@@ -115,7 +115,7 @@ def generate_map(outputs):
     plt.imshow(get_map(fq, fg, Fg))
     plt.savefig('a.png')
 
-generate_map(model(next(iter(dl))))
+generate_map(model(next(iter(dl))[0]))
 
 # with open(args.output, 'w') as f:
 #     for qname, glist in sorted(list(test(model, [query], [gallery], True).items())):

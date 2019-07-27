@@ -107,7 +107,7 @@ def get_map(fq, fg, Fg):
     print(fq.shape, Fg.shape)
     result = fq.reshape(1, fq.shape[0]) @ Fg.reshape(Fg.shape[0], -1)
     result = result.reshape(Fg.shape[1:])    
-    result = result / fg_norm
+    result = - result 
     max = np.max(result)
     min = np.min(result)
     print(max)

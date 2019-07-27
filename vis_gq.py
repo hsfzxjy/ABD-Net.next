@@ -47,17 +47,20 @@ class _args:
     shallow_cam = True
     resnet_last_stride = 1
 
-
-model = models.init_model(
-    'resnet50_abd_old', num_classes=1,
-    use_gpu=True, args=vars(_args)
-)
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-w', dest='weights')
+parser.add_argument('-l', dest='lst')
+parser.add_argument('-a', dest='arch')
+parser.add_argument('-n', dest='name')
 # parser.add_argument('-d', dest='dir')
 # parser.add_argument('-o', dest='output')
 args = parser.parse_args()
+
+model = models.init_model(
+    arch, num_classes=1,
+    use_gpu=True, args=vars(_args)
+)
+
 
 try:
     checkpoint = torch.load(args.weights)
@@ -81,7 +84,7 @@ model = nn.DataParallel(model).cuda()
 transform = build_transforms(384, 128, is_train=False, data_augment=[])
 dl = DataLoader(
     load_data(select_pair(), transform),
-    batch_size=2, shuffle=False, num_workers=4, pin_memory=True, drop_last=False
+    batch_size=2, shuffle=False, num_workers=1, pin_memory=True, drop_last=False
 )
 # gallery = DataLoader(
 #     load_data(args.dir, transform),
@@ -106,14 +109,26 @@ def get_map(fq, fg, Fg):
     print('donegit pu')
     return 1 / (1 + np.exp(-(result - max)))
 
-def generate_map(outputs):
-    fq, Fq = get_feature(outputs, 0, 1)
-    fg, Fg = get_feature(outputs, 1, 1)
+def generate_map(outputs, position):
+    fq, Fq = get_feature(outputs, 0, position)
+    fg, Fg = get_feature(outputs, 1, position)
 
     import scipy.io as io
     import matplotlib.pyplot as plt
     plt.imshow(get_map(fq, fg, Fg))
     plt.savefig('a.png')
+
+def generate_CAM(outputs):
+
+    from scipy.misc import imresize
+
+    cam = np.zeros((24, 8))
+    cam[:12, 8] = generate_map(outputs, 1)
+    cam[12:, 8] = generate_map(outputs, 2)
+    cam = imresize(cam, (384, 128))
+    
+    return cam
+
 
 def save_class_activation_on_image(org_img, activation_map, prefix):
     """
@@ -136,13 +151,30 @@ def save_class_activation_on_image(org_img, activation_map, prefix):
     cv2.imwrite(path_to_file, activation_heatmap)
     # Heatmap on picture
     print(org_img.shape)
-    org_img = cv2.resize(org_img, (224, 224))
-    cv2.imwrite(prefix + '_Orig.jpg', org_img)
+    org_img = cv2.resize(org_img, (384, 128))
+    cv2.imwrite(dirname + '/Gallery.jpg', org_img)
     img_with_heatmap = .4 * np.float32(activation_heatmap) + .6 * np.float32(org_img)
     img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
     path_to_file = os.path.join(prefix + '_Cam_On_Image.jpg')
     cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))
 model.eval()
+
+with open(args.lst) as f:
+    for i, line in enumerate(f):
+        fns = f.strip().split()
+        dirname = f'hm/{i}/'
+        dl = DataLoader(
+            load_data(fns, transform),
+            batch_size=2, shuffle=False, num_workers=1, pin_memory=True, drop_last=False
+        )
+        outputs = model(next(iter(dl))[0])
+        cam = generate_CAM(outputs)
+        save_class_activation_on_image(
+            cv2.imread(fns[1]), cam, dirname + args.name
+        )
+        cv2.imwrite(dirname + '/Query.jpg', cv2.imresize(cv2.imread(fns[0]), (384, 128)))
+
+
 generate_map(model(next(iter(dl))[0]))
 
 # with open(args.output, 'w') as f:

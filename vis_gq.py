@@ -161,7 +161,7 @@ model.eval()
 
 with open(args.lst) as f:
     for i, line in enumerate(f):
-        fns = f.strip().split()
+        fns = line.strip().split()
         dirname = f'hm/{i}/'
         dl = DataLoader(
             load_data(fns, transform),

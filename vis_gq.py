@@ -91,6 +91,8 @@ dl = DataLoader(
 #     batch_size=5, shuffle=False, num_workers=4, pin_memory=True, drop_last=False
 # )
 
+import os
+
 def get_feature(outputs, i, position):
 
     return outputs[2][position][i].data.cpu().numpy(), outputs[3]['after'][position - 1][i].data.cpu().numpy()
@@ -99,6 +101,7 @@ def get_map(fq, fg, Fg):
 
     import numpy as np
     from numpy.linalg import norm
+    from scipy.special import expit
     result = np.zeros(Fg.shape[1:])
     fg_norm = norm(fg)
     print(fq.shape, Fg.shape)
@@ -106,8 +109,9 @@ def get_map(fq, fg, Fg):
     result = result.reshape(Fg.shape[1:])    
     result = result / fg_norm
     max = np.max(result)
-    print('donegit pu')
-    return 1 / (1 + np.exp(-(result - max)))
+    print(max)
+    print('done')
+    return expit(result - max)
 
 def generate_map(outputs, position):
     fq, Fq = get_feature(outputs, 0, position)

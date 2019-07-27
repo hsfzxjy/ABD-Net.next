@@ -25,7 +25,7 @@ def select_pair():
 
     query = choice(glob('data/market1501/query/*'))
     pid, cid = re.findall(r'([-\d]+)_c(\d)', query)[0]
-    gallery = choice(glob(f'data/market1501/bounding_box_test/{pid}_c'))
+    gallery = choice(glob(f'data/market1501/bounding_box_test/{pid}_c*'))
 
     print(query, gallery, 'selected')
     return [query, gallery]

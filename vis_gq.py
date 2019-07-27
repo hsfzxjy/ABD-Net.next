@@ -132,7 +132,7 @@ def generate_CAM(outputs):
     cam[12:, :] = generate_map(outputs, 2)
     cam = imresize(cam, (384, 128))
     
-    return cam
+    return cam.transpose()
 
 
 def save_class_activation_on_image(org_img, activation_map, prefix):

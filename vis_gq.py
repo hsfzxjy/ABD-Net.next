@@ -103,7 +103,7 @@ def get_map(fq, fg, Fg):
     result = result.reshape(Fg.shape[1:])    
     result = result / fg_norm
     max = np.max(result)
-    print('done')
+    print('donegit pu')
     return 1 / (1 + np.exp(-(result - max)))
 
 def generate_map(outputs):
@@ -142,7 +142,7 @@ def save_class_activation_on_image(org_img, activation_map, prefix):
     img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
     path_to_file = os.path.join(prefix + '_Cam_On_Image.jpg')
     cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))
-
+model.eval()
 generate_map(model(next(iter(dl))[0]))
 
 # with open(args.output, 'w') as f:

@@ -113,7 +113,7 @@ def get_map(fq, fg, Fg):
     print('done')
     x = (result - min) / (max - min)
     corners = [x[i,j] > 0.5 for i in (0, 11) for j in (0, 7)]
-    if sum(corners) > 2:
+    if sum(corners) < 2:
         x = 1 - x
     # if (x > 0.5).sum() < 12 * 8 / 2:
     #     x = 1 - x

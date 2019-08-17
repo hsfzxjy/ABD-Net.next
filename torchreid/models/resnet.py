@@ -164,7 +164,6 @@ class ResNetCommonBranch(nn.Module):
             backbone.maxpool,
             backbone.layer1
         )
-        # owner.shallow_cam =
         self.shallow_cam = ShallowCAM(args, 256)
         self.backbone2 = nn.Sequential(
             backbone.layer2,
@@ -200,6 +199,57 @@ class ResNetDeepBranch(nn.Module):
     def forward(self, x):
         return self.backbone(x)
 
+class ResNetMGNLikeCommonBranch(nn.Module):
+
+    def __init__(self, owner, backbone, args):
+
+        super().__init__()
+
+        self.backbone1 = nn.Sequential(
+            backbone.conv1,
+            backbone.bn1,
+            backbone.relu,
+            backbone.maxpool,
+            backbone.layer1
+        )
+        self.shallow_cam = ShallowCAM(args, 256)
+        self.backbone2 = nn.Sequential(
+            backbone.layer2,
+            backbone.layer3[0],
+        )
+
+    def backbone_modules(self):
+
+        return [self.backbone1, self.backbone2]
+
+    def forward(self, x):
+
+        x = self.backbone1(x)
+        intermediate = x = self.shallow_cam(x)
+        x = self.backbone2(x)
+
+        return x, intermediate
+
+class ResNetMGNLikeDeepBranch(nn.Module):
+
+    def __init__(self, owner, backbone, args):
+
+        super().__init__()
+
+        self.backbone = nn.Sequential(
+            *deepcopy(backbone.layer3[1:]),
+            deepcopy(backbone.layer4)
+        )
+        self.out_dim = 2048
+
+    def backbone_modules(self):
+
+        return [self.backbone]
+
+    def forward(self, x):
+        return self.backbone(x)
+
+
 class MultiBranchResNet(branches.MultiBranchNetwork):
 
     def _get_common_branch(self, backbone, args):
@@ -209,6 +259,17 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
     def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
 
         return ResNetDeepBranch(self, backbone, args)
+
+class MultiBranchMGNLikeResNet(branches.MultiBranchNetwork):
+
+    def _get_common_branch(self, backbone, args):
+
+        return ResNetMGNLikeCommonBranch(self, backbone, args)
+
+    def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
+
+        return ResNetMGNLikeDeepBranch(self, backbone, args)
+
 
 def resnet50_backbone():
 
@@ -226,3 +287,8 @@ def resnet50(num_classes, args, **kw):
 
     backbone = resnet50_backbone()
     return MultiBranchResNet(backbone, args, num_classes)
+
+def resnet50_mgn_like(num_classes, args, **kw):
+
+    backbone = resnet50_backbone()
+    return MultiBranchMGNLikeResNet(backbone, args, num_classes)

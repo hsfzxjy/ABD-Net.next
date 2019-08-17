@@ -53,9 +53,13 @@ class MultiBranchNetwork(nn.Module):
                     )
                 )
 
-            if 'np' == branch_name:
+            if branch_name.startswith('np'):
                 middle_subbranch = self._get_middle_subbranch_for(backbone, args, NPBranch)
-                np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim)
+                try:
+                    part_num = int(branch_name[2:])
+                except (TypeError, ValueError):
+                    part_num = None
+                np_branch = NPBranch(self, backbone, args, middle_subbranch.out_dim, part_num=part_num)
                 branch_list.append(
                     Sequential(
                         middle_subbranch,
@@ -131,7 +135,10 @@ class GlobalBranch(nn.Module):
         self.num_classes = owner.num_classes
 
         self._init_fc_layer()
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        if args['global_max_pooling']:
+            self.avgpool = nn.AdaptiveMaxPool2d(1)
+        else:
+            self.avgpool = nn.AdaptiveAvgPool2d(1)
         self._init_classifier()
 
     def backbone_modules(self):
@@ -181,7 +188,7 @@ class GlobalBranch(nn.Module):
 
 class NPBranch(nn.Module):
 
-    def __init__(self, owner, backbone, args, input_dim):
+    def __init__(self, owner, backbone, args, input_dim, part_num=None):
         super().__init__()
 
         self.owner = weakref.ref(owner)
@@ -190,11 +197,19 @@ class NPBranch(nn.Module):
         self.output_dim = args['np_dim']
         self.args = args
         self.num_classes = owner.num_classes
-        self.part_num = args['np_np']
+        self.with_global = args['np_with_global']
+        if part_num is None:
+            part_num = args['np_np']
+        self.part_num = subbranch_num = part_num
+        if self.with_global:
+            subbranch_num += 1
 
-        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(self.part_num)])
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
-        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(self.part_num)])
+        self.fcs = nn.ModuleList([self._init_fc_layer() for i in range(subbranch_num)])
+        if args['np_max_pooling']:
+            self.avgpool = nn.AdaptiveMaxPool2d(1)
+        else:
+            self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.classifiers = nn.ModuleList([self._init_classifier() for i in range(subbranch_num)])
 
     def backbone_modules(self):
 
@@ -231,7 +246,7 @@ class NPBranch(nn.Module):
         triplet, xent, predict = [], [], []
 
         assert x.size(2) % self.part_num == 0,\
-            f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
+            "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
         margin = x.size(2) // self.part_num
 
         for p in range(self.part_num):
@@ -242,6 +257,16 @@ class NPBranch(nn.Module):
             triplet.append(x_sliced)
             predict.append(x_sliced)
             x_sliced = self.classifiers[p](x_sliced)
+            xent.append(x_sliced)
+
+        if self.with_global:
+            x_sliced = self.avgpool(x)
+            x_sliced = x_sliced.view(x_sliced.size(0), -1)
+
+            x_sliced = self.fcs[-1](x_sliced)
+            triplet.append(x_sliced)
+            predict.append(x_sliced)
+            x_sliced = self.classifiers[-1](x_sliced)
             xent.append(x_sliced)
 
         return predict, xent, triplet, {}
@@ -344,7 +369,7 @@ class ABDBranch(nn.Module):
         x = self.reduction(x)
 
         assert x.size(2) % self.part_num == 0,\
-            f"Height {x.size(2)} is not a multiplication of {self.part_num}. Aborted."
+            "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
 
         margin = x.size(2) // self.part_num
         for p in range(self.part_num):
@@ -352,7 +377,7 @@ class ABDBranch(nn.Module):
 
             if self.use_dan:
                 to_sum = []
-                module_name: str
+                # module_name: str
                 for module_name in self.dan_module_names:
                     x_out = getattr(self, module_name)(x_sliced)
                     to_sum.append(x_out)
@@ -453,7 +478,7 @@ class DANBranch(nn.Module):
         x = F.relu(x)
 
         feats = []
-        module_name: str
+        # module_name: str
         for module_name in self.dan_module_names:
             x_out = getattr(self, module_name)(x)
             feats.append(x_out)

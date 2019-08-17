@@ -164,8 +164,10 @@ def argument_parser():
     # ************************************************************
     parser.add_argument('--compatibility', action='store_true')
     parser.add_argument('--branches', nargs='+', type=str, default=['global', 'abd'])
-    parser.add_argument('--global-dim', type=int, default=1024)
     parser.add_argument('--dropout', type=float, default=0.5)
+
+    parser.add_argument('--global-dim', type=int, default=1024)
+    parser.add_argument('--global-max-pooling', action='store_true')
 
     parser.add_argument('--abd-dim', type=int, default=1024)
     parser.add_argument('--abd-np', type=int, default=2)
@@ -175,6 +177,8 @@ def argument_parser():
 
     parser.add_argument('--np-dim', type=int, default=1024)
     parser.add_argument('--np-np', type=int, default=2)
+    parser.add_argument('--np-with-global', action='store_true')
+    parser.add_argument('--np-max-pooling', action='store_true')
 
     parser.add_argument('--dan-dim', type=int, default=1024)
     parser.add_argument('--dan-dan', nargs='+', type=str, default=[])

@@ -1,87 +1,74 @@
-# Data Preparation and Miscs
+# ABD-Net: Attentive but Diverse Person Re-Identification
 
-Refer to original README at [here](./README_ORIG.md).
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/abd-net-attentive-but-diverse-person-re/person-re-identification-on-msmt17)](https://paperswithcode.com/sota/person-re-identification-on-msmt17?p=abd-net-attentive-but-diverse-person-re) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/abd-net-attentive-but-diverse-person-re/person-re-identification-on-dukemtmc-reid)](https://paperswithcode.com/sota/person-re-identification-on-dukemtmc-reid?p=abd-net-attentive-but-diverse-person-re) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/abd-net-attentive-but-diverse-person-re/person-re-identification-on-market-1501)](https://paperswithcode.com/sota/person-re-identification-on-market-1501?p=abd-net-attentive-but-diverse-person-re)
 
-# Cython Evalution
+Code for this paper [ABD-Net: Attentive but Diverse Person Re-Identification](https://arxiv.org/abs/1908.01114)
 
-```bash
-cd torchreid/eval_cylib
-make
+Tianlong Chen, Shaojin Ding\*, Jingyi Xie\*, Ye Yuan, Wuyang Chen, Yang Yang, Zhou Ren, Zhangyang Wang
+
+In ICCV 2019
+
+Refer to **Training Guides README** [here](./README_Training_Guides.md), original README [here](./README_ORIG.md), datasets README [here](./DATASETS.md), Model ZOO README [here](https://kaiyangzhou.github.io/deep-person-reid/MODEL_ZOO.html).
+
+We provide complete usage pretrained models for our paper.
+
+- Market1501 [best ABD-Net model](https://drive.google.com/file/d/1TuxnwSecg0EFFd5Z_665kek_e0Q-N4tU/view?usp=sharing)
+- Duke [best ABD-Net model](https://drive.google.com/file/d/1wQtbi8gBe_oMLc9GvDXrGF5yRBoz51o_/view?usp=sharing)
+- MSMT17 [best ABD-Net model](https://drive.google.com/file/d/1_ZpSfOxrid9xpSecAxEA2WAa6h-uWc1O/view?usp=sharing)
+
+More models will come soon. If you want a pretrained model for some specific datasets, please be free to post an issue in our repo.
+
+## Overview
+
+Attention mechanism has been shown to be effective for person re-identification (Re-ID). However, the learned attentive feature embeddings which are often not naturally diverse nor uncorrelated, will compromise the retrieval performance based on the Euclidean distance. We advocate that enforcing diversity could greatly complement the power of attention. To this end, we propose an Attentive but Diverse Network (ABD-Net), which seamlessly integrates attention modules and diversity regularization throughout the entire network, to learn features that are representative, robust, and more discriminative.
+
+Here are the visualization of attention maps. (i) Original images; (ii) Attentive feature maps; (iii) Attentive but diverse feature maps. Diversity can be observed to make attention "broader" in general, and to correct some mistaken over-emphasis (such as clothes textures) by attention. (L: large values; S: small values.)
+
+![](./doc_images/JET_VIS.png)
+
+
+
+## Methods
+
+![](./doc_images/Arch.png)
+
+We add a CAM (Channel Attention Module) and O.F. on the outputs of res\_conv\_2 block. The regularized feature map is used as the input of res\_conv\_3. Next, after the res\_conv\_4 block, the network splits into a **global branch** and an **attentive branch** in parallel. We apply O.W. on all conv layers in our ResNet-50 backbone, i.e.​, from res\_conv\_1 to res\_conv\_4 and the two res\_conv\_5 in both branches. The outputs of two branches are concatenated as the final feature embedding. 
+
+Here are the detailed structures of CAM (Channel Attention Module) and PAM (Position Attention Module).
+
+![](./doc_images/att.png)
+
+
+
+## Results
+
+Our proposed ABD-Net achieves the state-of-the-art (SOTA) performance in Market-1501, DukeMTMC-Re-ID and MSMT17 datasets. The detailed comparison with previous SOTA can be found in [our paper](https://arxiv.org/abs/1908.01114).
+
+|    Dataset     | Top-1 |  mAP  |
+| :------------: | :---: | :---: |
+|  Market-1501   | 95.60 | 88.28 |
+| DukeMTMC-Re-ID | 89.00 | 78.59 |
+|     MSMT17     | 82.30 | 60.80 |
+
+Here are three Re-ID examples of ABD-Net (XE), Baseline + PAM + CAM and Baseline on Market-1s501. Left: query image. Right: i): top-5 results of ABD-Net (XE). ii): top-5 results of Baseline + PAM + CAM. iii): top-5 results of Baseline. Images in red boxes are negative results.
+
+![](./doc_images/qr.png)
+
+
+
+## Citation
+
+If you use this code for your research, please cite our paper.
+
+```
+​```
+@InProceedings{Chen_2019_ICCV,
+author = {Tianlong Chen and Shaojin Ding and Jingyi Xie and Ye Yuan and Wuyang Chen and Yang Yang and Zhou Ren and Zhangyang Wang},
+title = {ABD-Net: Attentive but Diverse Person Re-Identification},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2019}
+}
+​```
 ```
 
-# Command
-
-Example:
-
-```bash
-python train.py -s market1501 -t market1501 \
-    --flip-eval --eval-freq 1 \
-    --label-smooth \
-    --criterion htri \
-    --lambda-htri 0.1  \
-    --data-augment none \
-    --margin 1.2 \
-    --train-batch-size 64 \
-    --height 224 \
-    --width 224 \
-    --optim adam --lr 0.0003 \
-    --stepsize 20 40 \
-     --gpu-devices 4,5 \
-     --max-epoch 80 \
-     --save-dir path/to/dir \
-     --arch resnet50 \
-     --use-of \
-     --abd-dan cam pam \
-     --abd-np 2 \
-     --shallow-cam \
-     --use-ow
-```
-
-## Criterion
-
- + `--criterion`. May be `xent`, `htri`.
-
-## OF
- + `--use-of`
- + `--of-beta <beta>`. Default `1e-6`.
- + `--of-start-epoch <epoch>`. Default `23`.
- + `--of-position <p1> <p2> ...`. Can be a subset of `{before, after, cam, pam, intermediate}`. Default to all of them.
-
-## OW
-
- + `--use-ow`
- + `--ow-beta <beta>`. Default `1e-3`.
-
-## Shallow CAM
-
- + `--shallow-cam`. When set, ShallowCAM will be used.
-
-## Branches
-
- + `--branches <b1> <b2> ...`. Can be a subset of `{global, abd, dan, np}`. Default to `{global, abd}`.
-
-## Global Branch
-
- + `--global-dim <dim>`. Default to `1024`.
-
-## ABD Branch
-
- + `--abd-dim <dim>`. Specify the feature dim for each part. Default to `1024`.
- + `--abd-np <np>`. Default to `2`.
- + `--abd-dan ...`. Can be a subset of `{cam, pam}`. Default to `{}`.
- + `--abd-dan-no-head`. When set, DANHead will not be used.
-
-## NP Branch
-
-+ `--np-dim <dim>`. Specify the feature dim for each part. Default to `1024`.
-+ `--np-np <np>`. Default to `2`.
-
-## DAN Branch
-
- + `--dan-dim <dim>`. Specify the feature dim for each part. Default to `1024`.
- + `--dan-dan ...`. Can be a subset of `{cam, pam}`. Default to `{}`.
- + `--dan-dan-no-head`. When set, DANHead will not be used.
-
-## Arch
-
- + `--arch <arch>`. May be one of `{resnet50, densenet121, densenet121_d4, densenet121_t3_d4, densenet121_d3_t3_d4, densenet161, densenet161_d4, densenet161_t3_d4, densenet161_d3_t3_d4}`.

@@ -48,7 +48,7 @@ def get_criterion(num_classes: int, use_gpu: bool, args):
         from torchreid.losses.cross_entropy_loss import CrossEntropyLoss
         criterion = CrossEntropyLoss(num_classes, use_gpu=use_gpu, label_smooth=args.label_smooth)
     else:
-        raise RuntimeError(f'Unknown criterion {args.criterion}')
+        raise RuntimeError('Unknown criterion {}'.format(args.criterion))
 
     return criterion
 

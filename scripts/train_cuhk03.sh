@@ -47,7 +47,7 @@ elif [ "$1"x == "debug"x ]; then
 elif [ "$1"x == "kill"x ]; then
     ps aux | grep $LOG_DIR | awk '{system("kill " $2)}'
 elif [ "$1"x == "log"x ]; then
-    tail -f $LOG_DIR/log_train.txt
+    tail -f $LOG_DIR/log_train.txt -n 1000
 else
     echo Unknown sub-command: $1
     exit 1

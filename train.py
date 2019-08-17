@@ -170,7 +170,7 @@ def main():
             'state_dict': state_dict,
             'rank1': 0,
             'epoch': epoch,
-        }, False, osp.join(args.save_dir, 'checkpoint_ep' + str(epoch + 1) + '.pth.tar'))
+        }, False, osp.join(args.save_dir, 'checkpoint_latest.pth.tar'))
 
         scheduler.step()
 

@@ -32,6 +32,7 @@ class Logger(object):
         self.console.write(msg)
         if self.file is not None:
             self.file.write(msg)
+        self.flush()
 
     def flush(self):
         self.console.flush()

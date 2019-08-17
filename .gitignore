@@ -125,3 +125,5 @@ dmypy.json
 
 data/
 log/
+nohup.out
+*/eval_cylib/*.c

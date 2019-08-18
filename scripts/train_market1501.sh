@@ -8,7 +8,6 @@ export GPU=$GPU
 echo Using GPU: $GPU
 
 export LOG_DIR="log/abd_best_market1501_"$2
-mkdir -p $LOG_DIR
 echo Logging to: $LOG_DIR
 
 cd `git rev-parse --show-toplevel`
@@ -34,7 +33,7 @@ function run_script {
         --abd-dan cam pam \
         --abd-np 2 \
         --shallow-cam \
-        --use-ow 
+        --use-ow $extra_args
 }
 export -f run_script
 
@@ -43,6 +42,10 @@ if [ "$1"x == "train"x ]; then
     sleep 2
     tail -f $LOG_DIR/log_train.txt
 elif [ "$1"x == "debug"x ]; then
+    run_script
+elif [ "$1"x == "test"x ]; then
+    export LOG_DIR=../.__
+    export extra_args="--evaluate --load-weights $2"
     run_script
 elif [ "$1"x == "kill"x ]; then
     ps aux | grep $LOG_DIR | awk '{system("kill " $2)}'

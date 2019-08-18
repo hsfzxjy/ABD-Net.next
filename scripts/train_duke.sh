@@ -7,13 +7,13 @@ fi
 export GPU=$GPU
 echo Using GPU: $GPU
 
-export LOG_DIR="log/abd_best_market1501_"$2
+export LOG_DIR="log/abd_best_duke_"
 echo Logging to: $LOG_DIR
 
 cd `git rev-parse --show-toplevel`
 
 function run_script {
-    python train.py -s market1501 -t market1501 \
+    python train.py -s dukemtmcreid -t dukemtmcreid \
         --flip-eval --eval-freq 1 \
         --label-smooth \
         --criterion htri \
@@ -33,7 +33,7 @@ function run_script {
         --abd-dan cam pam \
         --abd-np 2 \
         --shallow-cam \
-        --use-ow $extra_args
+        --use-ow 
 }
 export -f run_script
 

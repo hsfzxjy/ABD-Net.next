@@ -26,7 +26,7 @@ function run_script {
         --optim adam --lr 0.0003 \
         --stepsize 20 40 \
         --gpu-devices $GPU \
-        --max-epoch 80 \
+        --max-epoch 120 \
         --save-dir $LOG_DIR \
         --arch resnet50 \
         --use-of \

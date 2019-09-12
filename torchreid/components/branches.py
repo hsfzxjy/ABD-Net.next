@@ -245,9 +245,9 @@ class NPBranch(nn.Module):
 
         triplet, xent, predict = [], [], []
 
-        assert x.size(2) % self.part_num == 0,\
-            "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
-        margin = x.size(2) // self.part_num
+        # assert x.size(2) % self.part_num == 0,\
+        #     "Height {} is not a multiplication of {}. Aborted.".format(x.size(2), self.part_num)
+        margin = (x.size(2) - 1) // self.part_num + 1
 
         for p in range(self.part_num):
             x_sliced = self.avgpool(x[:, :, p * margin:(p + 1) * margin, :])

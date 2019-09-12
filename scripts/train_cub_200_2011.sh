@@ -7,33 +7,39 @@ fi
 export GPU=$GPU
 echo Using GPU: $GPU
 
-export LOG_DIR="log/abd_best_duke_"
+export LOG_DIR="log/abd_best_cub_200_2011_eof"
 echo Logging to: $LOG_DIR
 
 cd `git rev-parse --show-toplevel`
 
 function run_script {
-    python train.py -s dukemtmcreid -t dukemtmcreid \
+    python train.py -s cub_200_2011 -t cub_200_2011 \
         --flip-eval --eval-freq 1 \
         --label-smooth \
         --criterion htri \
-        --lambda-htri 0.1  \
+        --lambda-htri 1  \
         --data-augment crop random-erase \
-        --margin 1.2 \
+        --margin 0.3 \
         --train-batch-size 64 \
-        --height 384 \
-        --width 128 \
+        --height 288 \
+        --width 288 \
         --optim adam --lr 0.0003 \
         --stepsize 20 40 \
         --gpu-devices $GPU \
         --max-epoch 120 \
         --save-dir $LOG_DIR \
-        --arch resnet50 \
+        --arch resnet50_mgn_like \
+        --branches global np2 np3 \
+        --global-dim 1024 \
+        --np-dim 1024 --np-with-global \
         --use-of \
         --abd-dan cam pam \
-        --abd-np 2 \
-        --shallow-cam \
-        --use-ow $extra_args
+        --abd-dim 1024 \
+        --cls-dim 2048 \
+        --abd-np 1 \
+        --use-ow \
+        --resnet-last-stride 1 \
+        --of-beta 1e-8 
 }
 export -f run_script
 

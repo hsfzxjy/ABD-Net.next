@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 
+import torch
 from torch import nn
 import torch.utils.model_zoo as model_zoo
 from copy import deepcopy
@@ -232,7 +233,7 @@ class ResNetMGNLikeCommonBranch(nn.Module):
 
 class ResNetMGNLikeDeepBranch(nn.Module):
 
-    def __init__(self, owner, backbone, args):
+    def __init__(self, owner, backbone, args, last_branch_class):
 
         super().__init__()
 
@@ -240,6 +241,7 @@ class ResNetMGNLikeDeepBranch(nn.Module):
             *deepcopy(backbone.layer3[1:]),
             deepcopy(backbone.layer4)
         )
+        
         self.out_dim = 2048
 
     def backbone_modules(self):
@@ -260,6 +262,36 @@ class MultiBranchResNet(branches.MultiBranchNetwork):
 
         return ResNetDeepBranch(self, backbone, args)
 
+class MultiBranchResNetCls(branches.MultiBranchNetwork):
+
+    def __init__(self, backbone, args, num_classes, **kwargs):
+
+        super().__init__(backbone, args, num_classes, **kwargs)
+
+        from torchreid.utils.torchtools import init_params
+        self.final_classifier = nn.Linear(
+            args['cls_dim'],
+            num_classes,
+        )
+        init_params(self.final_classifier)
+
+    def _get_common_branch(self, backbone, args):
+
+        return ResNetCommonBranch(self, backbone, args)
+
+    def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
+
+        return ResNetDeepBranch(self, backbone, args)
+
+    def forward(self, x):
+        _, xent, trip, _ = outputs = list(super().forward(x))
+        xent = list(xent)
+        xent.append(
+            self.final_classifier(torch.cat(trip, 1))
+        )
+        outputs[1] = tuple(xent)
+        return tuple(outputs)
+
 class MultiBranchMGNLikeResNet(branches.MultiBranchNetwork):
 
     def _get_common_branch(self, backbone, args):
@@ -268,15 +300,15 @@ class MultiBranchMGNLikeResNet(branches.MultiBranchNetwork):
 
     def _get_middle_subbranch_for(self, backbone, args, last_branch_class):
 
-        return ResNetMGNLikeDeepBranch(self, backbone, args)
+        return ResNetMGNLikeDeepBranch(self, backbone, args, last_branch_class)
 
 
-def resnet50_backbone():
+def resnet50_backbone(last_stride):
 
     network = ResNet(
         block=Bottleneck,
         layers=[3, 4, 6, 3],
-        last_stride=1,  # Always remove down-sampling
+        last_stride=last_stride,  # Always remove down-sampling
     )
     init_pretrained_weights(network, model_urls['resnet50'])
 
@@ -285,10 +317,15 @@ def resnet50_backbone():
 
 def resnet50(num_classes, args, **kw):
 
-    backbone = resnet50_backbone()
+    backbone = resnet50_backbone(args['resnet_last_stride'])
     return MultiBranchResNet(backbone, args, num_classes)
+
+def resnet50_cls(num_classes, args, **kw):
+
+    backbone = resnet50_backbone(args['resnet_last_stride'])
+    return MultiBranchResNetCls(backbone, args, num_classes)
 
 def resnet50_mgn_like(num_classes, args, **kw):
 
-    backbone = resnet50_backbone()
+    backbone = resnet50_backbone(args['resnet_last_stride'])
     return MultiBranchMGNLikeResNet(backbone, args, num_classes)

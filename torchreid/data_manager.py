@@ -122,32 +122,41 @@ class ImageDataManager(BaseDataManager):
                 cuhk03_classic_split=self.cuhk03_classic_split
             )
 
-            self.testloader_dict[name]['query'] = DataLoader(
-                ImageDataset(dataset.query, transform=transform_test),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+            if hasattr(dataset, 'val'):
+                self.testloader_dict[name]['val'] = DataLoader(
+                    ImageDataset(dataset.val, transform=transform_test),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
+            else:
+                if not hasattr(dataset, 'query') or not hasattr(dataset, 'gallery'):
+                    continue
+                self.testloader_dict[name]['query'] = DataLoader(
+                    ImageDataset(dataset.query, transform=transform_test),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
 
-            self.testloader_dict[name]['gallery'] = DataLoader(
-                ImageDataset(dataset.gallery, transform=transform_test),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+                self.testloader_dict[name]['gallery'] = DataLoader(
+                    ImageDataset(dataset.gallery, transform=transform_test),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
 
-            self.testloader_dict[name]['query_flip'] = DataLoader(
-                ImageDataset(dataset.query, transform=transform_test_flip),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+                self.testloader_dict[name]['query_flip'] = DataLoader(
+                    ImageDataset(dataset.query, transform=transform_test_flip),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
 
-            self.testloader_dict[name]['gallery_flip'] = DataLoader(
-                ImageDataset(dataset.gallery, transform=transform_test_flip),
-                batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
-                pin_memory=self.pin_memory, drop_last=False
-            )
+                self.testloader_dict[name]['gallery_flip'] = DataLoader(
+                    ImageDataset(dataset.gallery, transform=transform_test_flip),
+                    batch_size=self.test_batch_size, shuffle=False, num_workers=self.workers,
+                    pin_memory=self.pin_memory, drop_last=False
+                )
 
-            self.testdataset_dict[name]['query'] = dataset.query
-            self.testdataset_dict[name]['gallery'] = dataset.gallery
+                self.testdataset_dict[name]['query'] = dataset.query
+                self.testdataset_dict[name]['gallery'] = dataset.gallery
 
         print("\n")
         print("  **************** Summary ****************")

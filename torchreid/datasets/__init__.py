@@ -14,11 +14,16 @@ from .cuhk01 import CUHK01
 from .prid450s import PRID450S
 from .ilids import iLIDS
 from .sensereid import SenseReID
+from .cub_200_2011 import CUB_200_2011
 
 from .mars import Mars
+from .veri import VeRi
 from .ilidsvid import iLIDSVID
 from .prid2011 import PRID2011
 from .dukemtmcvidreid import DukeMTMCVidReID
+from .vehicleid import VehicleID
+
+from functools import partial
 
 __imgreid_factory = {
     'market1501': Market1501,
@@ -33,6 +38,10 @@ __imgreid_factory = {
     'prid450s': PRID450S,
     'ilids': iLIDS,
     'sensereid': SenseReID,
+    'cub_200_2011': CUB_200_2011,
+    'veri': VeRi,
+    'vehicleid': VehicleID,
+    **{('vehicleid_{}'.format(num)): partial(VehicleID, num) for num in (800, 1600, 2400, 3200, 6000, 13164)},
 }
 
 

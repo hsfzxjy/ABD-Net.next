@@ -9,7 +9,7 @@ from .bases import BaseImageDataset
 
 class VeRi(BaseImageDataset):
 
-    dataset_dir = 'veri'
+    dataset_dir = 'VeRi'
 
     def __init__(self, root='data', verbose=True, **kwargs):
         super().__init__()
@@ -53,20 +53,37 @@ class VeRi(BaseImageDataset):
         ids = set()
         fns = defaultdict(list)
         for file in files:
-            id = int(re.findall(r'/(\d{4})_', file)[0])
+            id, cid = map(int, re.findall(r'/(\d{4})_c(\d{3})', file)[0])
             ids.add(id)
-            fns[id].append(file)
+            fns[id].append((file, cid))
 
         mapping = {v: i for i, v in enumerate(sorted(ids))}
 
         dataset = []
         for k, fs in fns.items():
-            for i, f in enumerate(fs):
-                dataset.append((f, mapping[k], i))
+            for (f, cid) in fs:
+                dataset.append((f, mapping[k], cid))
 
         return dataset
 
     def _get_query_test(self):
+
+        if os.environ.get('use_info'):
+            q = []
+            with open(osp.join(self.dataset_dir, 'info/query_info.txt')) as f:
+                f.readline()
+                for line in f:
+                    img, pid, cid, _ = line.strip().split()
+                    q.append((osp.join(self.query_dir, img), int(pid), int(cid)))
+
+            g = []
+            with open(osp.join(self.dataset_dir, 'info/gallery_info.txt')) as f:
+                f.readline()
+                for line in f:
+                    img, pid, cid, _ = line.strip().split()
+                    g.append((osp.join(self.gallery_dir, img), int(pid), int(cid)))
+
+            return q, g
 
         q_files = set(osp.basename(x) for x in glob(osp.join(self.query_dir, '*')))
         t_files = glob(osp.join(self.gallery_dir, '*'))

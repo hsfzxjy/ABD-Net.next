@@ -25,6 +25,7 @@ __model_factory = {
     **densenet.model_mapping,
     'resnet50': resnet.resnet50,
     'resnet50_mgn_like': resnet.resnet50_mgn_like,
+    'resnet50_cls': resnet.resnet50_cls,
     'resnext50_32x4d': resnext50_32x4d,
     'resnext101_32x4d': resnext101_32x4d,
     'se_resnet50': se_resnet50,

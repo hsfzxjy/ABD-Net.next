@@ -38,6 +38,8 @@ def write_json(obj, fpath):
 
 
 def save_checkpoint(state, is_best=False, fpath='checkpoint.pth.tar'):
+    if os.environ.get('no_save'):
+        return
     if len(osp.dirname(fpath)) != 0:
         mkdir_if_missing(osp.dirname(fpath))
     torch.save(state, fpath)

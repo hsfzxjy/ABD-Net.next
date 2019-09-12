@@ -1,39 +1,47 @@
 #!/bin/bash
 
 if [ -z "$GPU" ]; then
-    GPU=0,1
+    GPU=0
 fi
+
+if [ -z "$of_beta" ]; then
+    of_beta=1e-6
+fi
+
+export of_beta=$of_beta
+echo Using OF Beta: $of_beta
 
 export GPU=$GPU
 echo Using GPU: $GPU
 
-export LOG_DIR="log/abd_best_duke_"
+export LOG_DIR="log/resnet_of_${of_beta}_market_eof"
 echo Logging to: $LOG_DIR
 
 cd `git rev-parse --show-toplevel`
 
 function run_script {
-    python train.py -s dukemtmcreid -t dukemtmcreid \
+    python train.py -s market1501 -t market1501 \
         --flip-eval --eval-freq 1 \
         --label-smooth \
-        --criterion htri \
-        --lambda-htri 0.1  \
-        --data-augment crop random-erase \
-        --margin 1.2 \
-        --train-batch-size 64 \
+        --criterion xent \
+        --data-augment crop \
+        --margin 0.3 \
+        --train-batch-size 32 \
         --height 384 \
         --width 128 \
         --optim adam --lr 0.0003 \
         --stepsize 20 40 \
         --gpu-devices $GPU \
-        --max-epoch 120 \
+        --max-epoch 60 \
         --save-dir $LOG_DIR \
         --arch resnet50 \
+        --branches abd \
         --use-of \
-        --abd-dan cam pam \
-        --abd-np 2 \
-        --shallow-cam \
-        --use-ow $extra_args
+        --of-position before \
+        --abd-dim 1024 \
+        --abd-np 1 \
+        --resnet-last-stride 1 \
+        --of-beta $of_beta --of-start-epoch 25
 }
 export -f run_script
 

@@ -7,13 +7,13 @@ fi
 export GPU=$GPU
 echo Using GPU: $GPU
 
-export LOG_DIR="log/abd_best_duke_"
+export LOG_DIR="log/abd_best_veri_"$2"_eof"
 echo Logging to: $LOG_DIR
 
 cd `git rev-parse --show-toplevel`
 
 function run_script {
-    python train.py -s dukemtmcreid -t dukemtmcreid \
+    python train.py -s veri -t veri \
         --flip-eval --eval-freq 1 \
         --label-smooth \
         --criterion htri \
@@ -21,8 +21,8 @@ function run_script {
         --data-augment crop random-erase \
         --margin 1.2 \
         --train-batch-size 64 \
-        --height 384 \
-        --width 128 \
+        --height 224 \
+        --width 224 \
         --optim adam --lr 0.0003 \
         --stepsize 20 40 \
         --gpu-devices $GPU \
